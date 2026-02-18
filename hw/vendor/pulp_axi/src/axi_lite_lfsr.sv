@@ -94,7 +94,7 @@ module axi_lite_lfsr #(
 
     // B
     prim_fifo_sync #(
-        .pass  ( 1'b0 ),
+        .Pass  ( 1'b0 ),
         .Width ( 'd1  ),
         .Depth ( 'd2  )
     ) i_stream_fifo_w_b (
