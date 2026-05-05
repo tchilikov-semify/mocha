@@ -13,7 +13,7 @@ filesets:
       - lowrisc:prim:util
       - lowrisc:prim_generic:flop_2sync
     files:
-      # Includes.
+      - include/common_cells/prim_flop_macros.sv: {is_include_file: true, include_path: include/common_cells}
       - include/common_cells/registers.svh: {is_include_file: true, include_path: include}
       # Packages.
       - rtl/cb_filter_pkg.sv
