@@ -1,0 +1,17 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "testrig",
+  target_dir: "testrig",
+
+  upstream: {
+    url: "git@github.com:CTSRD-CHERI/TestRIG.git",
+    rev: "master",
+  },
+
+  mapping: [
+    {from: "utils/scripts/runTestRIG.py", to: "testrig.py"},
+    {from: "utils/scripts/regressiontest.py", to: "regression_testrig.py"},
+  ],
+}

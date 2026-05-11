@@ -1,0 +1,110 @@
+CAPI=2:
+# Copyright lowRISC contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "cosmic::cva6_testrig"
+description: "CVA6-CHERI RVFI-DII TestRIG simulation testbench."
+
+filesets:
+  testrig_tb:
+    depend:
+      # - cosmic::cva6cheri
+      - lowrisc:mocha:top_chip_system
+      - lowrisc:mocha_constants:top_pkg
+      - lowrisc:prim_generic:ram_1p
+      - lowrisc:prim:macros
+      - lowrisc:dv:common_ifs
+      - lowrisc:dv:dv_macros
+    files:
+      # packages
+      - rvfi/cva6_rvfi_pkg.sv
+      - cva6_testrig_agent/cva6_testrig_agent_pkg.sv
+      - env/cva6_testrig_env_pkg.sv
+      - tests/cva6_testrig_test_pkg.sv
+
+      # DPI header
+      - cva6_testrig_agent/dpi/testrig_dpi.svh: {file_type: user, is_include_file: true, include_path: cva6_testrig_agent/dpi}
+
+      # RVFI
+      - rvfi/cva6_rvfi_seq_item.sv: {file_type: user, is_include_file: true, include_path: rvfi}
+      - rvfi/cva6_rvfi_monitor.sv: {file_type: user, is_include_file: true, include_path: rvfi}
+      - rvfi/cva6_rvfi_if.sv
+      - rvfi/cva6_rvfi_serializer.sv
+
+      # DII
+      - cva6_testrig_agent/cva6_testrig_dii_driver.sv: {file_type: user, is_include_file: true, include_path: cva6_testrig_agent}
+      - cva6_testrig_agent/cva6_testrig_agent.sv: {file_type: user, is_include_file: true, include_path: cva6_testrig_agent}
+      - cva6_testrig_agent/cva6_dii_intf.sv
+      - rvfi_dii_generator.sv
+      - env/cva6_testrig_env.sv: {file_type: user, is_include_file: true, include_path: env}
+
+      - tests/cva6_testrig_test.sv: {file_type: user, is_include_file: true, include_path: tests}
+      - coverage/isa_coverage.sv
+      - cva6_testrig_tb_top.sv
+    file_type: systemVerilogSource
+
+  testrig_dpi:
+    # FuseSoC is not really compatible with C++ / DPI files, workaround for now by passing them directly to the tool
+    files:
+      - cva6_testrig_agent/dpi/testrig.cc
+      - cva6_testrig_agent/dpi/testrig.hh
+      - cva6_testrig_agent/dpi/testrig_dpi.cc
+      - cva6_testrig_agent/dpi/testrig_dpi.h
+      - cva6_testrig_agent/dpi/socket_packet_utils.c
+    file_type: cppSource
+
+parameters:
+  TRACE_EXECUTION:
+    datatype: bool
+    paramtype: vlogdefine
+    description: "Enable execution tracing"
+  RVFI:
+    datatype: bool
+    paramtype: vlogdefine
+    description: "Enable RVFI interface"
+  DII_SIM:
+    datatype: bool
+    paramtype: vlogdefine
+    description: "Enable DII simulation mode"
+
+targets:
+  default:
+    default_tool: xcelium
+    parameters:
+      - TRACE_EXECUTION=true
+      - RVFI=true
+      - DII_SIM=true
+    filesets:
+      - testrig_tb
+      - testrig_dpi
+    toplevel: cva6_testrig_tb_top
+    tools:
+      xcelium:
+        xrun_options:
+          - -64bit
+          - -sv
+          - -uvm
+          - -uvmhome CDNS-1.2
+          - -licqueue
+          - -elaborate
+          - -snapshot cva6_work
+          - -l build.log
+          - -access rwc
+          - -debug_opts verisium_pp
+          - -coverage functional
+          - -covdut isa_coverage
+          - -covworkdir cov_work
+          - -covoverwrite
+          - -nowarn TSNSPK
+          - -nowarn FUNTSK
+          - -nowarn ZROMCV
+          - -nowarn BNDWRN
+          - -nowarn BNDMEM
+          - -nowarn DEFFIN
+          - +define+XCELIUM
+          - +define+XSIM
+          - +define+DISABLE_OVERLAP_DETECTION
+          # manually pass in DPI source files
+          - src/cosmic__cva6_testrig_0/cva6_testrig_agent/dpi/testrig.cc
+          - src/cosmic__cva6_testrig_0/cva6_testrig_agent/dpi/testrig_dpi.cc
