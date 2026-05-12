@@ -1,0 +1,17 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: "sail_riscv",
+  target_dir: "sail-cheri-riscv/sail-riscv",
+
+  upstream: {
+    url: "https://github.com/Capabilities-Limited/sail-riscv.git",
+    rev: "654ab4d557f7750c98bbd9cc9343243e2ed7961c",
+  },
+
+  exclude_from_upstream: [
+    ".git",
+    ".github",
+  ]
+}

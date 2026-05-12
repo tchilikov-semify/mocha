@@ -9,6 +9,6 @@
   upstream:
   {
     url: https://github.com/Capabilities-Limited/sail-cheri-riscv.git
-    rev: db7355e0ac927fd1e875e6063a916f4371a6fa25
+    rev: 74a9da1f78bdf50d263ffc98f2a587cf969b3e08
   }
 }

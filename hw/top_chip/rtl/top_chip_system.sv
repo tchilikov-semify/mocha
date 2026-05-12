@@ -5,6 +5,7 @@
 // Include macros for tag controller
 `include "register_interface/assign.svh"
 `include "register_interface/typedef.svh"
+`include "axi/assign.svh"
 
 module top_chip_system #(
   parameter int unsigned SPIHostNumCS = 1,

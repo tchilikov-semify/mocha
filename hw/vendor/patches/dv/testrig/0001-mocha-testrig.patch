@@ -1,0 +1,89 @@
+diff --git a/testrig.py b/testrig.py
+index 0184a85..55dcd60 100755
+--- a/testrig.py
++++ b/testrig.py
+@@ -80,7 +80,7 @@ def z_ext(ext_name):
+ def x_ext(ext_name):
+   return ["", "X"+ext_name]
+ 
+-known_rvfi_dii = {'spike', 'rvbs', 'sail', 'piccolo', 'flute', 'toooba', 'ibex', 'muntjac', 'qemu', 'manual', 'none'}
++known_rvfi_dii = {'spike', 'rvbs', 'sail', 'piccolo', 'flute', 'toooba', 'ibex', 'muntjac', 'cva6', 'cva6_coverage', 'qemu', 'manual', 'none'}
+ known_vengine = {'QCVEngine', 'QCVEngine-docker'}
+ multi_letter_exts = ["_".join(filter(None, [e0, e1, e2, e3]))
+                      for e0 in z_ext("icsr")
+@@ -171,8 +171,12 @@ parser.add_argument('--path-to-ibex', metavar='PATH', type=str,
+ parser.add_argument('--path-to-muntjac', metavar='PATH', type=str,
+   default=op.join(implementations_path, "muntjac/bin/muntjac_core"),
+   help="The PATH to the Muntjac executable")
++parser.add_argument('--path-to-cva6', metavar='PATH', type=str,
++  default=op.join(implementations_path, "cheri-cva6/corev_apu/tb/tb_testRig_cheri/work-ver/Variane_testharness_dii"))
++parser.add_argument('--path-to-cva6-coverage', metavar='PATH', type=str,
++  default=op.join(scripts_path, op.pardir, op.pardir, op.pardir, "ip", "cva6_cheri", "dv", "testrig"))
+ parser.add_argument('--path-to-QCVEngine', metavar='PATH', type=str,
+-  default=op.join(vengines_path, "QuickCheckVEngine/bin/QCVEngine"),
++  default=op.join(scripts_path, op.pardir, "qcvengine", "bin", "QCVEngine"),
+   help="The PATH to the QCVEngine executable")
+ parser.add_argument('--path-to-sail-riscv-dir', metavar='PATH', type=str,
+   default=None,  # This value is set to None so that later it can be set depending on whether CHERI is enabled or not.
+@@ -221,6 +225,8 @@ parser.add_argument('--no-shrink', action='count', default=0,
+   help="Disable VEngine test case shrinking")
+ parser.add_argument('--no-save', action='count', default=0,
+   help="Don't ask to save files")
++parser.add_argument('--save-all', action='count', default=0,
++  help="Save all traces not just failures")
+ parser.add_argument('--continue-on-fail', action='count', default=0,
+   help="Continue when encountering a failure")
+ parser.add_argument('--test-len', metavar='LEN', default=None, type=auto_int,
+@@ -483,10 +489,7 @@ def spawn_rvfi_dii_server(name, port, log, isa_def):
+   ##############################################################################
+   elif name == 'sail':
+     if args.path_to_sail_riscv_dir is None:
+-      args.path_to_sail_riscv_dir = op.join(implementations_path, "sail-")
+-      if isa_def.has_cheri:
+-        args.path_to_sail_riscv_dir += "cheri-"
+-      args.path_to_sail_riscv_dir += "riscv/c_emulator/"
++      args.path_to_sail_riscv_dir = op.join(scripts_path, op.pardir, "sail-cheri-riscv", "c_emulator")
+     full_sail_sim = op.join(op.dirname(op.realpath(__file__)), args.path_to_sail_riscv_dir, isa_def.get_sail_name())
+     cmd = [full_sail_sim]
+     if not isa_def.has("c"):
+@@ -506,6 +509,17 @@ def spawn_rvfi_dii_server(name, port, log, isa_def):
+     env2["RVFI_DII_PORT"] = str(port)
+     cmd = [args.path_to_muntjac]
+   ##############################################################################
++  elif name == 'cva6':
++    env2["RVFI_DII_PORT"] = str(port)
++    cmd = [args.path_to_cva6]
++    # Port info
++    cmd += ["-q", "cva6-rvfi-dii", "-w", str(port)]
++    cmd += ["-f", "cva6-trace.fst"]
++  ##############################################################################
++  elif name == 'cva6_coverage':
++    env2["RVFI_DII_PORT"] = str(port)
++    cmd = ['make', '-C', args.path_to_cva6_coverage, 'run']
++  ##############################################################################
+   elif name == 'manual':
+     return None
+   ##############################################################################
+@@ -572,6 +586,8 @@ def spawn_vengine(name, mport, iport, arch, log, more_args=[]):
+       relaxed = False
+     if args.no_save:
+       cmd += ['--no-save']
++    if args.save_all:
++      cmd += ['--save-all']
+     if args.continue_on_fail:
+       cmd += ['--continue-on-fail']
+     if args.test_len:
+@@ -645,11 +661,11 @@ def main():
+     for a in servA:
+       if a != None:
+         print("killing implementation A's rvfi-dii server")
+-        a.kill()
++        a.terminate()
+     for b in servB:
+       if b != None:
+         print("killing implementation B's rvfi-dii server")
+-        b.kill()
++        b.terminate()
+     for g in generator:
+       if g != None:
+         print("killing generator")

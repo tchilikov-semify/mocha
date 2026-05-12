@@ -1,3 +1,0 @@
-[submodule "sail-riscv"]
-	path = sail-riscv
-	url = https://github.com/CTSRD-CHERI/sail-riscv

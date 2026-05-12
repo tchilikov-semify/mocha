@@ -1,5 +1,6 @@
 SIM_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 PRJ_DIR := $(abspath $(SIM_DIR)/..)
+HW_DIR  := $(abspath $(SIM_DIR)/../../../..)
 
 # FuseSoC places Xcelium build artefacts here.
 # --build-root directs FuseSoC to create its build tree under sim/ rather than
@@ -32,7 +33,7 @@ endif
 # xrun stops at elaboration because -elaborate is in the core's xrun_options.
 build:
 	export LD_LIBRARY_PATH=/usr/lib64:/lib64:$$LD_LIBRARY_PATH; \
-	fusesoc --cores-root=$(PRJ_DIR) run --build-root=$(SIM_DIR) --target=default cosmic::cva6_testrig
+	fusesoc --cores-root=$(HW_DIR) run --build-root=$(SIM_DIR) --target=default cosmic::cva6_testrig
 
 # Called by runTestRIG.py as the cva6_coverage subprocess.
 # RVFI_DII_PORT is injected into the environment by runTestRIG.py before invoking this.

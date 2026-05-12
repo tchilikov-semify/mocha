@@ -10,8 +10,10 @@
     rev: "master",
   },
 
+  patch_dir: "../patches/dv/testrig/",
+
   mapping: [
-    {from: "utils/scripts/runTestRIG.py", to: "testrig.py"},
+    {from: "utils/scripts/runTestRIG.py", to: "testrig.py", patch_dir: "."},
     {from: "utils/scripts/regressiontest.py", to: "regression_testrig.py"},
   ],
 }

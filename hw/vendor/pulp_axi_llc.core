@@ -10,6 +10,7 @@ filesets:
   files_rtl:
     depend:
       - lowrisc:common_cells:all
+      - lowrisc:prim:assert
       - lowrisc:prim:util
       - pulp-platform.org::axi
     files:

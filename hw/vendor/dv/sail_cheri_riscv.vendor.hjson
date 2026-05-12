@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 {
   name: "sail_cheri_riscv",
-  target_dir: "sail_cheri_riscv",
+  target_dir: "sail-cheri-riscv",
 
   upstream: {
     url: "https://github.com/Capabilities-Limited/sail-cheri-riscv.git",
-    rev: "db7355e0ac927fd1e875e6063a916f4371a6fa25",
+    rev: "master",
   },
 
   exclude_from_upstream: [
