@@ -21,7 +21,7 @@ else
 endif
 
 ifeq ($(WAVES),1)
-  WAVE_ARG := -input "@database -open waves -shm -into waves.shm; probe -create cva6_testrig_tb_top -depth all -database waves; run; exit"
+  WAVE_ARG := -input "@database -open waves -shm -into waves.shm; probe -create -shm -all -depth all -dynamic -memories -variables -database waves; run; database -close waves; exit"
 else
   WAVE_ARG := -input "@run; exit"
 endif

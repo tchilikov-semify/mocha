@@ -24,6 +24,8 @@ module rvfi_dii_generator
         end
     end
 
+    ////// TODO: support for superscalar mode, for now just disable in config
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     logic [                31:0]    instr, instr_ff;                            // the current instruction frame passed

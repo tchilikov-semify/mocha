@@ -9,6 +9,13 @@ module cva6_testrig_tb_top;
 
   localparam logic [31:0] BOOT_ADDR = 32'h8000_0000;
 
+  cap_reg_t boot_cap;
+  initial begin
+    boot_cap      = REG_ROOT_CAP;
+    boot_cap.addr = addrw_t'(BOOT_ADDR);
+    boot_cap.flags.int_mode = '1;
+  end
+
   wire clk;
   wire rst_n;
   logic [CVA6Cfg.DIIIDLEN-1:0] dii_id_commit;
@@ -22,6 +29,7 @@ module cva6_testrig_tb_top;
     config_pkg::cva6_user_cfg_t cfg = CVA6UserCfg;
     cfg.RVZiCond                      = bit'(0);
     cfg.CvxifEn                       = bit'(0);
+    cfg.SuperscalarEn                 = bit'(0);
     cfg.NrNonIdempotentRules          = unsigned'(1);
     cfg.NonIdempotentAddrBase         = 1024'({64'b0});
     cfg.NonIdempotentLength           = 1024'({top_pkg::SRAMBase});
@@ -32,13 +40,6 @@ module cva6_testrig_tb_top;
     return build_config_pkg::build_config(cfg);
   endfunction
   localparam config_pkg::cva6_cfg_t CVA6Cfg = build_cva6_config(cva6_config_pkg::cva6_cfg);
-
-  cva6_cheri_pkg::cap_pcc_t boot_cap;
-  initial begin
-    boot_cap = cva6_cheri_pkg::PCC_ROOT_CAP;
-    boot_cap.addr = BOOT_ADDR;
-    boot_cap.flags.int_mode = 1'b1;
-  end
 
   // RVFI
   localparam type rvfi_instr_t    = `RVFI_INSTR_T(CVA6Cfg);
