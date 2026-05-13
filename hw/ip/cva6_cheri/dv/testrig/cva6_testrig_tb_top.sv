@@ -98,7 +98,8 @@ module cva6_testrig_tb_top;
     .noc_resp_i    (axi_resp    )
   );
 
-  localparam int unsigned SRAM_ADDR_WIDTH = $clog2(top_pkg::SRAMLength / (top_pkg::AxiDataWidth / 8));
+  // 21 → 16MB SRAM, enough to cover QCVEngine gen_cache address range (~10MB above base)
+  localparam int unsigned SRAM_ADDR_WIDTH = 21;
   axi_sram #(
     .AddrWidth          (SRAM_ADDR_WIDTH)
   ) u_axi_sram (
