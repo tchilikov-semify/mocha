@@ -16,3 +16,5 @@ union FetchResult = {
   F_RVC       : half,                      /* Compressed ISA */
   F_Error     : (ExceptionType, xlenbits)  /* standard exception and PC */
 }
+
+function isRVC(h : half) -> bool = not(h[1 .. 0] == 0b11)

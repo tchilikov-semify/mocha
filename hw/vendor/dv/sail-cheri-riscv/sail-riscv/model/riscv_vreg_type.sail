@@ -14,7 +14,6 @@ type vreglenbits = bits(vlenmax) /* use the largest possible register length */
 type vregtype = vreglenbits
 
 /* vector instruction types */
-enum vsetop       = { VSETVLI, VSETVL }
 
 enum vvfunct6     = { VV_VADD, VV_VSUB, VV_VMINU, VV_VMIN, VV_VMAXU, VV_VMAX, VV_VAND, VV_VOR, VV_VXOR,
   VV_VRGATHER, VV_VRGATHEREI16, VV_VSADDU, VV_VSADD, VV_VSSUBU, VV_VSSUB, VV_VSLL, VV_VSMUL,
@@ -53,7 +52,7 @@ enum nxfunct6     = { NX_VNCLIPU, NX_VNCLIP}
 
 enum nxsfunct6    = { NXS_VNSRL, NXS_VNSRA }
 
-enum mmfunct6     = { MM_VMAND, MM_VMNAND, MM_VMANDNOT, MM_VMXOR, MM_VMOR, MM_VMNOR, MM_VMORNOT, MM_VMXNOR }
+enum mmfunct6     = { MM_VMAND, MM_VMNAND, MM_VMANDN, MM_VMXOR, MM_VMOR, MM_VMNOR, MM_VMORN, MM_VMXNOR }
 
 enum nifunct6     = { NI_VNCLIPU, NI_VNCLIP }
 
@@ -100,7 +99,7 @@ enum rfvvfunct6   = { FVV_VFREDOSUM, FVV_VFREDUSUM, FVV_VFREDMAX, FVV_VFREDMIN,
 enum wmvvfunct6   = { WMVV_VWMACCU, WMVV_VWMACC, WMVV_VWMACCSU }
 
 enum mvxfunct6    = { MVX_VAADDU, MVX_VAADD, MVX_VASUBU, MVX_VASUB, MVX_VSLIDE1UP, MVX_VSLIDE1DOWN,
-	MVX_VMUL, MVX_VMULH, MVX_VMULHU, MVX_VMULHSU, MVX_VDIVU, MVX_VDIV, MVX_VREMU, MVX_VREM }
+  MVX_VMUL, MVX_VMULH, MVX_VMULHU, MVX_VMULHSU, MVX_VDIVU, MVX_VDIV, MVX_VREMU, MVX_VREM }
 
 enum mvxmafunct6  = { MVX_VMACC, MVX_VNMSAC, MVX_VMADD, MVX_VNMSUB }
 

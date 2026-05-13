@@ -6,8 +6,12 @@
 /*  SPDX-License-Identifier: BSD-2-Clause                                                */
 /*=======================================================================================*/
 
-/* Define the XLEN value for the architecture. */
+// Define the XLEN value for the architecture.
+// This is done using the smallest/most logarithmic possible value since Sail's
+// type system works well for multiply and 2^ but not divide and log2.
+type log2_xlen_bytes : Int = 2
 
-type xlen       : Int = 32
-type xlen_bytes : Int = 4
-type xlenbits         = bits(xlen)
+type physaddrbits_len : Int = 34
+
+// This is the maximum; designs can implement shorter ASIDLENs.
+type asidlen    : Int = 9

@@ -1,6 +1,11 @@
 Extending the model
 ===================
 
+> [!WARNING]
+> This document is undergoing updates and is not fully up to date
+> with the current state of the model. Please refer to the
+> [Sail code](../model/) itself for the most up to date information.
+
 Changing the register representation
 ------------------------------------
 
@@ -60,7 +65,7 @@ construct of the Sail language. `riscv_platform.sail` can be examined
 to see how this is done for the SiFive core-local interrupt (CLINT)
 controller, the HTIF timer and terminal devices.  The
 implementation of the actual functionality provided by these MMIO
-devices would need to be added to the C and OCaml emulators.
+devices would need to be added to the C emulators.
 
 If this functionality requires the definition of new interrupt
 sources, their encodings would need to be added to `riscv_types.sail`,

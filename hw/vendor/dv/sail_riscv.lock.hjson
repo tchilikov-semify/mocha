@@ -8,7 +8,7 @@
 {
   upstream:
   {
-    url: https://github.com/Capabilities-Limited/sail-riscv.git
-    rev: 654ab4d557f7750c98bbd9cc9343243e2ed7961c
+    url: https://github.com/CTSRD-CHERI/sail-riscv.git
+    rev: 74194fdf63ad2c86af76e44b36bd899b47d4cca3
   }
 }

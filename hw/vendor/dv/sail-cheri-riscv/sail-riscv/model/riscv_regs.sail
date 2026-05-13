@@ -48,8 +48,7 @@ register x29 : regtype
 register x30 : regtype
 register x31 : regtype
 
-val rX : forall 'n, 0 <= 'n < 32. regno('n) -> xlenbits
-function rX r = {
+function rX (Regno(r) : regno) -> xlenbits = {
   let v : regtype =
     match r {
       0 => zero_reg,
@@ -90,19 +89,16 @@ function rX r = {
 }
 
 $ifdef RVFI_DII
-val rvfi_wX : forall 'n, 0 <= 'n < 32. (regno('n), xlenbits) -> unit
-function rvfi_wX (r,v) = {
+function rvfi_wX (Regno(r) : regno, v : xlenbits) -> unit = {
   rvfi_int_data[rvfi_rd_wdata] = zero_extend(v);
   rvfi_int_data[rvfi_rd_addr] = to_bits(8,r);
   rvfi_int_data_present = true;
 }
 $else
-val rvfi_wX : forall 'n, 0 <= 'n < 32. (regno('n), xlenbits) -> unit
-function rvfi_wX (r,v) = ()
+function rvfi_wX (r : regno, v : xlenbits) -> unit = ()
 $endif
 
-val wX : forall 'n, 0 <= 'n < 32. (regno('n), xlenbits) -> unit
-function wX (r, in_v) = {
+function wX (Regno(r) : regno, in_v : xlenbits) -> unit = {
   let v = regval_into_reg(in_v);
   match r {
     0  => (),
@@ -140,67 +136,23 @@ function wX (r, in_v) = {
     _  => assert(false, "invalid register number")
   };
   if (r != 0) then {
-     rvfi_wX(r, in_v);
-     if   get_config_print_reg()
-     then print_reg("x" ^ dec_str(r) ^ " <- " ^ RegStr(v));
+    rvfi_wX(Regno(r), in_v);
+    if   get_config_print_reg()
+    then print_reg("x" ^ dec_str(r) ^ " <- " ^ RegStr(v));
   }
 }
 
-function rX_bits(i: bits(5)) -> xlenbits = rX(unsigned(i))
+function rX_bits(i: regidx) -> xlenbits = rX(regidx_to_regno(i))
 
-function wX_bits(i: bits(5), data: xlenbits) -> unit = {
-  wX(unsigned(i)) = data
+function wX_bits(i: regidx, data: xlenbits) -> unit = {
+  wX(regidx_to_regno(i)) = data
 }
 
 overload X = {rX_bits, wX_bits, rX, wX}
 
-/* register names */
-
-val reg_name_abi : regidx -> string
-
-function reg_name_abi(r) = {
-  match (r) {
-    0b00000 => "zero",
-    0b00001 => "ra",
-    0b00010 => "sp",
-    0b00011 => "gp",
-    0b00100 => "tp",
-    0b00101 => "t0",
-    0b00110 => "t1",
-    0b00111 => "t2",
-    0b01000 => "fp",
-    0b01001 => "s1",
-    0b01010 => "a0",
-    0b01011 => "a1",
-    0b01100 => "a2",
-    0b01101 => "a3",
-    0b01110 => "a4",
-    0b01111 => "a5",
-    0b10000 => "a6",
-    0b10001 => "a7",
-    0b10010 => "s2",
-    0b10011 => "s3",
-    0b10100 => "s4",
-    0b10101 => "s5",
-    0b10110 => "s6",
-    0b10111 => "s7",
-    0b11000 => "s8",
-    0b11001 => "s9",
-    0b11010 => "s10",
-    0b11011 => "s11",
-    0b11100 => "t3",
-    0b11101 => "t4",
-    0b11110 => "t5",
-    0b11111 => "t6"
-  }
-}
-
-overload to_str = {reg_name_abi}
-
 /* mappings for assembly */
 
-val reg_name : bits(5) <-> string
-mapping reg_name = {
+mapping reg_name_raw : bits(5) <-> string = {
     0b00000 <-> "zero",
     0b00001 <-> "ra",
     0b00010 <-> "sp",
@@ -235,7 +187,9 @@ mapping reg_name = {
     0b11111 <-> "t6"
 }
 
-mapping creg_name : bits(3) <-> string = {
+mapping reg_name : regidx <-> string = { Regidx(i) <-> reg_name_raw(i) }
+
+mapping creg_name_raw : bits(3) <-> string = {
   0b000 <-> "s0",
   0b001 <-> "s1",
   0b010 <-> "a0",
@@ -246,37 +200,10 @@ mapping creg_name : bits(3) <-> string = {
   0b111 <-> "a5"
 }
 
-val init_base_regs : unit -> unit
-function init_base_regs () = {
-  x1  = zero_reg;
-  x2  = zero_reg;
-  x3  = zero_reg;
-  x4  = zero_reg;
-  x5  = zero_reg;
-  x6  = zero_reg;
-  x7  = zero_reg;
-  x8  = zero_reg;
-  x9  = zero_reg;
-  x10 = zero_reg;
-  x11 = zero_reg;
-  x12 = zero_reg;
-  x13 = zero_reg;
-  x14 = zero_reg;
-  x15 = zero_reg;
-  x16 = zero_reg;
-  x17 = zero_reg;
-  x18 = zero_reg;
-  x19 = zero_reg;
-  x20 = zero_reg;
-  x21 = zero_reg;
-  x22 = zero_reg;
-  x23 = zero_reg;
-  x24 = zero_reg;
-  x25 = zero_reg;
-  x26 = zero_reg;
-  x27 = zero_reg;
-  x28 = zero_reg;
-  x29 = zero_reg;
-  x30 = zero_reg;
-  x31 = zero_reg
-}
+mapping creg_name : cregidx <-> string = { Cregidx(i) <-> creg_name_raw(i) }
+
+/* Mappings for encoding */
+
+mapping encdec_reg : regidx <-> bits(5) = { Regidx(r) <-> r }
+
+mapping encdec_creg : cregidx <-> bits(3) = { Cregidx(r) <-> r }

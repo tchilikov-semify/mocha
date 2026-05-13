@@ -8,39 +8,55 @@
 
 /* Basic type and function definitions used pervasively in the model. */
 
+// Function used to determine if an extension is enabled in the current configuration.
+// This means an extension is implemented & supported, *and* any necessary bits
+// are set in the relevant CSRs (misa, mstatus, etc.) to enable its use. It is possible
+// for some extensions to be supported in hardware, but temporarily disabled via a CSR,
+// in which case this function should return false.
+val extensionEnabled : extension -> bool
+scattered function extensionEnabled
+
 /* this value is only defined for the runtime platform for ELF loading
  * checks, and not used in the model.
  */
-let xlen_val = sizeof(xlen)
+let xlen_val = xlen
 
-let xlen_max_unsigned = 2 ^ sizeof(xlen) - 1
-let xlen_max_signed = 2 ^ (sizeof(xlen) - 1) - 1
-let xlen_min_signed = 0 - 2 ^ (sizeof(xlen) - 1)
+let xlen_max_unsigned = 2 ^ xlen - 1
+let xlen_max_signed = 2 ^ (xlen - 1) - 1
+let xlen_min_signed = 0 - 2 ^ (xlen - 1)
 
 type half = bits(16)
 type word = bits(32)
 
+type pagesize_bits : Int = 12
+let  pagesize_bits = sizeof(pagesize_bits)
+
 /* register identifiers */
 
-type regidx  = bits(5)
-type cregidx = bits(3)    /* identifiers in RVC instructions */
-type csreg   = bits(12)   /* CSR addressing */
+newtype regidx = Regidx : bits(5)  /* uncompressed register identifiers */
+newtype cregidx = Cregidx : bits(3) /* identifiers in RVC instructions */
+type csreg = bits(12)  /* CSR addressing */
+
+function regidx_offset(Regidx(r) : regidx, o : bits(5)) -> regidx = Regidx(r + o)
+function regidx_bits (Regidx(b) : regidx) -> bits(5) = b
 
 /* register file indexing */
 
-type regno ('n : Int), 0 <= 'n < 32 = atom('n)
+newtype regno = Regno : range(0, 31)
 
-val regidx_to_regno : bits(5) -> {'n, 0 <= 'n < 32. regno('n)}
-function regidx_to_regno b = let 'r = unsigned(b) in r
+function regidx_to_regno (Regidx(b) : regidx) -> regno = Regno(unsigned(b))
 
 /* mapping RVC register indices into normal indices */
 val creg2reg_idx : cregidx -> regidx
-function creg2reg_idx(creg) = 0b01 @ creg
+function creg2reg_idx(Cregidx(i)) = Regidx(0b01 @ i)
 
 /* some architecture and ABI relevant register identifiers */
-let zreg : regidx = 0b00000  /* x0, zero register  */
-let ra   : regidx = 0b00001  /* x1, return address */
-let sp   : regidx = 0b00010  /* x2, stack pointer  */
+let zreg : regidx = Regidx(0b00000) /* x0, zero register  */
+let ra   : regidx = Regidx(0b00001) /* x1, return address */
+let sp   : regidx = Regidx(0b00010) /* x2, stack pointer  */
+
+// Compressed zero reg.
+let czreg : cregidx = Cregidx(0b000)
 
 /* instruction fields */
 
@@ -53,41 +69,19 @@ type amo    = bits(1)  /* amo opcode flags */
 
 enum Architecture = {RV32, RV64, RV128}
 type arch_xlen = bits(2)
-function architecture(a : arch_xlen) -> option(Architecture) =
-  match (a) {
-    0b01 => Some(RV32),
-    0b10 => Some(RV64),
-    0b11 => Some(RV128),
-    _    => None()
-  }
 
-function arch_to_bits(a : Architecture) -> arch_xlen =
-  match (a) {
-    RV32  => 0b01,
-    RV64  => 0b10,
-    RV128 => 0b11
-  }
-
-
-/* model-internal exceptions */
-
-union exception = {
-  Error_not_implemented : string,
-  Error_internal_error  : unit
-}
-
-val not_implemented : forall ('a : Type). string -> 'a
-function not_implemented message = throw(Error_not_implemented(message))
-
-val internal_error : forall ('a : Type). (string, int, string) -> 'a
-function internal_error(file, line, s) = {
-    assert (false, file ^ ":" ^ dec_str(line) ^ ": " ^ s);
-    throw Error_internal_error()
+mapping architecture : Architecture <-> arch_xlen = {
+  RV32  <-> 0b01,
+  RV64  <-> 0b10,
+  RV128 <-> 0b11,
+  backwards 0b00 => internal_error(__FILE__, __LINE__, "architecture(0b00) is invalid")
 }
 
 /* privilege levels */
 
 type priv_level = bits(2)
+// Note the order must be from lowest privilege to highest so num_of_Privilege
+// is in that order (0 = User, 1 = Supervisor, 2 = Machine).
 enum Privilege  = {User, Supervisor, Machine}
 
 val privLevel_to_bits : Privilege -> priv_level
@@ -126,15 +120,22 @@ overload to_str = {privLevel_to_str}
 enum Retired = {RETIRE_SUCCESS, RETIRE_FAIL}
 
 /* memory access types */
-
-union AccessType ('a : Type) = {
-  Read      : 'a,
-  Write     : 'a,
-  ReadWrite : ('a, 'a),
-  Execute   : unit
+enum CacheAccessType = {
+  CleanFlush,
+  Inval,
+  Zero
 }
 
-enum word_width = {BYTE, HALF, WORD, DOUBLE}
+union AccessType ('a : Type) = {
+  Read            : 'a,
+  Write           : 'a,
+  // (Read, Write)
+  ReadWrite       : ('a, 'a),
+  Execute         : unit,
+  Cache           : CacheAccessType,
+}
+
+enum word_width = { BYTE, HALF, WORD, DOUBLE}
 
 /* architectural interrupt definitions */
 
@@ -147,7 +148,8 @@ enum InterruptType = {
   I_M_Timer,
   I_U_External,
   I_S_External,
-  I_M_External
+  I_M_External,
+  Local_Counter_Overflow,
 }
 
 val interruptType_to_bits : InterruptType -> exc_code
@@ -161,7 +163,8 @@ function interruptType_to_bits (i) =
     I_M_Timer    => 0x07,
     I_U_External => 0x08,
     I_S_External => 0x09,
-    I_M_External => 0x0b
+    I_M_External => 0x0b,
+    Local_Counter_Overflow => 0x0d,
   }
 
 /* architectural exception definitions */
@@ -212,6 +215,30 @@ function exceptionType_to_bits(e) =
     E_Extension(e)         => ext_exc_type_to_bits(e)
   }
 
+val exceptionType_of_bits : exc_code -> ExceptionType
+function exceptionType_of_bits(e) =
+  match (e) {
+    0x00 => E_Fetch_Addr_Align(),
+    0x01 => E_Fetch_Access_Fault(),
+    0x02 => E_Illegal_Instr(),
+    0x03 => E_Breakpoint(),
+    0x04 => E_Load_Addr_Align(),
+    0x05 => E_Load_Access_Fault(),
+    0x06 => E_SAMO_Addr_Align(),
+    0x07 => E_SAMO_Access_Fault(),
+    0x08 => E_U_EnvCall(),
+    0x09 => E_S_EnvCall(),
+    0x0a => E_Reserved_10(),
+    0x0b => E_M_EnvCall(),
+    0x0c => E_Fetch_Page_Fault(),
+    0x0d => E_Load_Page_Fault(),
+    0x0e => E_Reserved_14(),
+    0x0f => E_SAMO_Page_Fault(),
+
+    /* extensions (or failure) */
+    _ => E_Extension(ext_exc_type_of_bits(e))
+  }
+
 val num_of_ExceptionType : ExceptionType -> {'n, (0 <= 'n < xlen). int('n)}
 function num_of_ExceptionType(e) =
   match (e) {
@@ -246,7 +273,7 @@ function exceptionType_to_str(e) =
     E_Breakpoint()         => "breakpoint",
     E_Load_Addr_Align()    => "misaligned-load",
     E_Load_Access_Fault()  => "load-access-fault",
-    E_SAMO_Addr_Align()    => "misaliged-store/amo",
+    E_SAMO_Addr_Align()    => "misaligned-store/amo",
     E_SAMO_Access_Fault()  => "store/amo-access-fault",
     E_U_EnvCall()          => "u-call",
     E_S_EnvCall()          => "s-call",
@@ -268,13 +295,12 @@ overload to_str = {exceptionType_to_str}
 type tv_mode = bits(2)
 enum TrapVectorMode = {TV_Direct, TV_Vector, TV_Reserved}
 
-val trapVectorMode_of_bits : tv_mode -> TrapVectorMode
-function trapVectorMode_of_bits (m) =
-  match (m) {
-    0b00 => TV_Direct,
-    0b01 => TV_Vector,
-    _    => TV_Reserved
-  }
+mapping trapVectorMode_bits : tv_mode <-> TrapVectorMode = {
+  0b00 <-> TV_Direct,
+  0b01 <-> TV_Vector,
+  0b10 <-> TV_Reserved,
+  0b11 <-> TV_Reserved, // Used by CLIC.
+}
 
 /* extension context status */
 
@@ -302,14 +328,15 @@ function extStatus_of_bits(e) =
 /* supervisor-level address translation modes */
 
 type satp_mode = bits(4)
-enum SATPMode = {Sbare, Sv32, Sv39, Sv48}
+enum SATPMode = {Bare, Sv32, Sv39, Sv48, Sv57}
 
-function satp64Mode_of_bits(a : Architecture, m : satp_mode) -> option(SATPMode) =
+function satpMode_of_bits(a : Architecture, m : satp_mode) -> option(SATPMode) =
   match (a, m) {
-    (_,    0x0) => Some(Sbare),
+    (_,    0x0) => Some(Bare),
     (RV32, 0x1) => Some(Sv32),
     (RV64, 0x8) => Some(Sv39),
     (RV64, 0x9) => Some(Sv48),
+    (RV64, 0xA) => Some(Sv57),
     (_, _)      => None()
   }
 
@@ -336,6 +363,8 @@ enum amoop = {AMOSWAP, AMOADD, AMOXOR, AMOAND, AMOOR,
               AMOMIN, AMOMAX, AMOMINU, AMOMAXU}   /* AMO ops */
 enum csrop = {CSRRW, CSRRS, CSRRC}                /* CSR ops */
 
+enum cbop_zicbom = {CBO_CLEAN, CBO_FLUSH, CBO_INVAL}  /* Zicbom ops */
+
 enum brop_zba = {RISCV_SH1ADD, RISCV_SH2ADD, RISCV_SH3ADD}
 
 enum brop_zbb = {RISCV_ANDN, RISCV_ORN, RISCV_XNOR, RISCV_MAX,
@@ -357,17 +386,8 @@ enum extop_zbb = {RISCV_SEXTB, RISCV_SEXTH, RISCV_ZEXTH}
 
 enum zicondop = {RISCV_CZERO_EQZ, RISCV_CZERO_NEZ}
 
-mapping bool_bits : bool <-> bits(1) = {
-  true   <-> 0b1,
-  false  <-> 0b0
-}
-
-mapping bool_not_bits : bool <-> bits(1) = {
-  true   <-> 0b0,
-  false  <-> 0b1
-}
-
-mapping size_bits : word_width <-> bits(2) = {
+// Get the bit encoding of word_width.
+mapping size_enc : word_width <-> bits(2) = {
   BYTE   <-> 0b00,
   HALF   <-> 0b01,
   WORD   <-> 0b10,
@@ -381,35 +401,15 @@ mapping size_mnemonic : word_width <-> string = {
   DOUBLE <-> "d"
 }
 
-val word_width_bytes : word_width -> {'s, 's == 1 | 's == 2 | 's == 4 | 's == 8 . atom('s)}
-function word_width_bytes width = match width {
-  BYTE   => 1,
-  HALF   => 2,
-  WORD   => 4,
-  DOUBLE => 8
+mapping size_bytes : word_width <-> {1, 2, 4, 8} = {
+  BYTE   <-> 1,
+  HALF   <-> 2,
+  WORD   <-> 4,
+  DOUBLE <-> 8,
 }
 
-/*!
- * Raise an internal error reporting that width w is invalid for access kind, k,
- * and current xlen. The file name and line number should be passed in as the
- * first two arguments using the __FILE__ and __LINE__ built-in macros.
- * This is mainly used to supress Sail warnings about incomplete matches and
- * should be unreachable. See https://github.com/riscv/sail-riscv/issues/194
- * and https://github.com/riscv/sail-riscv/pull/197 .
- */
-val report_invalid_width : forall ('a : Type). (string, int, word_width, string) -> 'a
-function report_invalid_width(f , l, w, k) -> 'a = {
-  /*
-   * Ideally we would call internal_error here but this triggers a Sail bug,
-   * https://github.com/rems-project/sail/issues/203 in versions < 0.15.1, so
-   * we work around this by manually inlining.
-   * TODO when we are happy to require Sail >= 0.15.1 uncomment the following
-   * and remove the rest of the function.
-   */
-  // internal_error(f, l, "Invalid width, " ^ size_mnemonic(w) ^ ", for " ^ k ^
-  //   " with xlen=" ^ dec_str(sizeof(xlen)));
-  assert (false, f ^ ":" ^ dec_str(l) ^ ": " ^ "Invalid width, "
-    ^ size_mnemonic(w) ^ ", for " ^ k ^ " with xlen="
-    ^ dec_str(sizeof(xlen)));
-  throw Error_internal_error()
+struct mul_op = {
+  high       : bool,
+  signed_rs1 : bool,
+  signed_rs2 : bool
 }

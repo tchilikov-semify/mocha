@@ -35,8 +35,13 @@
  * per the platform memory map.
  */
 
-function is_aligned_addr forall 'n. (addr : xlenbits, width : atom('n)) -> bool =
+function is_aligned_addr_phys forall 'n. (physaddr(addr) : physaddr, width : int('n)) -> bool =
   unsigned(addr) % width == 0
+
+function is_aligned_addr_virt forall 'n. (virtaddr(addr) : virtaddr, width : int('n)) -> bool =
+  unsigned(addr) % width == 0
+
+overload is_aligned_addr = {is_aligned_addr_phys, is_aligned_addr_virt}
 
 function read_kind_of_flags (aq : bool, rl : bool, res : bool) -> option(read_kind) =
   match (aq, rl, res) {
@@ -50,219 +55,325 @@ function read_kind_of_flags (aq : bool, rl : bool, res : bool) -> option(read_ki
     (false, true, true)   => None()
   }
 
+function write_kind_of_flags (aq : bool, rl : bool, con : bool) -> write_kind =
+  match (aq, rl, con) {
+    (false, false, false) => Write_plain,
+    (false, true,  false) => Write_RISCV_release,
+    (false, false, true)  => Write_RISCV_conditional,
+    (false, true , true)  => Write_RISCV_conditional_release,
+    (true,  true,  false) => Write_RISCV_strong_release,
+    (true,  true , true)  => Write_RISCV_conditional_strong_release,
+    // throw an illegal instruction here?
+    (true,  false, false) => throw(Error_not_implemented("store.aq")),
+    (true,  false, true)  => throw(Error_not_implemented("sc.aq"))
+  }
+
 // only used for actual memory regions, to avoid MMIO effects
-function phys_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : AccessType(ext_access_type), paddr : xlenbits, width : atom('n), aq : bool, rl: bool, res : bool, meta : bool) -> MemoryOpResult((bits(8 * 'n), mem_meta)) = {
+function phys_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : AccessType(ext_access_type), paddr : physaddr, width : int('n), aq : bool, rl: bool, res : bool, meta : bool) -> MemoryOpResult((bits(8 * 'n), mem_meta)) = {
   let result = (match read_kind_of_flags(aq, rl, res) {
     Some(rk) => Some(read_ram(rk, paddr, width, meta)),
     None()   => None()
   }) : option((bits(8 * 'n), mem_meta));
+  let result : option((bits(8 * 'n), mem_meta)) = if platform_get_rvfi_dii() & out_of_rvfi_dii_range(physaddr_bits(paddr), width) then None() else result;
   match (t, result) {
-    (Execute(),  None()) => MemException(E_Fetch_Access_Fault()),
-    (Read(Data), None()) => MemException(E_Load_Access_Fault()),
-    (_,          None()) => MemException(E_SAMO_Access_Fault()),
+    (Execute(),  None()) => Err(E_Fetch_Access_Fault()),
+    (Read(Data), None()) => Err(E_Load_Access_Fault()),
+    (_,          None()) => Err(E_SAMO_Access_Fault()),
     (_,      Some(v, m)) => { if   get_config_print_mem()
-                              then print_mem("mem[" ^ to_str(t) ^ "," ^ BitStr(paddr) ^ "] -> " ^ BitStr(v));
-                              MemValue(v, m) }
+                              then print_mem("mem[" ^ to_str(t) ^ "," ^ BitStr(physaddr_bits(paddr)) ^ "] -> " ^ BitStr(v));
+                              Ok(v, m) }
   }
 }
 
-/* dispatches to MMIO regions or physical memory regions depending on physical memory map */
-function checked_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : AccessType(ext_access_type), paddr : xlenbits, width : atom('n), aq : bool, rl : bool, res: bool, meta : bool) -> MemoryOpResult((bits(8 * 'n), mem_meta)) =
-  if   within_mmio_readable(paddr, width)
-  then MemoryOpResult_add_meta(mmio_read(t, paddr, width), default_meta)
-  else if within_phys_mem(paddr, width)
-  then match ext_check_phys_mem_read(t, paddr, width, aq, rl, res, meta) {
-    Ext_PhysAddr_OK()     => phys_mem_read(t, paddr, width, aq, rl, res, meta),
-    Ext_PhysAddr_Error(e) => MemException(e)
-  } else match t {
-    Execute()  => MemException(E_Fetch_Access_Fault()),
-    Read(Data) => MemException(E_Load_Access_Fault()),
-    _          => MemException(E_SAMO_Access_Fault())
-  }
+type amo_level = range(0, 3)
 
-/* PMP checks if enabled */
-function pmp_mem_read forall 'n, 0 < 'n <= max_mem_access . (t : AccessType(ext_access_type), p : Privilege, paddr : xlenbits, width : atom('n), aq : bool, rl : bool, res: bool, meta : bool) -> MemoryOpResult((bits(8 * 'n), mem_meta)) =
-  if   sys_pmp_count() == 0
-  then checked_mem_read(t, paddr, width, aq, rl, res, meta)
-  else {
-    match pmpCheck(paddr, width, t, p) {
-      None()  => checked_mem_read(t, paddr, width, aq, rl, res, meta),
-      Some(e) => MemException(e)
+val pma_amo_support_to_level : AtomicSupport -> amo_level
+function pma_amo_support_to_level(a) = {
+  match a {
+    AMONone => 0,
+    AMOSwap => 1,
+    AMOLogical => 2,
+    AMOArithmetic => 3,
+  }
+}
+
+val amo_op_to_pma : amoop -> AtomicSupport
+function amo_op_to_pma(op) = {
+  match op {
+    AMOSWAP => AMOSwap,
+    AMOXOR => AMOLogical,
+    AMOAND => AMOLogical,
+    AMOOR => AMOLogical,
+    AMOADD => AMOArithmetic,
+    AMOMIN => AMOArithmetic,
+    AMOMAX => AMOArithmetic,
+    AMOMINU => AMOArithmetic,
+    AMOMAXU => AMOArithmetic,
+  }
+}
+
+function pmaCheck forall 'n, 0 < 'n <= max_mem_access .
+(
+  pbmt       : PBMT,
+  paddr      : physaddr,
+  width      : int('n),
+  accTy      : AccessType(ext_access_type),
+  res_or_con : bool,
+)  -> option(ExceptionType) = {
+  match matching_pma(pma_regions, paddr, width) {
+    None() => {
+      Some(accessFaultFromAccessType(accTy))
+    },
+    Some(struct { attributes, _ }) => {
+      let attributes = resolve_pma_pbmt(attributes, pbmt);
+      let misaligned = not(is_aligned_addr(paddr, width));
+      // Check if we need to raise an exception for misalignment.
+      if misaligned & attributes.misalignmentCausesAccessFault then {
+        Some(accessFaultFromAccessType(accTy))
+      } else if misaligned & attributes.misalignmentCausesAlignmentFault then {
+        Some(alignmentFaultFromAccessType(accTy))
+      } else {
+        // Check read/write/execute permissions.
+        let canAccess : bool = match accTy {
+          Execute()       => attributes.executable,
+          Read(_)         => attributes.readable & not(res_or_con & attributes.reservability == RsrvNone),
+          Write(_)        => attributes.writable & not(res_or_con & attributes.reservability == RsrvNone),
+          ReadWrite(_, _) => attributes.readable &
+                             attributes.writable &
+                             // TODO: Extend ReadWrite with the specific
+                             // type of AMO operation. For now we assume
+                             // everything is arithmetic which is wrong.
+                             (pma_amo_support_to_level(AMOArithmetic) <=
+                              pma_amo_support_to_level(attributes.atomicSupport)),
+          Cache(Zero)     => attributes.writable & attributes.supportsCboZero,
+          Cache(_)        => internal_error(__FILE__, __LINE__,
+                                            "Invalid CacheAccessType; Inval, Clean and Flush check Read/Write permissions."),
+        };
+        let canAccess = platform_get_rvfi_dii() | (canAccess & ext_pma_check(accTy, attributes));
+        if canAccess then None() else Some(accessFaultFromAccessType(accTy))
+      }
     }
   }
+}
 
-/* Atomic accesses can be done to MMIO regions, e.g. in kernel access to device registers. */
+function alignmentOrAccessFaultPriority(exc : ExceptionType) -> range(0, 1) = {
+  match exc {
+    E_Fetch_Access_Fault() => 1,
+    E_Load_Access_Fault()  => 1,
+    E_SAMO_Access_Fault()  => 1,
+    E_Fetch_Addr_Align()   => 0,
+    E_Load_Addr_Align()    => 0,
+    E_SAMO_Addr_Align()    => 0,
+    e => internal_error(__FILE__, __LINE__, "Invalid exception: " ^ exceptionType_to_str(e))
+  }
+}
+
+val highestPriorityAlignmentOrAccessFault : (ExceptionType, ExceptionType) -> ExceptionType
+function highestPriorityAlignmentOrAccessFault  (l : ExceptionType, r : ExceptionType) -> ExceptionType = {
+  if alignmentOrAccessFaultPriority(l) > alignmentOrAccessFaultPriority(r) then l else r
+}
+
+// Check if access is permitted according to PMPs and PMAs.
+function phys_access_check forall 'n, 0 < 'n <= max_mem_access . (
+  typ : AccessType(ext_access_type),
+  priv : Privilege,
+  pbmt : PBMT,
+  paddr : physaddr,
+  width : int('n),
+  res_or_con : bool,
+) -> option(ExceptionType) = {
+  let pmpError : option(ExceptionType) = if sys_pmp_count() == 0 then None() else pmpCheck(paddr, width, typ, priv);
+  let pmaError : option(ExceptionType) = pmaCheck(pbmt, paddr, width, typ, res_or_con);
+  match (pmpError, pmaError) {
+    (None(), None())     => None(),
+    (Some(e), None())    => Some(e),
+    (None(), Some(e))    => Some(e),
+    (Some(e0), Some(e1)) => Some(highestPriorityAlignmentOrAccessFault(e0, e1)),
+  }
+}
 
 $ifdef RVFI_DII
-val rvfi_read : forall 'n, 'n > 0. (xlenbits, atom('n), MemoryOpResult((bits(8 * 'n), mem_meta))) -> unit
+val rvfi_read : forall 'n, 'n > 0. (xlenbits, int('n), MemoryOpResult((bits(8 * 'n), mem_meta))) -> unit
 function rvfi_read (addr, width, result) = {
   rvfi_mem_data[rvfi_mem_addr] = zero_extend(addr);
   rvfi_mem_data_present = true;
   match result {
     /* TODO: report tag bit for capability writes and extend mask by one bit. */
-    MemValue(v, _) => if width <= 16
-                       then { rvfi_mem_data[rvfi_mem_rdata] = sail_zero_extend(v, 256);
-                              rvfi_mem_data[rvfi_mem_rmask] = rvfi_encode_width_mask(width) }
-                       else { internal_error(__FILE__, __LINE__, "Expected at most 16 bytes here!") },
-    MemException(_) => ()
+    Ok(v, _) => if width <= 16
+               then { rvfi_mem_data[rvfi_mem_rdata] = sail_zero_extend(v, 256);
+                      rvfi_mem_data[rvfi_mem_rmask] = rvfi_encode_width_mask(width) }
+               else { internal_error(__FILE__, __LINE__, "Expected at most 16 bytes here!") },
+    Err(_) => ()
   };
 }
 $else
-val rvfi_read : forall 'n, 'n > 0. (xlenbits, atom('n), MemoryOpResult((bits(8 * 'n), mem_meta))) -> unit
+val rvfi_read : forall 'n, 'n > 0. (xlenbits, int('n), MemoryOpResult((bits(8 * 'n), mem_meta))) -> unit
 function rvfi_read (addr, width, result) = ()
 $endif
 
-/* NOTE: The rreg effect is due to MMIO. */
-$ifdef RVFI_DII
-val mem_read      : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), xlenbits, atom('n), bool, bool, bool)       -> MemoryOpResult(bits(8 * 'n))
-val mem_read_priv : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, xlenbits, atom('n), bool, bool, bool)       -> MemoryOpResult(bits(8 * 'n))
-val mem_read_meta : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), xlenbits, atom('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))
-val mem_read_priv_meta : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, xlenbits, atom('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))
-$else
-val mem_read      : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), xlenbits, atom('n), bool, bool, bool)       -> MemoryOpResult(bits(8 * 'n))
-val mem_read_priv : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, xlenbits, atom('n), bool, bool, bool)       -> MemoryOpResult(bits(8 * 'n))
-val mem_read_meta : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), xlenbits, atom('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))
-val mem_read_priv_meta : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, xlenbits, atom('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))
-$endif
-
-/* The most generic memory read operation */
-function mem_read_priv_meta (typ, priv, paddr, width, aq, rl, res, meta) = {
+/* dispatches to MMIO regions or physical memory regions depending on physical memory map */
+function checked_mem_read forall 'n, 0 < 'n <= max_mem_access . (
+  typ : AccessType(ext_access_type),
+  priv : Privilege,
+  pbmt : PBMT,
+  paddr : physaddr,
+  width : int('n),
+  aq : bool,
+  rl : bool,
+  res: bool,
+  meta : bool,
+) -> MemoryOpResult((bits(8 * 'n), mem_meta)) = {
   let result : MemoryOpResult((bits(8 * 'n), mem_meta)) =
     if (aq | res) & not(is_aligned_addr(paddr, width))
-    then MemException(E_Load_Addr_Align())
+    then Err(E_Load_Addr_Align())
     else match (aq, rl, res) {
       (false, true,  false) => throw(Error_not_implemented("load.rl")),
       (false, true,  true)  => throw(Error_not_implemented("lr.rl")),
-      (_, _, _)             => pmp_mem_read(typ, priv, paddr, width, aq, rl, res, meta)
+      _ => match phys_access_check(typ, priv, pbmt, paddr, width, res) {
+        Some(e) => Err(e),
+        None() => {
+          if  within_mmio_readable(paddr, width)
+          then MemoryOpResult_add_meta(mmio_read(typ, paddr, width), default_meta)
+          else match ext_check_phys_mem_read(typ, paddr, width, aq, rl, res, meta) {
+            Ext_PhysAddr_OK()     => phys_mem_read(typ, paddr, width, aq, rl, res, meta),
+            Ext_PhysAddr_Error(e) => Err(e)
+          }
+        }
+      },
     };
-  rvfi_read(paddr, width, result);
+  rvfi_read(physaddr_bits(paddr), width, result);
   result
 }
 
-function mem_read_meta (typ, paddr, width, aq, rl, res, meta) =
-  mem_read_priv_meta(typ, effectivePrivilege(typ, mstatus, cur_privilege), paddr, width, aq, rl, res, meta)
+/* Atomic accesses can be done to MMIO regions, e.g. in kernel access to device registers. */
+
+val mem_read           : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), PBMT, physaddr, int('n), bool, bool, bool)                  -> MemoryOpResult(bits(8 * 'n))
+val mem_read_priv      : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, PBMT, physaddr, int('n), bool, bool, bool)       -> MemoryOpResult(bits(8 * 'n))
+val mem_read_meta      : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), PBMT, physaddr, int('n), bool, bool, bool, bool)            -> MemoryOpResult((bits(8 * 'n), mem_meta))
+val mem_read_priv_meta : forall 'n, 0 < 'n <= max_mem_access . (AccessType(ext_access_type), Privilege, PBMT, physaddr, int('n), bool, bool, bool, bool) -> MemoryOpResult((bits(8 * 'n), mem_meta))
+
+/* The most generic memory read operation */
+function mem_read_priv_meta (typ, priv, pbmt, paddr, width, aq, rl, res, meta) =
+  checked_mem_read(typ, priv, pbmt, paddr, width, aq, rl, res, meta)
+
+function mem_read_meta (typ, pbmt, paddr, width, aq, rl, res, meta) =
+  mem_read_priv_meta(typ, effectivePrivilege(typ, mstatus, cur_privilege()), pbmt, paddr, width, aq, rl, res, meta)
 
 /* Specialized mem_read_meta that drops the metadata */
-function mem_read_priv (typ, priv, paddr, width, aq, rl, res) =
-  MemoryOpResult_drop_meta(mem_read_priv_meta(typ, priv, paddr, width, aq, rl, res, false))
+function mem_read_priv (typ, priv, pbmt, paddr, width, aq, rl, res) =
+  MemoryOpResult_drop_meta(mem_read_priv_meta(typ, priv, pbmt, paddr, width, aq, rl, res, false))
 
 /* Specialized mem_read_priv that operates at the default effective privilege */
-function mem_read (typ, paddr, width, aq, rel, res) =
-  mem_read_priv(typ, effectivePrivilege(typ, mstatus, cur_privilege), paddr, width, aq, rel, res)
+function mem_read (typ, pbmt, paddr, width, aq, rel, res) =
+  mem_read_priv(typ, effectivePrivilege(typ, mstatus, cur_privilege()), pbmt, paddr, width, aq, rel, res)
 
-val mem_write_ea : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bool, bool, bool) -> MemoryOpResult(unit)
-
-function mem_write_ea (addr, width, aq, rl, con) = {
+val mem_write_ea : forall 'n, 0 < 'n <= max_mem_access . (physaddr, int('n), bool, bool, bool) -> MemoryOpResult(unit)
+function mem_write_ea (addr, width, aq, rl, con) =
   if (rl | con) & not(is_aligned_addr(addr, width))
-  then MemException(E_SAMO_Addr_Align())
-  else match (aq, rl, con) {
-    (false, false, false) => MemValue(write_ram_ea(Write_plain, addr, width)),
-    (false, true,  false) => MemValue(write_ram_ea(Write_RISCV_release, addr, width)),
-    (false, false, true)  => MemValue(write_ram_ea(Write_RISCV_conditional, addr, width)),
-    (false, true , true)  => MemValue(write_ram_ea(Write_RISCV_conditional_release, addr, width)),
-    (true,  false, false) => throw(Error_not_implemented("store.aq")),
-    (true,  true,  false) => MemValue(write_ram_ea(Write_RISCV_strong_release, addr, width)),
-    (true,  false, true)  => throw(Error_not_implemented("sc.aq")),
-    (true,  true , true)  => MemValue(write_ram_ea(Write_RISCV_conditional_strong_release, addr, width))
-  }
-}
+  then Err(E_SAMO_Addr_Align())
+  else Ok(write_ram_ea(write_kind_of_flags(aq, rl, con), addr, width))
 
 $ifdef RVFI_DII
-val rvfi_write : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bits(8 * 'n), mem_meta, MemoryOpResult(bool)) -> unit
+val rvfi_write : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, int('n), bits(8 * 'n), mem_meta, MemoryOpResult(bool)) -> unit
 function rvfi_write (addr, width, value, meta, result) = {
   rvfi_mem_data[rvfi_mem_addr] = zero_extend(addr);
   rvfi_mem_data_present = true;
   match result {
     /* Log only the memory address (without the value) if the write fails. */
-    MemValue(_) => if width <= 16 then {
+    Ok(_) => if width <= 16 then {
         /* TODO: report tag bit for capability writes and extend mask by one bit. */
         rvfi_mem_data[rvfi_mem_wdata] = sail_zero_extend(value,256);
         rvfi_mem_data[rvfi_mem_wmask] = rvfi_encode_width_mask(width);
       } else {
         internal_error(__FILE__, __LINE__, "Expected at most 16 bytes here!");
       },
-    MemException(_) => ()
+    Err(_) => ()
   }
 }
 $else
-val rvfi_write : forall 'n, 'n > 0. (xlenbits, atom('n), bits(8 * 'n), mem_meta, MemoryOpResult(bool)) -> unit
+val rvfi_write : forall 'n, 'n > 0. (xlenbits, int('n), bits(8 * 'n), mem_meta, MemoryOpResult(bool)) -> unit
 function rvfi_write (addr, width, value, meta, result) = ()
 $endif
 
 // only used for actual memory regions, to avoid MMIO effects
-function phys_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk : write_kind, paddr : xlenbits, width : atom('n), data : bits(8 * 'n), meta : mem_meta) -> MemoryOpResult(bool) = {
-  let result = MemValue(write_ram(wk, paddr, width, data, meta));
-  if   get_config_print_mem()
-  then print_mem("mem[" ^ BitStr(paddr) ^ "] <- " ^ BitStr(data));
-  result
+function phys_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk : write_kind, paddr : physaddr, width : int('n), data : bits(8 * 'n), meta : mem_meta) -> MemoryOpResult(bool) = {
+  if platform_get_rvfi_dii() & out_of_rvfi_dii_range(physaddr_bits(paddr), width)
+  then Err(E_SAMO_Access_Fault())
+  else {
+    let result = write_ram(wk, paddr, width, data, meta);
+    if   get_config_print_mem()
+    then print_mem("mem[" ^ BitStr(physaddr_bits(paddr)) ^ "] <- " ^ BitStr(data));
+    Ok(result)
+  }
 }
 
 /* dispatches to MMIO regions or physical memory regions depending on physical memory map */
-function checked_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk : write_kind, paddr : xlenbits, width : atom('n), data: bits(8 * 'n), meta: mem_meta) -> MemoryOpResult(bool) =
-  if   within_mmio_writable(paddr, width)
-  then mmio_write(paddr, width, data)
-  else if within_phys_mem(paddr, width)
-  then match ext_check_phys_mem_write (wk, paddr, width, data, meta) {
-    Ext_PhysAddr_OK() => phys_mem_write(wk, paddr, width, data, meta),
-    Ext_PhysAddr_Error(e)  => MemException(e)
-  }
-  else MemException(E_SAMO_Access_Fault())
-
-/* PMP checks if enabled */
-function pmp_mem_write forall 'n, 0 < 'n <= max_mem_access . (wk: write_kind, paddr : xlenbits, width : atom('n), data: bits(8 * 'n), typ: AccessType(ext_access_type), priv: Privilege, meta: mem_meta) -> MemoryOpResult(bool) =
-  if   sys_pmp_count() == 0
-  then checked_mem_write(wk, paddr, width, data, meta)
-  else {
-    match pmpCheck(paddr, width, typ, priv) {
-      None()  => checked_mem_write(wk, paddr, width, data, meta),
-      Some(e) => MemException(e)
-    }
-  }
+function checked_mem_write forall 'n, 0 < 'n <= max_mem_access . (
+  pbmt : PBMT,
+  paddr : physaddr,
+  width : int('n),
+  data : bits(8 * 'n),
+  typ : AccessType(ext_access_type),
+  priv : Privilege,
+  aq : bool,
+  rl : bool,
+  con : bool,
+  meta : mem_meta,
+) -> MemoryOpResult(bool) = {
+  let result : MemoryOpResult(bool) =
+    if (rl | con) & not(is_aligned_addr(paddr, width))
+    then Err(E_SAMO_Addr_Align())
+    else match phys_access_check(typ, priv, pbmt, paddr, width, con) {
+      Some(e) => Err(e),
+      None() => {
+        if within_mmio_writable(paddr, width)
+        then mmio_write(paddr, width, data)
+        else {
+          let wk = write_kind_of_flags(aq, rl, con);
+          match ext_check_phys_mem_write (wk, paddr, width, data, meta) {
+            Ext_PhysAddr_OK()      => phys_mem_write(wk, paddr, width, data, meta),
+            Ext_PhysAddr_Error(e)  => Err(e)
+          }
+        }
+      }
+    };
+  rvfi_write(physaddr_bits(paddr), width, data, meta, result);
+  result
+}
 
 /* Atomic accesses can be done to MMIO regions, e.g. in kernel access to device registers. */
 
 /* Memory write with an explicit metadata value.  Metadata writes are
  * currently assumed to have the same alignment constraints as their
  * data.
- * NOTE: The wreg effect is due to MMIO, the rreg is due to checking mtime.
  */
-val mem_write_value_priv_meta : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bits(8 * 'n), AccessType(ext_access_type), Privilege, mem_meta, bool, bool, bool) -> MemoryOpResult(bool)
-function mem_write_value_priv_meta (paddr, width, value, typ, priv, meta, aq, rl, con) = {
-  if (rl | con) & not(is_aligned_addr(paddr, width))
-  then MemException(E_SAMO_Addr_Align())
-  else {
-    let wk : write_kind = match (aq, rl, con) {
-      (false, false, false) => Write_plain,
-      (false, true,  false) => Write_RISCV_release,
-      (false, false, true)  => Write_RISCV_conditional,
-      (false, true , true)  => Write_RISCV_conditional_release,
-      (true,  true,  false) => Write_RISCV_strong_release,
-      (true,  true , true)  => Write_RISCV_conditional_strong_release,
-      // throw an illegal instruction here?
-      (true,  false, false) => throw(Error_not_implemented("store.aq")),
-      (true,  false, true)  => throw(Error_not_implemented("sc.aq"))
-    };
-    let result = pmp_mem_write(wk, paddr, width, value, typ, priv, meta);
-    rvfi_write(paddr, width, value, meta, result);
-    result
-  }
-}
+val mem_write_value_priv_meta : forall 'n, 0 < 'n <= max_mem_access . (PBMT, physaddr, int('n), bits(8 * 'n), AccessType(ext_access_type), Privilege, mem_meta, bool, bool, bool) -> MemoryOpResult(bool)
+function mem_write_value_priv_meta (pbmt, paddr, width, value, typ, priv, meta, aq, rl, con) =
+  checked_mem_write(pbmt, paddr, width, value, typ, priv, aq, rl, con, meta)
 
 /* Memory write with explicit Privilege, implicit AccessType and metadata */
-val mem_write_value_priv : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bits(8 * 'n), Privilege, bool, bool, bool) -> MemoryOpResult(bool)
-function mem_write_value_priv (paddr, width, value, priv, aq, rl, con) =
-  mem_write_value_priv_meta(paddr, width, value, Write(default_write_acc), priv, default_meta, aq, rl, con)
+val mem_write_value_priv : forall 'n, 0 < 'n <= max_mem_access . (PBMT, physaddr, int('n), bits(8 * 'n), Privilege, bool, bool, bool) -> MemoryOpResult(bool)
+function mem_write_value_priv (pbmt, paddr, width, value, priv, aq, rl, con) =
+  mem_write_value_priv_meta(pbmt, paddr, width, value, Write(default_write_acc), priv, default_meta, aq, rl, con)
 
 /* Memory write with explicit metadata and AccessType, implicit and Privilege */
-val mem_write_value_meta : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bits(8 * 'n), ext_access_type, mem_meta, bool, bool, bool) -> MemoryOpResult(bool)
-function mem_write_value_meta (paddr, width, value, ext_acc, meta, aq, rl, con) = {
+val mem_write_value_meta : forall 'n, 0 < 'n <= max_mem_access . (PBMT, physaddr, int('n), bits(8 * 'n), ext_access_type, mem_meta, bool, bool, bool) -> MemoryOpResult(bool)
+function mem_write_value_meta (pbmt, paddr, width, value, ext_acc, meta, aq, rl, con) = {
   let typ = Write(ext_acc);
-  let ep = effectivePrivilege(typ, mstatus, cur_privilege);
-  mem_write_value_priv_meta(paddr, width, value, typ, ep, meta, aq, rl, con)
+  let ep = effectivePrivilege(typ, mstatus, cur_privilege());
+  mem_write_value_priv_meta(pbmt, paddr, width, value, typ, ep, meta, aq, rl, con)
 }
 
 /* Memory write with default AccessType, Privilege, and metadata */
-val mem_write_value : forall 'n, 0 < 'n <= max_mem_access . (xlenbits, atom('n), bits(8 * 'n), bool, bool, bool) -> MemoryOpResult(bool)
-function mem_write_value (paddr, width, value, aq, rl, con) = {
-  mem_write_value_meta(paddr, width, value, default_write_acc, default_meta, aq, rl, con)
+val mem_write_value : forall 'n, 0 < 'n <= max_mem_access . (PBMT, physaddr, int('n), bits(8 * 'n), bool, bool, bool) -> MemoryOpResult(bool)
+function mem_write_value (pbmt, paddr, width, value, aq, rl, con) = {
+  mem_write_value_meta(pbmt, paddr, width, value, default_write_acc, default_meta, aq, rl, con)
+}
+
+/* Same as mem_write_value but uses ReadWrite for the access type instead of Write. */
+val mem_write_value_amo : forall 'n, 0 < 'n <= max_mem_access . (PBMT, physaddr, int('n), bits(8 * 'n), bool, bool, bool) -> MemoryOpResult(bool)
+function mem_write_value_amo (pbmt, paddr, width, value, aq, rl, con) = {
+  let typ = ReadWrite(default_write_acc, default_write_acc);
+  let ep = effectivePrivilege(typ, mstatus, cur_privilege());
+  mem_write_value_priv_meta(pbmt, paddr, width, value, typ, ep, default_meta, aq, rl, con)
 }

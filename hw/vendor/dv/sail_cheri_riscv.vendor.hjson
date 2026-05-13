@@ -7,7 +7,7 @@
 
   upstream: {
     url: "https://github.com/Capabilities-Limited/sail-cheri-riscv.git",
-    rev: "master",
+    rev: "db7355e0ac927fd1e875e6063a916f4371a6fa25",
   },
 
   exclude_from_upstream: [

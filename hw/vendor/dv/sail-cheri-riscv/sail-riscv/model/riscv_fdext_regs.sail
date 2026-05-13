@@ -15,58 +15,59 @@
 
 /* **************************************************************** */
 /* NaN boxing/unboxing.                                             */
-/* When 16-bit floats (half-precision) are stored in 32/64-bit regs  */
-/* they must be 'NaN boxed'.                                         */
-/* When 16-bit floats (half-precision) are read from 32/64-bit regs  */
-/* they must be 'NaN unboxed'.                                       */
-/* When 32-bit floats (single-precision) are stored in 64-bit regs  */
-/* they must be 'NaN boxed' (upper 32b all ones).                   */
-/* When 32-bit floats (single-precision) are read from 64-bit regs  */
-/* they must be 'NaN unboxed'.                                      */
 
-function canonical_NaN_H() -> bits(16) = 0x_7e00
-function canonical_NaN_S() -> bits(32) = 0x_7fc0_0000
-function canonical_NaN_D() -> bits(64) = 0x_7ff8_0000_0000_0000
+// Canonical NaNs are used when an invalid boxed value is unboxed.
+val canonical_NaN : forall 'n, 'n in {16, 32, 64, 128} . (implicit('n)) -> bits('n)
+function canonical_NaN(n) =
+  match 'n {
+    //     sign  exponent    significand
+    16  => 0b0 @ ones(5)  @ 0b1 @ zeros(9),
+    32  => 0b0 @ ones(8)  @ 0b1 @ zeros(22),
+    64  => 0b0 @ ones(11) @ 0b1 @ zeros(51),
+    128 => 0b0 @ ones(15) @ 0b1 @ zeros(111),
+  }
 
-val      nan_box_H : bits(16) -> flenbits
-function nan_box_H   val_16b =
-  if (sizeof(flen) == 32)
-  then 0x_FFFF @ val_16b
-  else 0x_FFFF_FFFF_FFFF @ val_16b
+// For backwards compatibility with code that existed before the
+// generic version above.
+function canonical_NaN_H() -> bits(16)  = canonical_NaN(16)
+function canonical_NaN_S() -> bits(32)  = canonical_NaN(32)
+function canonical_NaN_D() -> bits(64)  = canonical_NaN(64)
+function canonical_NaN_Q() -> bits(128) = canonical_NaN(128)
 
-val      nan_unbox_H : flenbits -> bits(16)
-function nan_unbox_H   regval =
-  if (sizeof(flen) == 32)
-  then if regval [32..16] == 0x_FFFF
-       then regval [15..0]
-       else canonical_NaN_H()
-  else if regval [63..16] == 0x_FFFF_FFFF_FFFF
-       then regval [15..0]
-       else canonical_NaN_H()
+// n-bit writes to a >n-bit floating point register "box" the value
+// by prepending 1s, which turn it into a qNaN.
+val nan_box : forall 'n 'm, 'n <= 'm . (implicit('m), bits('n)) -> bits('m)
+function nan_box(n, x) = ones('m - 'n) @ x
 
-val nan_box_S : bits(32) -> flenbits
-function nan_box_S val_32b = {
-  assert(sys_enable_fdext());
-  if (sizeof(flen) == 32)
-  then val_32b
-  else 0x_FFFF_FFFF @ val_32b
-}
-
-val nan_unbox_S : flenbits -> bits(32)
-function nan_unbox_S regval = {
-  assert(sys_enable_fdext());
-  if (sizeof(flen) == 32)
-  then regval
-  else if regval [63..32] == 0x_FFFF_FFFF
-       then regval [31..0]
-       else canonical_NaN_S()
-}
-
-overload nan_box = { nan_box_H, nan_box_S }
-overload nan_unbox = { nan_unbox_H, nan_unbox_S }
+// Except for floating-point transfer instructions (FSn and FMV.n.X),
+// n-bit reads of a >n-bit floating point register "unbox" the value stored
+// in the register. If the register does not contain a valid boxed value
+// then a canonical NaN value is returned instead.
+// TODO: Use right-open interval when available. See https://github.com/rems-project/sail/issues/471
+val nan_unbox : forall 'n 'm, 'm in {16, 32, 64, 128} & 'n >= 'm . (implicit('m), bits('n)) -> bits('m)
+function nan_unbox(m, x) = if 'n == 'm then x else (
+  if x['n - 1 .. 'm] == ones() then x['m - 1 .. 0] else canonical_NaN()
+)
 
 /* **************************************************************** */
 /* Floating point register file                                     */
+
+newtype fregidx = Fregidx : bits(5)
+newtype fregno = Fregno : range(0, 31)
+function fregidx_to_fregno (Fregidx(b) : fregidx) -> fregno = Fregno(unsigned(b))
+function fregidx_offset(Fregidx(r) : fregidx, o : bits(5)) -> fregidx = Fregidx(r + o)
+function fregidx_bits(Fregidx(r) : fregidx) -> bits(5) = r
+
+function cregidx_to_fregidx (Cregidx(b) : cregidx) -> fregidx = Fregidx(0b01 @ b)
+
+/*
+ * TODO: This is not quite right for having both Zfinx and E, but at least it
+ * marks the places we need to consider it
+ */
+function fregidx_to_regidx (Fregidx(b) : fregidx) -> regidx =
+  Regidx(truncate(b, let Regidx(zreg_bits) = zreg in length(zreg_bits)))
+
+mapping encdec_freg : fregidx <-> bits(5) = { Fregidx(r) <-> r }
 
 register f0  : fregtype
 register f1  : fregtype
@@ -104,7 +105,7 @@ register f31 : fregtype
 function dirty_fd_context() -> unit = {
   assert(sys_enable_fdext());
   mstatus[FS] = extStatus_to_bits(Dirty);
-  mstatus[SD] = 0b1
+  mstatus[SD] = 0b1;
 }
 
 function dirty_fd_context_if_present() -> unit = {
@@ -112,8 +113,7 @@ function dirty_fd_context_if_present() -> unit = {
   if sys_enable_fdext() then dirty_fd_context()
 }
 
-val rF : forall 'n, 0 <= 'n < 32. regno('n) -> flenbits
-function rF r = {
+function rF (Fregno(r) : fregno) -> flenbits = {
   assert(sys_enable_fdext());
   let v : fregtype =
     match r {
@@ -154,8 +154,7 @@ function rF r = {
   fregval_from_freg(v)
 }
 
-val wF : forall 'n, 0 <= 'n < 32. (regno('n), flenbits) -> unit
-function wF (r, in_v) = {
+function wF (Fregno(r) : fregno, in_v : flenbits) -> unit = {
   assert(sys_enable_fdext());
   let v = fregval_into_freg(in_v);
   match r {
@@ -202,52 +201,52 @@ function wF (r, in_v) = {
       print_reg("f" ^ dec_str(r) ^ " <- " ^ FRegStr(v));
 }
 
-function rF_bits(i: bits(5)) -> flenbits = rF(unsigned(i))
+function rF_bits(i: fregidx) -> flenbits = rF(fregidx_to_fregno(i))
 
-function wF_bits(i: bits(5), data: flenbits) -> unit = {
-  wF(unsigned(i)) = data
+function wF_bits(i: fregidx, data: flenbits) -> unit = {
+  wF(fregidx_to_fregno(i)) = data
 }
 
 overload F = {rF_bits, wF_bits, rF, wF}
 
-val rF_H : bits(5) -> bits(16)
+val rF_H : fregidx -> bits(16)
 function rF_H(i) = {
-  assert(sizeof(flen) >= 16);
+  assert(flen >= 16);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   nan_unbox(F(i))
 }
 
-val wF_H : (bits(5), bits(16)) -> unit
+val wF_H : (fregidx, bits(16)) -> unit
 function wF_H(i, data) = {
-  assert(sizeof(flen) >= 16);
+  assert(flen >= 16);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   F(i) = nan_box(data)
 }
 
-val rF_S : bits(5) -> bits(32)
+val rF_S : fregidx -> bits(32)
 function rF_S(i) = {
-  assert(sizeof(flen) >= 32);
+  assert(flen >= 32);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   nan_unbox(F(i))
 }
 
-val wF_S : (bits(5), bits(32)) -> unit
+val wF_S : (fregidx, bits(32)) -> unit
 function wF_S(i, data) = {
-  assert(sizeof(flen) >= 32);
+  assert(flen >= 32);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   F(i) = nan_box(data)
 }
 
-val rF_D : bits(5) -> bits(64)
+val rF_D : fregidx -> bits(64)
 function rF_D(i) = {
-  assert(sizeof(flen) >= 64);
+  assert(flen >= 64);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   F(i)
 }
 
-val wF_D : (bits(5), bits(64)) -> unit
+val wF_D : (fregidx, bits(64)) -> unit
 function wF_D(i, data) = {
-  assert(sizeof(flen) >= 64);
+  assert(flen >= 64);
   assert(sys_enable_fdext() & not(sys_enable_zfinx()));
   F(i) = data
 }
@@ -256,69 +255,71 @@ overload F_H = { rF_H, wF_H }
 overload F_S = { rF_S, wF_S }
 overload F_D = { rF_D, wF_D }
 
-val rF_or_X_H : bits(5) -> bits(16)
+val rF_or_X_H : fregidx -> bits(16)
 function rF_or_X_H(i) = {
-  assert(sizeof(flen) >= 16);
+  assert(flen >= 16);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_H(i)
-  else X(i)[15..0]
+  else X(fregidx_to_regidx(i))[15..0]
 }
 
-val rF_or_X_S : bits(5) -> bits(32)
+val rF_or_X_S : fregidx -> bits(32)
 function rF_or_X_S(i) = {
-  assert(sizeof(flen) >= 32);
+  assert(flen >= 32);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_S(i)
-  else X(i)[31..0]
+  else X(fregidx_to_regidx(i))[31..0]
 }
 
-val rF_or_X_D : bits(5) -> bits(64)
+val rF_or_X_D : fregidx -> bits(64)
 function rF_or_X_D(i) = {
-  assert(sizeof(flen) >= 64);
+  assert(flen >= 64);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_D(i)
-  else if sizeof(xlen) >= 64
-  then X(i)[63..0]
+  else if xlen >= 64
+  then X(fregidx_to_regidx(i))[63..0]
   else {
-    assert(i[0] == bitzero);
-    if i == zeros() then zeros() else X(i + 1) @ X(i)
+    let ridx = fregidx_to_regidx(i);
+    assert(regidx_bits(ridx)[0] == bitzero);
+    if ridx == zreg then zeros() else X(regidx_offset(ridx, 0b00001)) @ X(ridx)
   }
 }
 
-val wF_or_X_H : (bits(5), bits(16)) -> unit
+val wF_or_X_H : (fregidx, bits(16)) -> unit
 function wF_or_X_H(i, data) = {
-  assert(sizeof(flen) >= 16);
+  assert(flen >= 16);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_H(i) = data
-  else X(i) = sign_extend(data)
+  else X(fregidx_to_regidx(i)) = sign_extend(data)
 }
 
-val wF_or_X_S : (bits(5), bits(32)) -> unit
+val wF_or_X_S : (fregidx, bits(32)) -> unit
 function wF_or_X_S(i, data) = {
-  assert(sizeof(flen) >= 32);
+  assert(flen >= 32);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_S(i) = data
-  else X(i) = sign_extend(data)
+  else X(fregidx_to_regidx(i)) = sign_extend(data)
 }
 
-val wF_or_X_D : (bits(5), bits(64)) -> unit
+val wF_or_X_D : (fregidx, bits(64)) -> unit
 function wF_or_X_D(i, data) = {
-  assert (sizeof(flen) >= 64);
+  assert (flen >= 64);
   assert(sys_enable_fdext() != sys_enable_zfinx());
   if   sys_enable_fdext()
   then F_D(i) = data
-  else if sizeof(xlen) >= 64
-  then X(i) = sign_extend(data)
+  else if xlen >= 64
+  then X(fregidx_to_regidx(i)) = sign_extend(data)
   else {
-    assert (i[0] == bitzero);
-    if i != zeros() then {
-      X(i)     = data[31..0];
-      X(i + 1) = data[63..32];
+    let ridx = fregidx_to_regidx(i);
+    assert (regidx_bits(ridx)[0] == bitzero);
+    if ridx != zreg then {
+      X(ridx)                         = data[31..0];
+      X(regidx_offset(ridx, 0b00001)) = data[63..32];
     }
   }
 }
@@ -327,51 +328,9 @@ overload F_or_X_H = { rF_or_X_H, wF_or_X_H }
 overload F_or_X_S = { rF_or_X_S, wF_or_X_S }
 overload F_or_X_D = { rF_or_X_D, wF_or_X_D }
 
-/* register names */
-
-val freg_name_abi : regidx <-> string
-
-mapping freg_name_abi = {
-    0b00000 <-> "ft0",
-    0b00001 <-> "ft1",
-    0b00010 <-> "ft2",
-    0b00011 <-> "ft3",
-    0b00100 <-> "ft4",
-    0b00101 <-> "ft5",
-    0b00110 <-> "ft6",
-    0b00111 <-> "ft7",
-    0b01000 <-> "fs0",
-    0b01001 <-> "fs1",
-    0b01010 <-> "fa0",
-    0b01011 <-> "fa1",
-    0b01100 <-> "fa2",
-    0b01101 <-> "fa3",
-    0b01110 <-> "fa4",
-    0b01111 <-> "fa5",
-    0b10000 <-> "fa6",
-    0b10001 <-> "fa7",
-    0b10010 <-> "fs2",
-    0b10011 <-> "fs3",
-    0b10100 <-> "fs4",
-    0b10101 <-> "fs5",
-    0b10110 <-> "fs6",
-    0b10111 <-> "fs7",
-    0b11000 <-> "fs8",
-    0b11001 <-> "fs9",
-    0b11010 <-> "fs10",
-    0b11011 <-> "fs11",
-    0b11100 <-> "ft8",
-    0b11101 <-> "ft9",
-    0b11110 <-> "ft10",
-    0b11111 <-> "ft11"
-}
-
-overload to_str = {freg_name_abi}
-
 /* mappings for assembly */
 
-val freg_name : bits(5) <-> string
-mapping freg_name = {
+mapping freg_name_raw : bits(5) <-> string = {
     0b00000 <-> "ft0",
     0b00001 <-> "ft1",
     0b00010 <-> "ft2",
@@ -406,46 +365,12 @@ mapping freg_name = {
     0b11111 <-> "ft11"
 }
 
-val freg_or_reg_name : bits(5) <-> string
-mapping freg_or_reg_name = {
-  reg if sys_enable_fdext() <-> freg_name(reg) if sys_enable_fdext(),
-  reg if sys_enable_zfinx() <-> reg_name(reg)  if sys_enable_zfinx()
-}
+mapping freg_name : fregidx <-> string = { Fregidx(i) <-> freg_name_raw(i) }
 
-val init_fdext_regs : unit -> unit
-function init_fdext_regs () = {
-  f0  = zero_freg;
-  f1  = zero_freg;
-  f2  = zero_freg;
-  f3  = zero_freg;
-  f4  = zero_freg;
-  f5  = zero_freg;
-  f6  = zero_freg;
-  f7  = zero_freg;
-  f8  = zero_freg;
-  f9  = zero_freg;
-  f10 = zero_freg;
-  f11 = zero_freg;
-  f12 = zero_freg;
-  f13 = zero_freg;
-  f14 = zero_freg;
-  f15 = zero_freg;
-  f16 = zero_freg;
-  f17 = zero_freg;
-  f18 = zero_freg;
-  f19 = zero_freg;
-  f20 = zero_freg;
-  f21 = zero_freg;
-  f22 = zero_freg;
-  f23 = zero_freg;
-  f24 = zero_freg;
-  f25 = zero_freg;
-  f26 = zero_freg;
-  f27 = zero_freg;
-  f28 = zero_freg;
-  f29 = zero_freg;
-  f30 = zero_freg;
-  f31 = zero_freg
+mapping freg_or_reg_name : fregidx <-> string = {
+  forwards f if sys_enable_zfinx() => reg_name(fregidx_to_regidx(f)),
+  backwards reg_name(Regidx(i)) if sys_enable_zfinx() => Fregidx(zero_extend(i)),
+  f <-> freg_name(f)
 }
 
 /* **************************************************************** */
@@ -462,8 +387,8 @@ bitfield Fcsr : bits(32) = {
 
 register fcsr : Fcsr
 
-val ext_write_fcsr : (bits(3), bits(5)) -> unit
-function ext_write_fcsr (frm, fflags) = {
+val write_fcsr : (bits(3), bits(5)) -> unit
+function write_fcsr (frm, fflags) = {
   fcsr[FRM]    = frm;      /* Note: frm can be an illegal value, 101, 110, 111 */
   fcsr[FFLAGS] = fflags;
   dirty_fd_context_if_present();

@@ -1,98 +1,85 @@
 /*=======================================================================================*/
-/*  CHERI RISCV Sail Model                                                               */
+/*  This Sail RISC-V architecture model, comprising all files and                        */
+/*  directories except where otherwise noted is subject the BSD                          */
+/*  two-clause license in the LICENSE file.                                              */
 /*                                                                                       */
-/*  This CHERI Sail RISC-V architecture model here, comprising all files and             */
-/*  directories except for the snapshots of the Lem and Sail libraries in the            */
-/*  prover_snapshots directory (which include copies of their licenses), is subject      */
-/*  to the BSD two-clause licence below.                                                 */
-/*                                                                                       */
-/*  Copyright (c) 2017-2021                                                              */
-/*    Alasdair Armstrong                                                                 */
-/*    Thomas Bauereiss                                                                   */
-/*    Brian Campbell                                                                     */
-/*    Jessica Clarke                                                                     */
-/*    Nathaniel Wesley Filardo (contributions prior to July 2020, thereafter Microsoft)  */
-/*    Alexandre Joannou                                                                  */
-/*    Microsoft                                                                          */
-/*    Prashanth Mundkur                                                                  */
-/*    Robert Norton-Wright (contributions prior to March 2020, thereafter Microsoft)     */
-/*    Alexander Richardson                                                               */
-/*    Peter Rugg                                                                         */
-/*    Peter Sewell                                                                       */
-/*                                                                                       */
-/*  All rights reserved.                                                                 */
-/*                                                                                       */
-/*  This software was developed by SRI International and the University of               */
-/*  Cambridge Computer Laboratory (Department of Computer Science and                    */
-/*  Technology) under DARPA/AFRL contract FA8650-18-C-7809 ("CIFV"), and                 */
-/*  under DARPA contract HR0011-18-C-0016 ("ECATS") as part of the DARPA                 */
-/*  SSITH research programme.                                                            */
-/*                                                                                       */
-/*  This software was developed within the Rigorous Engineering of                       */
-/*  Mainstream Systems (REMS) project, partly funded by EPSRC grant                      */
-/*  EP/K008528/1, at the Universities of Cambridge and Edinburgh.                        */
-/*                                                                                       */
-/*  This project has received funding from the European Research Council                 */
-/*  (ERC) under the European Union’s Horizon 2020 research and innovation                */
-/*  programme (grant agreement 789108, ELVER).                                           */
-/*                                                                                       */
-/*  Redistribution and use in source and binary forms, with or without                   */
-/*  modification, are permitted provided that the following conditions                   */
-/*  are met:                                                                             */
-/*  1. Redistributions of source code must retain the above copyright                    */
-/*     notice, this list of conditions and the following disclaimer.                     */
-/*  2. Redistributions in binary form must reproduce the above copyright                 */
-/*     notice, this list of conditions and the following disclaimer in                   */
-/*     the documentation and/or other materials provided with the                        */
-/*     distribution.                                                                     */
-/*                                                                                       */
-/*  THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS''                   */
-/*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED                    */
-/*  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A                      */
-/*  PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR                  */
-/*  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,                         */
-/*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT                     */
-/*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF                     */
-/*  USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND                  */
-/*  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,                   */
-/*  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT                   */
-/*  OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF                   */
-/*  SUCH DAMAGE.                                                                         */
+/*  SPDX-License-Identifier: BSD-2-Clause                                                */
 /*=======================================================================================*/
 
-// Specialize the accesstype for memory
+// Type constraint that checks if 'v is a valid virtual memory mode size.
+type is_sv_mode('v) -> Bool = 'v in {32, 39, 48, 57}
 
-/*
- * We can indicate to the MMU/PTW whether a memory operation conveys a
- * certainly cleared tag (Data) or a possibly asserted tag (Cap).  As the
- * MMU/PTW does not have access to the data paths, there is some possibility of
- * confusion.  Care must be taken to ensure that transactions marked as Data
- * are not used to convey asserted tags.  At the same time, tag-capable but
- * -clearing instructions should indicate that they are performing Data, not
- * Cap, operations to avoid spuriously raising CHERI page faults.  That is, if
- * reading a capability from memory but about to clear its tag, prefer to
- * indicate a Read(Data) to the MMU.  Similarly, if writing a capability with
- * known clear tag, indicate a Write(Data).
- */
+// Range of possible page levels depending on the virtual memory mode:
+//
+//   Sv32 = range(0, 1)
+//   Sv39 = range(0, 2)
+//   Sv48 = range(0, 3)
+//   Sv57 = range(0, 4)
+//
+type level_range('v), is_sv_mode('v) =
+  range(0, (if 'v == 32 then 1 else (if 'v == 39 then 2 else (if 'v == 48 then 3 else 4))))
+
+// Size of a Page Table Entry, depending on the virtual memory mode.
+type pte_bits('v), is_sv_mode('v) = bits(if 'v == 32 then 32 else 64)
+
+// Number of Physical Page Number bits, depending on the virtual memory mode.
+type ppn_bits('v), is_sv_mode('v) = bits(if 'v == 32 then 22 else 44)
+
+// Number of Virtual Page Number bits, depending on the virtual memory mode.
+type vpn_bits('v), is_sv_mode('v) = bits('v - pagesize_bits)
+
+
+// This enum is used for reads and writes and has slighly different
+// meanings in each case.
 enum ext_access_type = {
+  // Writes: Non-capability writes, or writes of untagged capabilities.
+  // Reads: Non-capability reads.
   Data,
-  Cap
+  // Writes: Writes of tagged capabilities
+  // Reads: Capability reads. (It may or may not end up being tagged but it *could* be tagged.)
+  Tagged,
 }
 
 let default_write_acc : ext_access_type = Data
 
+function isWriteAc(ac : AccessType(ext_access_type)) -> bool =
+  match ac {
+    Write(_) => true,
+    ReadWrite(_, _) => true,
+    _ => false,
+  }
+
+// Return true if we are writing a tagged capability.
+function isTaggedWrite(ac : AccessType(ext_access_type)) -> bool =
+  match ac {
+    Write(Tagged) => true,
+    ReadWrite(_, Tagged) => true,
+    _ => false,
+  }
+
+// Return true if we are reading a capability (which may be tagged).
+function isTaggedRead(ac : AccessType(ext_access_type)) -> bool =
+  match ac {
+    Read(Tagged) => true,
+    ReadWrite(Tagged, _) => true,
+    _ => false,
+  }
+
 val accessType_to_str : AccessType(ext_access_type) -> string
 function accessType_to_str (a) =
-  match (a) {
-    Read(Data)            => "R",
-    Write(Data)           => "W",
-    ReadWrite(Data, Data) => "RW",
-    Read(Cap)             => "RC",
-    Write(Cap)            => "WC",
-    ReadWrite(Cap, Cap)   => "RCWC",
-    ReadWrite(Data, Cap)  => "RWC",
-    ReadWrite(Cap, Data)  => "RCW",
-    Execute()             => "X"
+  match a {
+    Read(Data)                => "R",
+    Write(Data)               => "W",
+    Read(Tagged)              => "Rc",
+    Write(Tagged)             => "Wc",
+    ReadWrite(Data, Data)     => "RW",
+    ReadWrite(Data, Tagged)   => "RWc",
+    ReadWrite(Tagged, Data)   => "RcW",
+    ReadWrite(Tagged, Tagged) => "RcWc",
+    Execute()                 => "X",
+    Cache(CleanFlush)         => "CACHE.CLEANFLUSH",
+    Cache(Inval)              => "CACHE.INVAL",
+    Cache(Zero)               => "CACHE.ZERO",
   }
 
 overload to_str = {accessType_to_str}

@@ -2,74 +2,135 @@ RISCV Sail Model
 ================
 
 This repository contains a formal specification of the RISC-V architecture, written in
-[Sail](https://www.cl.cam.ac.uk/~pes20/sail/) ([repo](https://github.com/rems-project/sail)).   It has been adopted by the RISC-V Foundation.  As of 2021-08-24, the repo has been moved from <https://github.com/rems-project/sail-riscv> to <https://github.com/riscv/sail-riscv>.
+[Sail](https://github.com/rems-project/sail).   It has been adopted by the RISC-V Foundation.
 
 The model specifies
 assembly language formats of the instructions, the corresponding
 encoders and decoders, and the instruction semantics.
-The current status of its
-coverage of the prose RISC-V specification is summarized
-[here](doc/Status.md).
 A [reading guide](doc/ReadingGuide.md) to the model is provided in the
 [doc/](doc/) subdirectory, along with a guide on [how to
 extend](doc/ExtendingGuide.md) the model.
 
 
-Latex definitions can be generated from the model that are suitable
-for inclusion in reference documentation.  Drafts of the RISC-V
-[unprivileged](https://github.com/rems-project/riscv-isa-manual/blob/sail/release/riscv-spec-sail-draft.pdf)
-and [privileged](https://github.com/rems-project/riscv-isa-manual/blob/sail/release/riscv-privileged-sail-draft.pdf)
-specifications that include the Sail formal definitions are available
-in the sail branch of this [risc-v-isa-manual repository](https://github.com/rems-project/riscv-isa-manual/tree/sail).
-The process to perform this inclusion is explained [here](https://github.com/rems-project/riscv-isa-manual/blob/sail/README.SAIL).
-
-This is one of [several formal models](https://github.com/riscv/ISA_Formal_Spec_Public_Review/blob/master/comparison_table.md) that were compared within the
-[RISC-V ISA Formal Spec Public Review](https://github.com/riscv/ISA_Formal_Spec_Public_Review).
+Latex or AsciiDoc definitions can be generated from the model that are suitable for inclusion in reference documentation.
+There is also the newer [Sail AsciiDoctor documentation support for RISC-V](https://github.com/Alasdair/asciidoctor-sail/blob/master/doc/built/sail_to_asciidoc.pdf).
 
 
 What is Sail?
 -------------
 
-[Sail](https://www.cl.cam.ac.uk/~pes20/sail/) ([repo](https://github.com/rems-project/sail)) is a language for describing the instruction-set architecture
-(ISA) semantics of processors. Sail aims to provide a
-engineer-friendly, vendor-pseudocode-like language for describing
-instruction semantics. It is essentially a first-order imperative
-language, but with lightweight dependent typing for numeric types and
-bitvector lengths, which are automatically checked using Z3.
+[Sail](https://github.com/rems-project/sail) is a language for describing the instruction-set architecture
+(ISA) semantics of processors: the architectural specification of the behaviour of machine instructions. Sail is an
+engineer-friendly language, much like earlier vendor pseudocode, but more precisely defined and with tooling to support a wide range of use-cases.
 <p>
 
-Given a Sail definition, the tool will type-check it and generate
-LaTeX snippets to use in documentation, executable emulators (in C and OCaml), theorem-prover definitions for
-Isabelle, HOL4, and Coq, and definitions to integrate with our
-<a href="http://www.cl.cam.ac.uk/users/pes20/rmem">RMEM</a>
-and
-<a href="isla-axiomatic.cl.cam.ac.uk/">isla-axiomatic</a> tools for
-concurrency semantics.
+Given a Sail specification, the tool can type-check it, generate documentation snippets (in LaTeX or AsciiDoc), generate executable emulators, show specification coverage, generate versions of the ISA for relaxed memory model tools, support automated instruction-sequence test generation, generate  theorem-prover definitions for
+interactive proof (in Isabelle, HOL4, and Coq), support proof about binary code (in Islaris), and (in progress) generate a reference ISA model in SystemVerilog that can be used for formal hardware verification.
 <p>
 
   <img width="800" src="https://www.cl.cam.ac.uk/~pes20/sail/overview-sail.png?">
 <p>
 
-Sail is being used for multiple ISA descriptions, including
-essentially complete versions of the sequential behaviour of Armv8-A
-(automatically derived from the authoritative Arm-internal
-specification, and released under a BSD Clear licence with Arm's
-permission), RISC-V, MIPS, CHERI-RISC-V, and CHERI-MIPS; all these are complete
-enough to boot various operating systems.  There are also Sail models
-for smaller fragments of IBM POWER and x86.
+Getting started
+---------------
 
+### Building the model
 
+Install [Sail](https://github.com/rems-project/sail/). On Linux you can download a [binary release](https://github.com/rems-project/sail/releases) (strongly recommended), or you can install from source [using opam](https://github.com/rems-project/sail/blob/sail2/INSTALL.md). Then:
+
+```
+$ ./build_simulators.sh
+```
+
+will build the simulators in `build/c_emulator/riscv_sim_rv{32,64}d`.
+
+If you get an error message saying `sail: unknown option '--require-version'.` it's because your Sail compiler is too old. You need version 0.18 or later.
+
+By default the RV32D and RV64D emulators are built, without RVFI-DII support.
+You can see a complete list of targets by running `make help` in the
+build directory, then e.g.
+
+```
+$ make -C build riscv_sim_rv64f_rvfi
+```
+
+By default `build_simulators.sh` will download and build [libgmp](https://gmplib.org/).
+To use a system installation of libgmp, run `env DOWNLOAD_GMP=FALSE ./build_simulators.sh` instead.
+
+### Executing test binaries
+
+The simulator can be used to execute small test binaries.
+
+```
+$ build/c_emulator/riscv_sim_<arch> <elf-file>
+```
+
+A suite of RV32 and RV64 test programs derived from the
+[`riscv-tests`](https://github.com/riscv/riscv-tests) test-suite is
+included under [test/riscv-tests/](test/riscv-tests/).  The test-suite
+can be run using `make test` or `ctest` in the build directory.
+
+### Configuring platform options
+
+Information on configuration options for the simulator is available from
+`build/c_emulator/riscv_sim_<arch> -h`.
+
+Some useful options are: configuring whether misaligned accesses trap
+(`--enable-misaligned`), and
+whether page-table walks update PTE bits (`--enable-dirty-update`).
+
+### Booting OS images
+
+For booting operating system images, see the information under the
+[os-boot/](os-boot/) subdirectory.
+
+Supported RISC-V ISA features
+-----------------------------
+#### The Sail specification currently captures the following ISA extensions and features:
+
+- RV32I and RV64I base ISAs, v2.1
+- Zifencei extension for instruction-fetch fence, v2.0
+- Zicsr extension for CSR instructions, v2.0
+- Zicntr and Zihpm extensions for counters, v2.0
+- Zicond extension for integer conditional operations, v1.0
+- Zicbom and Zicboz extensions for cache-block management (Zicbop not currently supported), v1.0
+- M extension for integer multiplication and division, v2.0
+- Zmmul extension for integer multiplication only, v1.0
+- A extension for atomic instructions, v2.1
+- Zalrsc extension for load-reserved and store-conditional operations, v1.0
+- Zaamo extension for atomic memory operations, v1.0
+- Zabha extension for byte and halfword atomic memory operations, v1.0
+- F and D extensions for single and double-precision floating-point, v2.2
+- Zfh and Zfhmin extensions for half-precision floating-point, v1.0
+- Zfa extension for additional floating-point instructions, v1.0
+- Zfinx, Zdinx, and Zhinx extensions for floating-point in integer registers, v1.0
+- C extension for compressed instructions, v2.0
+- Zca, Zcf, Zcd, and Zcb extensions for code size reduction, v1.0
+- B (Zba, Zbb, Zbs) and Zbc extensions for bit manipulation, v1.0
+- Zbkb, Zbkc, and Zbkx extensions for bit manipulation for cryptography, v1.0
+- Zkn (Zknd, Zkne, Zknh) and Zks (Zksed, Zksh) extensions for scalar cryptography, v1.0.1
+- Zkr extension for entropy source, v1.0
+- V extension for vector operations, v1.0
+- Machine, Supervisor, and User modes
+- Smcntrpmf extension for cycle and instret privilege mode filtering, v1.0
+- Sscofpmf extension for Count Overflow and Mode-Based Filtering, v1.0
+- Sstc extension for Supervisor-mode Timer Interrupts, v1.0
+- Svinval extension for fine-grained address-translation cache invalidation, v1.0
+- Sv32, Sv39, Sv48 and Sv57 page-based virtual-memory systems
+- Physical Memory Protection (PMP)
+
+**For a list of unsupported extensions and features, see the [Extension Roadmap](https://github.com/riscv/sail-riscv/wiki/Extension-Roadmap).**
 
 Example RISC-V instruction specifications
 ----------------------------------
 
-These are verbatim excerpts from the model file containing the base instructions, [riscv_insts_base.sail](https://github.com/riscv/sail-riscv/blob/master/model/riscv_insts_base.sail), with a few comments added.
+These are verbatim excerpts from the model file containing the base instructions, [riscv_insts_base.sail](model/riscv_insts_base.sail), with a few comments added.
 
 ### ITYPE (or ADDI)
 ~~~~~
 /* the assembly abstract syntax tree (AST) clause for the ITYPE instructions */
 
-union clause ast = ITYPE : (bits(12), regbits, regbits, iop)
+union clause ast = ITYPE : (bits(12), regidx, regidx, iop)
 
 /* the encode/decode mapping between AST elements and 32-bit words */
 
@@ -87,18 +148,16 @@ mapping clause encdec = ITYPE(imm, rs1, rd, op) <-> imm @ rs1 @ encdec_iop(op) @
 /* the execution semantics for the ITYPE instructions */
 
 function clause execute (ITYPE (imm, rs1, rd, op)) = {
-  let rs1_val = X(rs1);
-  let immext : xlenbits = EXTS(imm);
-  let result : xlenbits = match op {
-    RISCV_ADDI  => rs1_val + immext,
-    RISCV_SLTI  => EXTZ(rs1_val <_s immext),
-    RISCV_SLTIU => EXTZ(rs1_val <_u immext),
-    RISCV_ANDI  => rs1_val & immext,
-    RISCV_ORI   => rs1_val | immext,
-    RISCV_XORI  => rs1_val ^ immext
+  let immext : xlenbits = sign_extend(imm);
+  X(rd) = match op {
+    RISCV_ADDI  => X(rs1) + immext,
+    RISCV_SLTI  => zero_extend(bool_to_bits(X(rs1) <_s immext)),
+    RISCV_SLTIU => zero_extend(bool_to_bits(X(rs1) <_u immext)),
+    RISCV_ANDI  => X(rs1) & immext,
+    RISCV_ORI   => X(rs1) | immext,
+    RISCV_XORI  => X(rs1) ^ immext
   };
-  X(rd) = result;
-  true
+  RETIRE_SUCCESS
 }
 
 /* the assembly/disassembly mapping between AST elements and strings */
@@ -113,7 +172,7 @@ mapping itype_mnemonic : iop <-> string = {
 }
 
 mapping clause assembly = ITYPE(imm, rs1, rd, op)
-                      <-> itype_mnemonic(op) ^ spc() ^ reg_name(rd) ^ sep() ^ reg_name(rs1) ^ sep() ^ hex_bits_12(imm)
+                      <-> itype_mnemonic(op) ^ spc() ^ reg_name(rd) ^ sep() ^ reg_name(rs1) ^ sep() ^ hex_bits_signed_12(imm)
 ~~~~~~
 
 ### SRET
@@ -124,14 +183,19 @@ union clause ast = SRET : unit
 mapping clause encdec = SRET() <-> 0b0001000 @ 0b00010 @ 0b00000 @ 0b000 @ 0b00000 @ 0b1110011
 
 function clause execute SRET() = {
-  match cur_privilege {
-    User       => handle_illegal(),
-    Supervisor => if   mstatus.TSR() == true
-                  then handle_illegal()
-                  else nextPC = handle_exception(cur_privilege, CTL_SRET(), PC),
-    Machine    => nextPC = handle_exception(cur_privilege, CTL_SRET(), PC)
+  let sret_illegal : bool = match cur_privilege {
+    User       => true,
+    Supervisor => not(extensionEnabled(Ext_S)) | mstatus[TSR] == 0b1,
+    Machine    => not(extensionEnabled(Ext_S))
   };
-  false
+  if   sret_illegal
+  then { handle_illegal(); RETIRE_FAIL }
+  else if not(ext_check_xret_priv (Supervisor))
+  then { ext_fail_xret_priv(); RETIRE_FAIL }
+  else {
+    set_next_pc(exception_handler(cur_privilege, CTL_SRET(), PC));
+    RETIRE_SUCCESS
+  }
 }
 
 mapping clause assembly = SRET() <-> "sret"
@@ -141,13 +205,9 @@ mapping clause assembly = SRET() <-> "sret"
 Sequential execution
 ----------
 
-The model builds OCaml and C emulators that can execute RISC-V ELF
+The model builds a C emulator that can execute RISC-V ELF
 files, and both emulators provide platform support sufficient to boot
-Linux, FreeBSD and seL4.  The OCaml emulator can generate its own
-platform device-tree description, while the C emulator currently
-requires a consistent description to be manually provided.  The C
-emulator can be linked against the Spike emulator for execution with
-per-instruction tandem-verification.
+Linux, FreeBSD and seL4.
 
 The C emulator, for the Linux boot, currently runs at approximately
 300 KIPS on an Intel i7-7700 (when detailed per-instruction tracing
@@ -156,8 +216,8 @@ is disabled), and there are many opportunities for future optimisation
 boot Linux in about 4 minutes, and FreeBSD in about 2 minutes. Memory
 usage for the C emulator when booting Linux is approximately 140MB.
 
-The files in the OCaml and C emulator directories implement ELF loading and the
-platform devices, define the physical memory map, and use command-line
+The files in the C emulator directory implements ELF loading and the
+platform devices, defines the physical memory map, and usees command-line
 options to select implementation-specific ISA choices.
 
 
@@ -176,14 +236,6 @@ directly inject instructions into the C emulator and produce trace
 information in RVFI format.  This has been used for cross testing
 against spike and the [RVBS](https://github.com/CTSRD-CHERI/RVBS)
 specification written in Bluespec SystemVerilog.
-
-The C emulator can also be directly linked to Spike, which provides
-tandem-verification on ELF binaries (including OS boots).  This is
-often useful in debugging OS boot issues in the model when the boot is
-known working on Spike.  It is also useful to detect platform-specific
-implementation choices in Spike that are not mandated by the ISA
-specification.
-
 
 Concurrent execution
 --------------------
@@ -210,19 +262,6 @@ Those tests have also been run on RISC-V hardware, on a SiFive RISC-V
 FU540 multicore proto board (Freedom Unleashed), kindly on loan from
 Imperas. To date, only sequentially consistent behaviour was observed there.
 
-
-
-Use in test generation
-----------------------
-
-The Sail OCaml backend can produce QuickCheck-style random generators for
-types in Sail specifications, which have been used to produce random
-instructions sequences for testing.  The generation of individual
-types can be overridden by the developer to, for example, remove
-implementation-specific instructions or introduce register biasing.
-
-
-
 Generating theorem-prover definitions
 --------------------------------------
 
@@ -247,142 +286,35 @@ tool.
 The files under `handwritten_support` provide library definitions for
 Coq, Isabelle and HOL4.
 
-
 Directory Structure
 -------------------
 
 ```
 sail-riscv
 - model                   // Sail specification modules
-- generated_definitions   // files generated by Sail, in RV32 and RV64 subdirectories
-  -  c
-  -  ocaml
-  -  lem
-  -  isabelle
-  -  coq
-  -  hol4
-  -  latex
-- prover_snapshots        // snapshots of generated theorem prover definitions
 - handwritten_support     // prover support files
 - c_emulator              // supporting platform files for C emulator
-- ocaml_emulator          // supporting platform files for OCaml emulator
+- cmake                   // extra build system modules
+- dependencies            // external dependencies (currently only SoftFloat)
+- sail_runtime            // build files for sail runtime
 - doc                     // documentation, including a reading guide
 - test                    // test files
   - riscv-tests           // snapshot of tests from the riscv/riscv-tests github repo
+  - first_party           // custom C and assembly tests for the model
 - os-boot                 // information and sample files for booting OS images
 ```
-
-Getting started
----------------
-
-### Building the model
-
-Install [Sail](https://github.com/rems-project/sail/) [using opam](https://github.com/rems-project/sail/blob/sail2/INSTALL.md) then:
-
-```
-$ make
-```
-will build the 64-bit OCaml simulator in
-`ocaml_emulator/riscv_ocaml_sim_RV64`, the C simulator in
-`c_emulator/riscv_sim_RV64`, the Isabelle model in
-`generated_definitions/isabelle/RV64/Riscv.thy`, the Coq model in
-`generated_definitions/coq/RV64/riscv.v`, and the HOL4 model in
-`generated_definitions/hol4/RV64/riscvScript.sml`.
-
-One can build either the RV32 or the RV64 model by specifying
-`ARCH=RV32` or `ARCH=RV64` on the `make` line, and using the matching
-target suffix.  RV64 is built by default, but the RV32 model can be
-built using:
-
-```
-$ ARCH=RV32 make
-```
-
-which creates the 32-bit OCaml simulator in
-`ocaml_emulator/riscv_ocaml_sim_RV32`, and the C simulator in
-`c_emulator/riscv_sim_RV32`, and the prover models in the
-corresponding `RV32` subdirectories.
-
-The Makefile targets `riscv_isa_build`, `riscv_coq_build`, and
-`riscv_hol_build` invoke the respective prover to process the
-definitions.  We have tested Isabelle 2018, Coq 8.8.1, and HOL4
-Kananaskis-12.  When building these targets, please make sure the
-corresponding prover libraries in the Sail directory
-(`$SAIL_DIR/lib/$prover`) are up-to-date and built, e.g. by running
-`make` in those directories.
-
-### Executing test binaries
-
-The C and OCaml simulators can be used to execute small test binaries.  The
-OCaml simulator depends on the Device Tree Compiler package, which can be
-installed in Ubuntu with:
-
-```
-$ sudo apt-get install device-tree-compiler
-```
-
-Then, you can run test binaries:
-
-
-```
-$ ./ocaml_emulator/riscv_ocaml_sim_<arch>  <elf-file>
-$ ./c_emulator/riscv_sim_<arch> <elf-file>
-```
-
-A suite of RV32 and RV64 test programs derived from the
-[`riscv-tests`](https://github.com/riscv/riscv-tests) test-suite is
-included under [test/riscv-tests/](test/riscv-tests/).  The test-suite
-can be run using `test/run_tests.sh`.
-
-### Configuring platform options
-
-Some information on additional configuration options for each
-simulator is available from `./ocaml_emulator/riscv_ocaml_sim_<arch>
--h` and `./c_emulator/riscv_sim_<arch> -h`.
-
-Some useful options are: configuring whether misaligned accesses trap
-(`--enable-misaligned` for C and `-enable-misaligned` for OCaml), and
-whether page-table walks update PTE bits (`--enable-dirty-update` for C
-and `-enable-dirty-update` for OCaml).
-
-### Experimental integration with riscv-config
-
-There is also (as yet unmerged) support for [integration with riscv-config](https://github.com/rems-project/sail-riscv/pull/43) to allow configuring the compiled model according to a riscv-config yaml specification.
-
-### Booting OS images
-
-For booting operating system images, see the information under the
-[os-boot/](os-boot/) subdirectory.
-
-### Using development versions of Sail
-
-Rarely, the version of Sail packaged in opam may not meet your needs. This could happen if you need a bug fix or new feature not yet in the released Sail version, or you are actively working on Sail. In this case you can tell the `sail-riscv` `Makefile` to use a local copy of Sail by setting `SAIL_DIR` to the root of a checkout of the Sail repo when you invoke `make`. Alternatively, you can use `opam pin` to install Sail from a local checkout of the Sail repo as described in the Sail installation instructions.
 
 Licence
 -------
 
 The model is made available under the BSD two-clause licence in LICENCE.
 
-
 Authors
 -------
 
- Prashanth Mundkur, SRI International;
- Rishiyur S. Nikhil (Bluespec Inc.);
- Jon French, University of Cambridge;
- Brian Campbell, University of Edinburgh;
- Robert Norton-Wright, University of Cambridge and Microsoft;
- Alasdair Armstrong, University of Cambridge;
- Thomas Bauereiss, University of Cambridge;
- Shaked Flur, University of Cambridge;
- Christopher Pulte, University of Cambridge;
- Peter Sewell, University of Cambridge;
- Alexander Richardson, University of Cambridge;
- Hesham Almatary, University of Cambridge;
- Jessica Clarke, University of Cambridge;
- Nathaniel Wesley Filardo, Microsoft;
- Peter Rugg, University of Cambridge;
- Scott Johnson, Aril Computer Corp.
+Originally written by Prashanth Mundkur at SRI International, and further developed by others, especially researchers at the University of Cambridge.
+
+See `LICENCE` and Git blame for a complete list of authors.
 
 Funding
 -------

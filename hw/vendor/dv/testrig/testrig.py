@@ -52,6 +52,7 @@ from typing import Optional
 ## misc paths variables ##
 scripts_path=op.dirname(op.realpath(__file__))
 testrig_root_path=op.join(scripts_path, op.pardir, op.pardir)
+home_path=op.join(testrig_root_path, op.pardir, op.pardir, op.pardir)
 implementations_path=op.join(testrig_root_path, "riscv-implementations")
 vengines_path=op.join(testrig_root_path, "vengines")
 
