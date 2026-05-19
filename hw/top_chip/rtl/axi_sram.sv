@@ -21,7 +21,7 @@ module axi_sram #(
   localparam longint unsigned AddrMask = (1 << (AddrWidth + $clog2(top_pkg::AxiDataWidth / 8))) - 1;
 
   // Every tag entry can store AxiDataWidth capability tags
-  localparam int unsigned TagBitAddrWidth = AddrWidth - $clog2(top_pkg::CapSizeBits / 8);
+  localparam int unsigned TagBitAddrWidth = AddrWidth + $clog2(top_pkg::AxiDataWidth / 8) - $clog2(top_pkg::CapSizeBits / 8);
   localparam int unsigned TagAddrWidth    = TagBitAddrWidth - $clog2(top_pkg::AxiDataWidth);
   localparam int unsigned TagBitWith      = $clog2(top_pkg::AxiDataWidth);
 

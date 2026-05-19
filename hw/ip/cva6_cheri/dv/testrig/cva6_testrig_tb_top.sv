@@ -112,6 +112,7 @@ module cva6_testrig_tb_top;
   // Clear data and tag memories between tests.
   initial forever begin
     u_axi_sram.u_ram.mem          = '{default: '0};
+    u_axi_sram.u_tag_ram.mem      = '{default: '0};
     @(negedge rst_n);
   end
 
