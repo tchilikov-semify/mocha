@@ -20,6 +20,7 @@ module cva6_testrig_tb_top;
   wire rst_n;
   logic [CVA6Cfg.DIIIDLEN-1:0] dii_id_commit;
   logic [CVA6Cfg.DIIIDLEN-1:0] trap_cnt;
+  logic past_end;
 
   clk_rst_if    clk_if  (.clk(clk), .rst_n(rst_n));
   cva6_rvfi_if  rvfi_if (.clk(clk));
@@ -29,7 +30,7 @@ module cva6_testrig_tb_top;
     config_pkg::cva6_user_cfg_t cfg = CVA6UserCfg;
     cfg.RVZiCond                      = bit'(0);
     cfg.CvxifEn                       = bit'(0);
-    cfg.SuperscalarEn                 = bit'(0);
+    // cfg.SuperscalarEn                 = bit'(0);
     cfg.NrNonIdempotentRules          = unsigned'(1);
     cfg.NonIdempotentAddrBase         = 1024'({64'b0});
     cfg.NonIdempotentLength           = 1024'({top_pkg::SRAMBase});
@@ -98,7 +99,7 @@ module cva6_testrig_tb_top;
     .noc_resp_i    (axi_resp    )
   );
 
-  // 21 → 16MB SRAM, enough to cover QCVEngine gen_cache address range (~10MB above base)
+  // 21 -> 16MB SRAM, enough to cover QCVEngine gen_cache address range (~10MB above base)
   localparam int unsigned SRAM_ADDR_WIDTH = 21;
   axi_sram #(
     .AddrWidth          (SRAM_ADDR_WIDTH)
@@ -152,7 +153,7 @@ module cva6_testrig_tb_top;
   );
 
   assign rvfi_if.reset         = ~rst_n;
-  assign rvfi_if.valid         = rvfi_serial.valid || rvfi_serial.trap;
+  assign rvfi_if.valid         = (rvfi_serial.valid | rvfi_serial.trap) & ~past_end;
   assign rvfi_if.order         = rvfi_serial.order;
   assign rvfi_if.insn          = rvfi_serial.insn;
   assign rvfi_if.trap          = rvfi_serial.trap;
@@ -176,8 +177,8 @@ module cva6_testrig_tb_top;
   assign rvfi_if.ext_mip       = rvfi_csr.mip;
   assign rvfi_if.ext_mcycle    = rvfi_csr.mcycle;
 
-  assign dii_id_commit = rvfi_if.order[31:0] + trap_cnt;
-
+  assign dii_id_commit  = rvfi_if.order[31:0] + trap_cnt;
+  assign past_end       = (dii_id_commit > dii_if.num_test_insns()) && rvfi_if.insn == dii_if.END_OF_TEST_INSTR;
 
   always @(posedge clk) begin
     if(~rst_n) begin
