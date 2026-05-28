@@ -152,6 +152,15 @@ module cva6_testrig_tb_top;
     .rvfi_o   (rvfi_serial  )
   );
 
+  rvfi_trace_monitor #(
+    .TRACE_FILE("rvfi_trace.S")
+  ) u_rvfi_monitor (
+    .clk_i   (clk),
+    .rst_ni  (rst_n),
+    .valid_i (rvfi_if.valid),
+    .insn_i  (rvfi_if.insn)
+  );
+
   assign rvfi_if.reset         = ~rst_n;
   assign rvfi_if.valid         = (rvfi_serial.valid | rvfi_serial.trap) & ~past_end;
   assign rvfi_if.order         = rvfi_serial.order;

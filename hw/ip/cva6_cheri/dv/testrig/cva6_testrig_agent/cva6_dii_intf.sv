@@ -12,15 +12,19 @@ interface cva6_dii_intf (
 
   assign test_sequence_complete = instructions_committed > instr_buffer.size();
 
-  function logic[31:0] num_test_insns();
+  function automatic logic[31:0] num_test_insns();
     return instr_buffer.size();
   endfunction
 
-  function logic [31:0] get_instr(int dii_id);
+  function automatic logic [31:0] get_instr(int dii_id);
     if (instr_buffer.size() == 0 || dii_id >= instr_buffer.size() || dii_id < 0)
       return END_OF_TEST_INSTR;
     else
       return instr_buffer[dii_id];
+  endfunction
+
+  function automatic logic is_compressed(int dii_id);
+    return ((get_instr(dii_id) & 32'b11) != 32'b11);
   endfunction
 
 endinterface : cva6_dii_intf

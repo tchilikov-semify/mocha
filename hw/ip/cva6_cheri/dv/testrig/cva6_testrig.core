@@ -31,6 +31,7 @@ filesets:
       - rvfi/cva6_rvfi_monitor.sv: {file_type: user, is_include_file: true, include_path: rvfi}
       - rvfi/cva6_rvfi_if.sv
       - rvfi/cva6_rvfi_serializer.sv
+      - rvfi/rvfi_trace_monitor.sv
 
       # DII
       - cva6_testrig_agent/cva6_testrig_dii_driver.sv: {file_type: user, is_include_file: true, include_path: cva6_testrig_agent}
