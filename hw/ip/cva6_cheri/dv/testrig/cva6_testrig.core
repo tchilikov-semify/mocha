@@ -42,6 +42,7 @@ filesets:
 
       - tests/cva6_testrig_test.sv: {file_type: user, is_include_file: true, include_path: tests}
       - coverage/isa_coverage.sv
+      # - coverage/alu_coverage.sv
       - cva6_testrig_tb_top.sv
     file_type: systemVerilogSource
 

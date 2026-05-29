@@ -30,7 +30,7 @@ module cva6_testrig_tb_top;
     config_pkg::cva6_user_cfg_t cfg = CVA6UserCfg;
     cfg.RVZiCond                      = bit'(0);
     cfg.CvxifEn                       = bit'(0);
-    // cfg.SuperscalarEn                 = bit'(0);
+    cfg.SuperscalarEn                 = bit'(0);
     cfg.NrNonIdempotentRules          = unsigned'(1);
     cfg.NonIdempotentAddrBase         = 1024'({64'b0});
     cfg.NonIdempotentLength           = 1024'({top_pkg::SRAMBase});
@@ -140,6 +140,19 @@ module cva6_testrig_tb_top;
     .rvfi_valid_i (rvfi_if.valid),
     .rvfi_insn_i  (rvfi_if.insn )
   );
+
+//  bind alu alu_coverage #(
+//     .CVA6Cfg   (CVA6Cfg  )
+//   ) alu_cov (
+//     .clk_i            (clk_i               ),
+//     .rst_ni           (rst_ni              ),
+//     .fu_i             (fu_data_i.fu        ),
+//     .operation_i      (fu_data_i.operation ),
+//     .operand_a_i      (operand_a           ),
+//     .operand_b_i      (operand_b           ),
+//     .result_o         (result_o            ),
+//     .alu_branch_res_o (alu_branch_res_o    )
+//   );
 
   cva6_rvfi_serializer #(
     .CVA6Cfg      (CVA6Cfg      ),
