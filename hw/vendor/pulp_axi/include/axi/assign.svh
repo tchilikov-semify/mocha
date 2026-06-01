@@ -18,6 +18,8 @@
 `ifndef AXI_ASSIGN_SVH_
 `define AXI_ASSIGN_SVH_
 
+`include "common_cells/registers.svh"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Internal implementation for assigning one AXI struct or interface to another struct or interface.
 // The path to the signals on each side is defined by the `__sep*` arguments.  The `__opt_as`

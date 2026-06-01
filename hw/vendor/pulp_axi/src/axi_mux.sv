@@ -21,6 +21,8 @@
 // Responses are switched based on these bits. For example, with 4 slave ports
 // a response with ID `6'b100110` will be forwarded to slave port 2 (`2'b10`).
 
+`include "common_cells/registers.svh"
+
 module axi_mux #(
   // AXI parameter and channel types
   parameter int unsigned SlvAxiIDWidth = 32'd0, // AXI ID width, slave ports
