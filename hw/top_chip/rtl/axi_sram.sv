@@ -16,9 +16,12 @@ module axi_sram #(
   input  top_pkg::axi_req_t  axi_req_i,
   output top_pkg::axi_resp_t axi_resp_o
 );
+  // Byte-address mask covering exactly the SRAM's capacity (2^AddrWidth words × DataWidth/8 bytes).
+  // Derived from AddrWidth so that instantiations with different sizes don't alias addresses.
+  localparam longint unsigned AddrMask = (1 << (AddrWidth + $clog2(top_pkg::AxiDataWidth / 8))) - 1;
 
   // Every tag entry can store AxiDataWidth capability tags
-  localparam int unsigned TagBitAddrWidth = AddrWidth - $clog2(top_pkg::CapSizeBits / 8);
+  localparam int unsigned TagBitAddrWidth = AddrWidth + $clog2(top_pkg::AxiDataWidth / 8) - $clog2(top_pkg::CapSizeBits / 8);
   localparam int unsigned TagAddrWidth    = TagBitAddrWidth - $clog2(top_pkg::AxiDataWidth);
   localparam int unsigned TagBitWith      = $clog2(top_pkg::AxiDataWidth);
 
@@ -84,7 +87,7 @@ module axi_sram #(
   );
 
   // Tag bit address calculation
-  assign sram_tag_bit_addr     = TagBitAddrWidth'((sram_addr & top_pkg::SRAMMask) >>
+  assign sram_tag_bit_addr     = TagBitAddrWidth'((sram_addr & AddrMask) >>
                                  $clog2(top_pkg::CapSizeBits / 8));
   assign sram_tag_word_addr    = TagAddrWidth'(sram_tag_bit_addr >>
                                  $clog2(top_pkg::AxiDataWidth));
@@ -117,7 +120,7 @@ module axi_sram #(
   );
 
   // Remove base offset and convert byte address to 64-bit word address
-  assign sram_word_addr = AddrWidth'((sram_addr & top_pkg::SRAMMask) >> $clog2(top_pkg::AxiDataWidth / 8));
+  assign sram_word_addr = AddrWidth'((sram_addr & AddrMask) >> $clog2(top_pkg::AxiDataWidth / 8));
   always_comb begin
     for (int i = 0; i < (top_pkg::AxiDataWidth / 8); ++i) begin
       sram_wmask[i*8 +: 8] = {8{sram_be[i]}};
