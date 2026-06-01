@@ -1,5 +1,5 @@
-cd $env(XLM_DIR)
-load -run ./cov_work/scope/cva6_testrig_test
+cd $env(SIM_DIR)
+load -run ./cosmic__cva6_testrig_0/default-xcelium/cov_work/scope/cva6_testrig_test
 config reports.detachable_report_data -set true
 
 # Generate the text report (summary is sufficient).
@@ -10,7 +10,7 @@ report -summary \
   -cumulative on \
   -local off \
   -grading covered \
-  -out ./coverage_reports/cov_report.txt
+  -out ./cosmic__cva6_testrig_0/default-xcelium/coverage_reports/cov_report.txt
 
 # Generate the functional coverage report for tracking.
 report -summary \
@@ -18,11 +18,11 @@ report -summary \
   -all \
   -metrics covergroup \
   -source off \
-  -out ./coverage_reports/cov_report_cg.txt
+  -out ./cosmic__cva6_testrig_0/default-xcelium/coverage_reports/cov_report_cg.txt
 
 # Generate the HTML reports.
 report_metrics \
-  -out ./coverage_reports \
+  -out ./cosmic__cva6_testrig_0/default-xcelium/coverage_reports \
   -overwrite \
   -title cva6_title \
   -detail \
@@ -35,7 +35,7 @@ report_metrics \
   -all
 
 # rank the test runs
-#rank -runfile cov_work/scope/cva6_testrig_test/runs.txt -html -out ./coverage_reports/grading
+#rank -runfile cosmic__cva6_testrig_0/default-xcelium/cov_work/scope/cva6_testrig_test/runs.txt -html -out ./cosmic__cva6_testrig_0/default-xcelium/coverage_reports/grading
 
-report -detail -text -out ./coverage_report.txt
+report -detail -text -out ./cosmic__cva6_testrig_0/default-xcelium/coverage_report.txt
 exit

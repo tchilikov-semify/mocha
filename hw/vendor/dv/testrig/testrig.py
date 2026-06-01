@@ -234,6 +234,8 @@ parser.add_argument('--test-len', metavar='LEN', default=None, type=auto_int,
   help="Tell vengine to generate tests up to LEN instructions long")
 parser.add_argument('--supported-features', metavar='FEAT', type=str,
   help="Specify supported features to vengine, separated by '_'. Each feature should begin with 'X'.")
+parser.add_argument('--waves', action='store_true', default=False,
+  help="Enable waveform dumping.")
 
 # Use argcomplete to provide bash tab completion (https://github.com/kislyuk/argcomplete)
 try:
@@ -432,6 +434,7 @@ def spawn_rvfi_dii_server(name, port, log, isa_def):
 
   env2 = os.environ.copy()
   cmd = []
+  cwd = None
   ##############################################################################
   if name == 'spike':
     if args.path_to_spike is None:
@@ -519,7 +522,27 @@ def spawn_rvfi_dii_server(name, port, log, isa_def):
   ##############################################################################
   elif name == 'cva6_coverage':
     env2["RVFI_DII_PORT"] = str(port)
-    cmd = ['make', '-C', args.path_to_cva6_coverage, 'run']
+    env2["LD_PRELOAD"] = sub.check_output(['gcc', '-print-file-name=libstdc++.so.6']).decode().strip() + ':' + env2.get('LD_PRELOAD', '')
+    uvm_verbosity = '+UVM_VERBOSITY=UVM_HIGH' if args.verbosity >= 2 else '+UVM_VERBOSITY=UVM_LOW'
+    if args.waves:
+      input_cmd = ('@database -open waves -shm -into waves.shm; '
+                   'probe -create -shm -all -depth all -dynamic -memories '
+                   '-variables -database waves; run; database -close waves; finish')
+    else:
+      input_cmd = '@run; finish'
+    cmd =  ['xrun',
+            '-64bit', '-R',
+            '-snapshot', 'cva6_work',
+            '-l', 'run.log',
+	          '-coverage', 'functional',
+	          '-covworkdir', 'cov_work',
+	          '-covoverwrite',
+	          '-covtest', 'cva6_testrig_test',
+	          '+UVM_TESTNAME=cva6_testrig_test',
+            '-input', input_cmd,
+            uvm_verbosity]
+    cwd = op.join(op.realpath(args.path_to_cva6_coverage), 'cosmic__cva6_testrig_0', 'default-xcelium')
+
   ##############################################################################
   elif name == 'manual':
     return None
@@ -532,7 +555,8 @@ def spawn_rvfi_dii_server(name, port, log, isa_def):
     return None
   ##############################################################################
   print("running rvfi-dii server as: ", " ".join(cmd))
-  p = sub.Popen(cmd, env=env2, stdin=None, stdout=use_log, stderr=use_log)
+  p = sub.Popen(cmd, env=env2, stdin=None, stdout=use_log, stderr=use_log, cwd=cwd, start_new_session=True)
+  p.terminate = lambda: os.killpg(os.getpgid(p.pid), signal.SIGTERM)
   print('spawned {:s} rvfi-dii server on port: {:d} ({})'.format(name, port, cmd))
   return p
 
