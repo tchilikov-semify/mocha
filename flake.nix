@@ -108,6 +108,37 @@
             UV_PYTHON = pythonSet.python.interpreter;
           };
         };
+        testrig = pkgs.mkShell {
+          name = "mocha-testrig";
+          nativeBuildInputs = with pkgs; [
+            # OCaml + opam to build sail at the correct version
+            opam
+            ocaml
+            pkg-config
+            gnumake
+            gcc
+            m4
+            # QuickCheckVEngine (Haskell, cabal-based)
+            ghc
+            cabal-install
+            # testrig.py orchestration
+            python3
+          ];
+          buildInputs = with pkgs; [
+            gmp
+            zlib
+          ];
+          shellHook = ''
+            if ! opam switch list 2>/dev/null | grep -q "mocha-testrig"; then
+              echo "First-time setup: initialising opam and installing sail..."
+              opam init --bare -y --disable-sandboxing
+              opam switch create mocha-testrig 4.14.1 -y
+              eval $(opam env --switch=mocha-testrig)
+              opam install -y sail menhir lem linksem z3 ott linenoise
+            fi
+            eval $(opam env --switch=mocha-testrig)
+          '';
+        };
       };
 
       apps = {

@@ -1,0 +1,4932 @@
+{
+    cheri_cva6_top:
+    {
+        Reference: Cheri RiscV CPU
+        Description: Top level instance of the CVA6-Cheri CPU
+        Node_Type: dut_name
+        Cheri_Extension_Instructions:
+        {
+            Reference: cheri_0000
+            Description: Cheri RiscV ISA Extension Specification: https://github.com/riscv/riscv-cheri/releases/tag/v0.9.6
+            Node_Type: section_title
+            LY:
+            {
+                Reference: cheri_0001
+                Description: ly rd, offset(rs1) #Load capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_ly.LY
+                ]
+            }
+            SY:
+            {
+                Reference: cheri_0002
+                Description: sy rs2, offset(rs1) #Store capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_sy.SY
+                ]
+            }
+            ADDY:
+            {
+                Reference: cheri_0003
+                Description: addy rd, rs1, rs2 #Capability pointer increment
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.ADDY
+                ]
+            }
+            ADDIY:
+            {
+                Reference: cheri_0004
+                Description: addiy sp, sp, nzimm #Capability pointer increment by immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_imm32_cheri.ADDIY
+                ]
+            }
+            YADDRW:
+            {
+                Reference: cheri_0005
+                Description: yaddrw rd, rs1, rs2 #Write capability address
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YADDRW
+                ]
+            }
+            YTAGR:
+            {
+                Reference: cheri_0006
+                Description: ytagr rd, rs1 #Read capability tag
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YTAGR
+                ]
+            }
+            YPERMR:
+            {
+                Reference: cheri_0007
+                Description: ypermr rd, rs1 #Read capability permissions
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YPERMR
+                ]
+            }
+            YMV:
+            {
+                Reference: cheri_0008
+                Description: ymv rd, rs1 #Capability register copy
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_ymv.YMV
+                ]
+            }
+            YPERMC:
+            {
+                Reference: cheri_0009
+                Description: ypermc rd, rs1, rs2 #Clear capability permissions
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YPERMC
+                ]
+            }
+            SRLIY_RV64:
+            {
+                Reference: cheri_0010_64
+                Description: srliy rd, rs1, shamt #Logical right shift of Y register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_srliy_rv64.SRLIY_RV64
+                ]
+            }
+            SRLIY_RV32:
+            {
+                Reference: cheri_0010
+                Description: srliy rd, rs1, shamt #Logical right shift of Y register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_srliy_rv64.SRLIY_RV32
+                ]
+            }
+            PACKY:
+            {
+                Reference: cheri_0012
+                Description: packy rd, rs1, rs2 #Pack Y register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.PACKY
+                ]
+            }
+            SYEQ:
+            {
+                Reference: cheri_0014
+                Description: syeq rd, rs1, rs2 #Capability equality comparison including capability tag
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.SYEQ
+                ]
+            }
+            YLT:
+            {
+                Reference: cheri_0015
+                Description: ylt rd, rs1, rs2 #Capability less than comparison including capability tag
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YLT
+                ]
+            }
+            YBLD:
+            {
+                Reference: cheri_0016
+                Description: ybld rd, rs1, rs2 #Build capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YBLD
+                ]
+            }
+            YSUNSEAL:
+            {
+                Reference: cheri_0017
+                Description: ysunseal rd, rs1, rs2 #Unseal by superset reconstruction
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YSUNSEAL
+                ]
+            }
+            YBNDSW:
+            {
+                Reference: cheri_0018
+                Description: ybndsw rd, rs1, rs2 #Write capability bounds
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YBNDSW
+                ]
+            }
+            YBNDSWI:
+            {
+                Reference: cheri_0019
+                Description: ybndswi rd, rs1, imm #Write capability bounds by immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_imm32_cheri.YBNDSWI
+                ]
+            }
+            YBNDSRW:
+            {
+                Reference: cheri_0020
+                Description: ybndsrw rd, rs1, rs2 #Write capability bounds, rounding up if required
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YBNDSRW
+                ]
+            }
+            YAMASK:
+            {
+                Reference: cheri_0021
+                Description: yamask rd, rs1 #Capability alignment mask
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YAMASK
+                ]
+            }
+            YBASER:
+            {
+                Reference: cheri_0022
+                Description: ybaser rd, rs1 #Read capability base address
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YBASER
+                ]
+            }
+            YLENR:
+            {
+                Reference: cheri_0023
+                Description: ylenr rd, rs1 #Read capability length
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YLENR
+                ]
+            }
+            YTYPER:
+            {
+                Reference: cheri_0024
+                Description: ytyper rd, rs1 #Read capability type
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YTYPER
+                ]
+            }
+            "AUIPC (RVY)":
+            {
+                Reference: cheri_0025
+                Description: Add upper immediate to pc
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_auipc_rvy.AUIPC_RVY
+                ]
+            }
+            "JAL (RVY)":
+            {
+                Reference: cheri_0026
+                Description: Immediate offset jump, and link and seal to capability register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_jal_rvy.JAL_RVY
+                ]
+            }
+            "JALR (RVY)":
+            {
+                Reference: cheri_0027
+                Description: Jump to capability register, and link and seal to capability register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_jalr_rvy.JALR_RVY
+                ]
+            }
+            "CSRRW (RVY)":
+            {
+                Reference: cheri_0028
+                Description: CSR write
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRW_RVY
+                ]
+            }
+            "CSRRS (RVY)":
+            {
+                Reference: cheri_0029
+                Description: CSR set
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRS_RVY
+                ]
+            }
+            "CSRRC (RVY)":
+            {
+                Reference: cheri_0030
+                Description: CSR clear
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRC_RVY
+                ]
+            }
+            "CSRRWI (RVY)":
+            {
+                Reference: cheri_0031
+                Description: CSR write (immediate form)
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRWI_RVY
+                ]
+            }
+            "CSRRSI (RVY)":
+            {
+                Reference: cheri_0032
+                Description: CSR set (immediate form)
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRSI_RVY
+                ]
+            }
+            "CSRRCI (RVY)":
+            {
+                Reference: cheri_0033
+                Description: CSR clear (immediate form)
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_csr_rvy.CSRRCI_RVY
+                ]
+            }
+            YSENTRY:
+            {
+                Reference: cheri_0034
+                Description: ysentry rd, rs1 #Seal capability as a sentry
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YSENTRY
+                ]
+            }
+            C.LYSP_32:
+            {
+                Reference: cheri_0035
+                Description: c.lysp rd', offset(sp) #Load capability stack pointer relative, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_lysp.C_LYSP_RV32Y
+                ]
+            }
+            C.LYSP_64:
+            {
+                Reference: cheri_0035_64
+                Description: c.lysp rd', offset(sp) #Load capability stack pointer relative, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_lysp.C_LYSP_RV64Y
+                ]
+            }
+            C.SYSP_32:
+            {
+                Reference: cheri_0036
+                Description: c.sysp rs2', offset(sp) #Store capability stack pointer relative, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_sysp.C_SYSP_RV32Y
+                ]
+            }
+            C.SYSP_64:
+            {
+                Reference: cheri_0036_64
+                Description: c.sysp rs2', offset(sp) #Store capability stack pointer relative, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_sysp.C_SYSP_RV64Y
+                ]
+            }
+            C.LY_32:
+            {
+                Reference: cheri_0037
+                Description: c.ly rd', offset(rs1') #Load capability, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_ly.C_LY_RV32Y
+                ]
+            }
+            C.LY_64:
+            {
+                Reference: cheri_0037_64
+                Description: c.ly rd', offset(rs1') #Load capability, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_ly.C_LY_RV64Y
+                ]
+            }
+            C.SY_32:
+            {
+                Reference: cheri_0038
+                Description: c.sy rs2', offset(rs1') #Store capability, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_sy.C_SY_RV32Y
+                ]
+            }
+            C.SY_64:
+            {
+                Reference: cheri_0038_64
+                Description: c.sy rs2', offset(rs1') #Store capability, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_sy.C_SY_RV64Y
+                ]
+            }
+            "C.ADDI16SP (RVY)":
+            {
+                Reference: cheri_0039
+                Description: Stack pointer increment in blocks of 16, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_addi16sp_rvy.C_ADDI16SP_RVY
+                ]
+            }
+            "C.ADDI4SPN (RVY)":
+            {
+                Reference: cheri_0040
+                Description: Stack pointer increment in blocks of 4, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_addi4spn_rvy.C_ADDI4SPN_RVY
+                ]
+            }
+            C.YMV:
+            {
+                Reference: cheri_0041
+                Description: c.ymv rd, rs2 #Capability register copy, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_ymv.C_YMV
+                ]
+            }
+            "C.JALR (RVY)":
+            {
+                Reference: cheri_0042
+                Description: Jump to capability register, and link and seal to capability register, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_jalr_rvy.C_JALR_RVY
+                ]
+            }
+            "C.JR (RVY)":
+            {
+                Reference: cheri_0043
+                Description: Jump to capability register, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_jr_rvy.C_JR_RVY
+                ]
+            }
+            LR.Y_32:
+            {
+                Reference: cheri_0044
+                Description: lr.y rd, 0(rs1) #Load Reserved capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_ly.C_LY_RV32Y
+                ]
+            }
+            LR.Y_64:
+            {
+                Reference: cheri_0044_64
+                Description: lr.y rd, 0(rs1) #Load Reserved capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_ly.C_LY_RV64Y
+                ]
+            }
+            SC.Y:
+            {
+                Reference: cheri_0045
+                Description: sc.y rd, rs2, 0(rs1) #Store Conditional capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_amo_y.SC_Y
+                ]
+            }
+            AMOSWAP.Y:
+            {
+                Reference: cheri_0046
+                Description: amoswap.y rd, rs2, 0(rs1) #Atomic swap of capabilities
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_amo_y.AMOSWAP_Y
+                ]
+            }
+            SH1ADDY:
+            {
+                Reference: cheri_0047
+                Description: sh1addy rd, rs1, rs2 #shift and add, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy.SH1ADDY
+                ]
+            }
+            SH2ADDY:
+            {
+                Reference: cheri_0048
+                Description: sh2addy rd, rs1, rs2 #shift and add, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy.SH2ADDY
+                ]
+            }
+            SH3ADDY:
+            {
+                Reference: cheri_0049
+                Description: sh3addy rd, rs1, rs2 #shift and add, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy.SH3ADDY
+                ]
+            }
+            "SH4ADDY (RV64Y)":
+            {
+                Reference: cheri_0050
+                Description: shift and add, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy.SH4ADDY
+                ]
+            }
+            "SH1ADDY.UW (RV64Y)":
+            {
+                Reference: cheri_0051
+                Description: shift and add unsigned word, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy_uw.SH1ADDY_UW
+                ]
+            }
+            "SH2ADDY.UW (RV64Y)":
+            {
+                Reference: cheri_0052
+                Description: shift and add unsigned word, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy_uw.SH2ADDY_UW
+                ]
+            }
+            "SH3ADDY.UW (RV64Y)":
+            {
+                Reference: cheri_0053
+                Description: shift and add unsigned word, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy_uw.SH3ADDY_UW
+                ]
+            }
+            "SH4ADDY.UW (RV64Y)":
+            {
+                Reference: cheri_0054
+                Description: shift and add unsigned word, representability check
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_shaddy_uw.SH4ADDY_UW
+                ]
+            }
+            "CBO.INVAL (RVY)":
+            {
+                Reference: cheri_0055
+                Description: Cache block invalidate (implemented as clean)
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_cbo.CBO_INVAL
+                ]
+            }
+            "CBO.CLEAN (RVY)":
+            {
+                Reference: cheri_0056
+                Description: Cache block clean
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_cbo.CBO_CLEAN
+                ]
+            }
+            "CBO.FLUSH (RVY)":
+            {
+                Reference: cheri_0057
+                Description: Cache block flush
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_cbo.CBO_FLUSH
+                ]
+            }
+            "CBO.ZERO (RVY)":
+            {
+                Reference: cheri_0058
+                Description: Cache block zero
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_cbo.CBO_ZERO
+                ]
+            }
+            "PREFETCH.R (RVY)":
+            {
+                Reference: cheri_0059
+                Description: Prefetch instruction cache line, always valid
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_prefetch.PREFETCH_R
+                ]
+            }
+            "PREFETCH.W (RVY)":
+            {
+                Reference: cheri_0060
+                Description: Prefetch read-only data cache line
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_prefetch.PREFETCH_W
+                ]
+            }
+            "PREFETCH.I (RVY)":
+            {
+                Reference: cheri_0061
+                Description: Prefetch writable data cache line
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_prefetch.PREFETCH_I
+                ]
+            }
+            YMODEW:
+            {
+                Reference: cheri_0062
+                Description: ymodew rd, rs1, rs2 #Set capability execution mode
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_2src.YMODEW
+                ]
+            }
+            YMODER:
+            {
+                Reference: cheri_0063
+                Description: ymoder rd, rs1 #Read capability mode
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_op_cheri_1src.YMODER
+                ]
+            }
+            YMODESWY:
+            {
+                Reference: cheri_0064
+                Description: Switch execution to (CHERI) Capability Mode
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_ymodesw.YMODESWY
+                ]
+            }
+            YMODESWI:
+            {
+                Reference: cheri_0065
+                Description: Switch execution to (Non-CHERI) Address Mode
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_ymodesw.YMODESWI
+                ]
+            }
+            "C.JAL (RV32Y)":
+            {
+                Reference: cheri_0066
+                Description: Immediate offset jump, and link and seal to capability register, 16-bit encoding
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_c_jal_rv32y.C_JAL_RV32Y
+                ]
+            }
+            HLV.Y:
+            {
+                Reference: cheri_0067
+                Description: hlv.y rd, rs1 #Hypervisor virtual machine load capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_hlv_hsv_y.HLV_Y
+                ]
+            }
+            HSV.Y:
+            {
+                Reference: cheri_0068
+                Description: hsv.y rs2, rs1 #Hypervisor virtual machine store capability
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_cheri.cp_hlv_hsv_y.HSV_Y
+                ]
+            }
+        }
+        "RV32I Base Integer instruction Set":
+        {
+            Reference: abc456
+            Description: Instruction Set Specification: https://docs.riscv.org/reference/isa/unpriv/rv-32-64g.html
+            Node_Type: section_title
+            LUI:
+            {
+                Reference: dc00
+                Description: LUI rd, imm #load upper immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_lui.LUI
+                ]
+            }
+            AUIPC:
+            {
+                Reference: dc01
+                Description: AUIPC rd, imm #add upper immediate to PC
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_auipc.AUIPC
+                ]
+            }
+            JAL:
+            {
+                Reference: dc02
+                Description: JAL rd, imm #jump and link
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_jal.JAL
+                ]
+            }
+            JALR:
+            {
+                Reference: dc03
+                Description: JALR rd, rs1, imm #jump and link register
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_jalr.JALR
+                ]
+            }
+            BEQ:
+            {
+                Reference: dc04
+                Description: BEQ rs1, rs2, imm #branch if equal
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BEQ
+                ]
+            }
+            BNE:
+            {
+                Reference: dc05
+                Description: BNE rs1, rs2, imm #branch if not equal
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BNE
+                ]
+            }
+            BLT:
+            {
+                Reference: dc06
+                Description: BLT rs1, rs2, imm #branch if less than signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BLT
+                ]
+            }
+            BGE:
+            {
+                Reference: dc07
+                Description: BGE rs1, rs2, imm #branch if greater or equal signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BGE
+                ]
+            }
+            BLTU:
+            {
+                Reference: dc08
+                Description: BLTU rs1, rs2, imm #branch if less than unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BLTU
+                ]
+            }
+            BGEU:
+            {
+                Reference: dc09
+                Description: BGEU rs1, rs2, imm #branch if greater or equal unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_branch.BGEU
+                ]
+            }
+            LB:
+            {
+                Reference: dc10
+                Description: LB rd, imm(rs1) #load byte signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LB
+                ]
+            }
+            LH:
+            {
+                Reference: dc11
+                Description: LH rd, imm(rs1) #load halfword signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LH
+                ]
+            }
+            LW:
+            {
+                Reference: dc12
+                Description: LW rd, imm(rs1) #load word
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LW
+                ]
+            }
+            LD:
+            {
+                Reference: dc12_64
+                Description: LD rd, imm(rs1) #load double word
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/61
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LD
+                ]
+            }
+            LBU:
+            {
+                Reference: dc13
+                Description: LBU rd, imm(rs1) #load byte unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/62
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LBU
+                ]
+            }
+            LHU:
+            {
+                Reference: dc14
+                Description: LHU rd, imm(rs1) #load halfword unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/63
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LHU
+                ]
+            }
+            LWU:
+            {
+                Reference: dc14_64
+                Description: LWU rd, imm(rs1) #load unsinged word
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/64
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_load.LWU
+                ]
+            }
+            SB:
+            {
+                Reference: dc15
+                Description: SB rs2, imm(rs1) #store byte
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/65
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_store.SB
+                ]
+            }
+            SH:
+            {
+                Reference: dc16
+                Description: SH rs2, imm(rs1) #store halfword
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_store.SH
+                ]
+            }
+            SW:
+            {
+                Reference: dc17
+                Description: SW rs2, imm(rs1) #store word
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_store.SW
+                ]
+            }
+            SD:
+            {
+                Reference: dc17_64
+                Description: SD rs2, imm(rs1) # Store
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_store.SD
+                ]
+            }
+            ADDI:
+            {
+                Reference: dc18
+                Description: ADDI rd, rs1, imm #add immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.ADDI
+                ]
+            }
+            SLTI:
+            {
+                Reference: dc19
+                Description: SLTI rd, rs1, imm #set less than immediate signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.SLTI
+                ]
+            }
+            SLTIU:
+            {
+                Reference: dc20
+                Description: SLTIU rd, rs1, imm #set less than immediate unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.SLTIU
+                ]
+            }
+            XORI:
+            {
+                Reference: dc21
+                Description: XORI rd, rs1, imm #XOR immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.XORI
+                ]
+            }
+            ORI:
+            {
+                Reference: dc22
+                Description: ORI rd, rs1, imm #OR immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.ORI
+                ]
+            }
+            ANDI:
+            {
+                Reference: dc23
+                Description: ANDI rd, rs1, imm #AND immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_i_type.ANDI
+                ]
+            }
+            SLLI:
+            {
+                Reference: dc24
+                Description: SLLI rd, rs1, shamt #shift left logical immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_shift_i.SLLI
+                ]
+            }
+            SRLI:
+            {
+                Reference: dc25
+                Description: SRLI rd, rs1, shamt #shift right logical immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_shift_i.SRLI
+                ]
+            }
+            SRAI:
+            {
+                Reference: dc26
+                Description: SRAI rd, rs1, shamt #shift right arithmetic immediate
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_shift_i.SRAI
+                ]
+            }
+            ADD:
+            {
+                Reference: dc27
+                Description: ADD rd, rs1, rs2 #add registers
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.ADD
+                ]
+            }
+            SUB:
+            {
+                Reference: dc28
+                Description: SUB rd, rs1, rs2 #subtract registers
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/61
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SUB
+                ]
+            }
+            SLL:
+            {
+                Reference: dc29
+                Description: SLL rd, rs1, rs2 #shift left logical
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/62
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SLL
+                ]
+            }
+            SLT:
+            {
+                Reference: dc30
+                Description: SLT rd, rs1, rs2 #set less than signed
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/63
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SLT
+                ]
+            }
+            SLTU:
+            {
+                Reference: dc31
+                Description: SLTU rd, rs1, rs2 #set less than unsigned
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/64
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SLTU
+                ]
+            }
+            XOR:
+            {
+                Reference: dc32
+                Description: XOR rd, rs1, rs2 #bitwise XOR
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/65
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.XOR
+                ]
+            }
+            SRL:
+            {
+                Reference: dc33
+                Description: SRL rd, rs1, rs2 #shift right logical
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/66
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SRL
+                ]
+            }
+            SRA:
+            {
+                Reference: dc34
+                Description: SRA rd, rs1, rs2 #shift right arithmetic
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/67
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.SRA
+                ]
+            }
+            OR:
+            {
+                Reference: dc35
+                Description: OR rd, rs1, rs2 #bitwise OR
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/68
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.OR
+                ]
+            }
+            AND:
+            {
+                Reference: dc36
+                Description: AND rd, rs1, rs2 #bitwise AND
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/69
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_r_type.AND
+                ]
+            }
+            FENCE:
+            {
+                Reference: dc37
+                Description: FENCE rd, rs1, imm #memory ordering fence
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/70
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_misc_mem.FENCE
+                ]
+            }
+            FENCE.TSO:
+            {
+                Reference: dc38
+                Description: FENCE.TSO rd, rs1, imm #memory fence TSO ordering
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/71
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_special_instrs.FENCE_TSO
+                ]
+            }
+            PAUSE:
+            {
+                Reference: dc39
+                Description: PAUSE rd, rs1, imm #hint pause execution
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/72
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_special_instrs.PAUSE
+                ]
+            }
+            ECALL:
+            {
+                Reference: dc40
+                Description: ECALL rd, rs1, imm #environment call trap
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/73
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_system.ECALL
+                ]
+            }
+            EBREAK:
+            {
+                Reference: dc41
+                Description: EBREAK rd, rs1, imm #environment breakpoint trap
+                Node_Type: metric
+                Milestone: V1
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/74
+                Items:
+                [
+                    functional:isa_coverage::cg_rv32/64i.cp_system.EBREAK
+                ]
+            }
+        }
+        "\"M\" Extension for Integer Multiplication and Division":
+        {
+            Reference: abc789
+            Description: Instruction Set Specification: https://docs.riscv.org/reference/isa/unpriv/m-st-ext.html
+            Node_Type: section_title
+            MUL:
+            {
+                Reference: m00
+                Description: MUL rd, rs1, rs2 # Multiply lower XLEN bits
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            MULH:
+            {
+                Reference: m01
+                Description: MULH rd, rs1, rs2 # Multiply High (signed x signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            MULHSU:
+            {
+                Reference: m02
+                Description: MULHSU rd, rs1, rs2 # Multiply High (signed x unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            MULHU:
+            {
+                Reference: m03
+                Description: MULHU rd, rs1, rs2 # Multiply High (unsigned x unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            DIV:
+            {
+                Reference: m04
+                Description: DIV rd, rs1, rs2 # Divide (signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            DIVU:
+            {
+                Reference: m05
+                Description: DIVU rd, rs1, rs2 # Divide (unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            REM:
+            {
+                Reference: m06
+                Description: REM rd, rs1, rs2 # Remainder (signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            REMU:
+            {
+                Reference: m07
+                Description: REMU rd, rs1, rs2 # Remainder (unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            MULW:
+            {
+                Reference: m08
+                Description: MULW rd, rs1, rs2 # Multiply word (lower 32 bits)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            DIVW:
+            {
+                Reference: m09
+                Description: DIVW rd, rs1, rs2 # Divide word (signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            DIVUW:
+            {
+                Reference: m10
+                Description: DIVUW rd, rs1, rs2 # Divide word (unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            REMW:
+            {
+                Reference: m11
+                Description: REMW rd, rs1, rs2 # Remainder word (signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            REMUW:
+            {
+                Reference: m12
+                Description: REMUW rd, rs1, rs2 # Remainder word (unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"A\" Extension for Atomic Instructions":
+        {
+            Reference: a123
+            Description: Instruction Set Specification: https://docs.riscv.org/reference/isa/unpriv/a-st-ext.html
+            Node_Type: section_title
+            LR.W:
+            {
+                Reference: a00
+                Description: LR.W rd, (rs1) # Load-Reserved
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            LR.D:
+            {
+                Reference: a01
+                Description: LR.D rd, (rs1) # Load-Reserved
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SC.W:
+            {
+                Reference: a02
+                Description: SC.W rd, rs2, (rs1) # Store-Conditional
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SC.D:
+            {
+                Reference: a03
+                Description: SC.D rd, rs2, (rs1) # Store-Conditional
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOSWAP.W:
+            {
+                Reference: a04
+                Description: AMOSWAP.W rd, rs2, (rs1) # Atomic Swap
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOSWAP.D:
+            {
+                Reference: a05
+                Description: AMOSWAP.D rd, rs2, (rs1) # Atomic Swap
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOADD.W:
+            {
+                Reference: a06
+                Description: AMOADD.W rd, rs2, (rs1) # Atomic Add
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOADD.D:
+            {
+                Reference: a07
+                Description: AMOADD.D rd, rs2, (rs1) # Atomic Add
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOXOR.W:
+            {
+                Reference: a08
+                Description: AMOXOR.W rd, rs2, (rs1) # Atomic XOR
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOXOR.D:
+            {
+                Reference: a09
+                Description: AMOXOR.D rd, rs2, (rs1) # Atomic XOR
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOAND.W:
+            {
+                Reference: a10
+                Description: AMOAND.W rd, rs2, (rs1) # Atomic AND
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOAND.D:
+            {
+                Reference: a11
+                Description: AMOAND.D rd, rs2, (rs1) # Atomic AND
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOOR.W:
+            {
+                Reference: a12
+                Description: AMOOR.W rd, rs2, (rs1) # Atomic OR
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOOR.D:
+            {
+                Reference: a13
+                Description: AMOOR.D rd, rs2, (rs1) # Atomic OR
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMIN.W:
+            {
+                Reference: a14
+                Description: AMOMIN.W rd, rs2, (rs1) # Atomic Min (Signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMIN.D:
+            {
+                Reference: a15
+                Description: AMOMIN.D rd, rs2, (rs1) # Atomic Min (Signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMAX.W:
+            {
+                Reference: a16
+                Description: AMOMAX.W rd, rs2, (rs1) # Atomic Max (Signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMAX.D:
+            {
+                Reference: a17
+                Description: AMOMAX.D rd, rs2, (rs1) # Atomic Max (Signed)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMINU.W:
+            {
+                Reference: a18
+                Description: AMOMINU.W rd, rs2, (rs1) # Atomic Min (Unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMINU.D:
+            {
+                Reference: a19
+                Description: AMOMINU.D rd, rs2, (rs1) # Atomic Min (Unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMAXU.W:
+            {
+                Reference: a20
+                Description: AMOMAXU.W rd, rs2, (rs1) # Atomic Max (Unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AMOMAXU.D:
+            {
+                Reference: a21
+                Description: AMOMAXU.D rd, rs2, (rs1) # Atomic Max (Unsigned)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"C\" Extension for Compressed Instructions":
+        {
+            Reference: c123
+            Description: https://docs.riscv.org/reference/isa/unpriv/c-st-ext.html
+            Node_Type: section_title
+            C.LDSP:
+            {
+                Reference: c00
+                Description: C.LDSP rd, offset(sp) # Stack-relative Load
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SDSP:
+            {
+                Reference: c01
+                Description: C.SDSP rs2, offset(sp) # Stack-relative Store
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.LW:
+            {
+                Reference: c02
+                Description: C.LW rd', offset(rs1') # Load Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SW:
+            {
+                Reference: c03
+                Description: C.SW rs2', offset(rs1') # Store Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.LD:
+            {
+                Reference: c04
+                Description: C.LD rd', offset(rs1') # Load Doubleword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SD:
+            {
+                Reference: c05
+                Description: C.SD rs2', offset(rs1') # Store Doubleword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.J:
+            {
+                Reference: c06
+                Description: C.J offset # Jump
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.JAL:
+            {
+                Reference: c07
+                Description: C.JAL offset # Jump and Link
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.JR:
+            {
+                Reference: c08
+                Description: C.JR rs1 # Jump Register
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.JALR:
+            {
+                Reference: c09
+                Description: C.JALR rs1 # Jump and Link Register
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.BEQZ:
+            {
+                Reference: c10
+                Description: C.BEQZ rs1', offset # Branch Equal Zero
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.BNEZ:
+            {
+                Reference: c11
+                Description: C.BNEZ rs1', offset # Branch Not Equal Zero
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.LI:
+            {
+                Reference: c12
+                Description: C.LI rd, imm # Load Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.LUI:
+            {
+                Reference: c13
+                Description: C.LUI rd, imm # Load Upper Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADDI:
+            {
+                Reference: c14
+                Description: C.ADDI rd, rd, imm # Add Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADDI16SP:
+            {
+                Reference: c15
+                Description: C.ADDI16SP sp, sp, imm # Add Immediate 16 SP
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADDI4SPN:
+            {
+                Reference: c16
+                Description: C.ADDI4SPN rd', sp, imm # Add Immediate 4 SPN
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SLLI:
+            {
+                Reference: c17
+                Description: C.SLLI rd, rd, shamt # Shift Left Logical Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SRLI:
+            {
+                Reference: c18
+                Description: C.SRLI rd', rd', shamt # Shift Right Logical Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SRAI:
+            {
+                Reference: c19
+                Description: C.SRAI rd', rd', shamt # Shift Right Arithmetic Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ANDI:
+            {
+                Reference: c20
+                Description: C.ANDI rd', rd', imm # AND Immediate
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.MV:
+            {
+                Reference: c21
+                Description: C.MV rd, rs2
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADD:
+            {
+                Reference: c22
+                Description: C.ADD rd, rd, rs2
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.AND:
+            {
+                Reference: c23
+                Description: C.AND rd', rd', rs2'
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.OR:
+            {
+                Reference: c24
+                Description: C.OR rd', rd', rs2'
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.XOR:
+            {
+                Reference: c25
+                Description: C.XOR rd', rd', rs2'
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SUB:
+            {
+                Reference: c26
+                Description: C.SUB rd', rd', rs2' # Subtract
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADDW:
+            {
+                Reference: c27
+                Description: C.ADDW rd', rd', rs2' # Add Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SUBW:
+            {
+                Reference: c28
+                Description: C.SUBW rd', rd', rs2' # Subtract word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.NOP:
+            {
+                Reference: c29
+                Description: C.NOP # No Operation
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.EBREAK:
+            {
+                Reference: c30
+                Description: C.EBREAK
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.ADDIW:
+            {
+                Reference: c31
+                Description: C.ADDIW rd, rd, imm # Add Immediate Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.LWSP:
+            {
+                Reference: c32
+                Description: C.LWSP rd, offset(sp) # Load Word SP-relative
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.SWSP:
+            {
+                Reference: c33
+                Description: C.SWSP rs2, offset(sp) # Store Word SP-relative
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.FLD:
+            {
+                Reference: c34
+                Description: C.FLD fd', offset(rs1') # Load Double (FP)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.FSD:
+            {
+                Reference: c35
+                Description: C.FSD fs2', offset(rs1') # Store Double (FP)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.FLDSP:
+            {
+                Reference: c36
+                Description: C.FLDSP fd, offset(x2) # Load Double (FP Stack-Pointer)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            C.FSDSP:
+            {
+                Reference: c37
+                Description: C.FSDSP fs2, offset(x2) # Store Double (FP Stack-Pointer)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"F\" Extension for Single-Precision Floating-Point":
+        {
+            Reference: f123
+            Description: https://docs.riscv.org/reference/isa/unpriv/f-st-ext.html
+            Node_Type: section_title
+            FLW:
+            {
+                Reference: f00
+                Description: FLW fd, offset(rs1)  # Load FP Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSW:
+            {
+                Reference: f01
+                Description: FSW fs2, offset(rs1)  # Store FP Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FADD.S:
+            {
+                Reference: f02
+                Description: FADD.S fd, fs1, fs2  # FP Add Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSUB.S:
+            {
+                Reference: f03
+                Description: FSUB.S fd, fs1, fs2  # FP Subtract Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMUL.S:
+            {
+                Reference: f04
+                Description: FMUL.S fd, fs1, fs2  # FP Multiply Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FDIV.S:
+            {
+                Reference: f05
+                Description: FDIV.S fd, fs1, fs2  # FP Divide Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSQRT.S:
+            {
+                Reference: f06
+                Description: FSQRT.S fd, fs1  # FP Square Root Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJ.S:
+            {
+                Reference: f07
+                Description: FSGNJ.S fd, fs1, fs2  # FP Sign Inject Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJN.S:
+            {
+                Reference: f08
+                Description: FSGNJN.S fd, fs1, fs2  # FP Sign Inject Negated Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJX.S:
+            {
+                Reference: f09
+                Description: FSGNJX.S fd, fs1, fs2  # FP Sign Inject XOR Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMIN.S:
+            {
+                Reference: f10
+                Description: FMIN.S fd, fs1, fs2  # FP Minimum Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMAX.S:
+            {
+                Reference: f11
+                Description: FMAX.S fd, fs1, fs2  # FP Maximum Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.S.W:
+            {
+                Reference: f12
+                Description: FCVT.S.W fd, rs1  # FP Convert Word to Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.S.WU:
+            {
+                Reference: f13
+                Description: FCVT.S.WU fd, rs1  # FP Convert Word Unsigned to Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.W.S:
+            {
+                Reference: f14
+                Description: FCVT.W.S rd, fs1  # FP Convert Single to Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.WU.S:
+            {
+                Reference: f15
+                Description: FCVT.WU.S rd, fs1  # FP Convert Single to Word Unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMV.W.X:
+            {
+                Reference: f16
+                Description: FMV.W.X fd, rs1  # FP Move from Integer
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMV.X.W:
+            {
+                Reference: f17
+                Description: FMV.X.W rd, fs1  # FP Move to Integer
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FEQ.S:
+            {
+                Reference: f18
+                Description: FEQ.S rd, fs1, fs2  # FP Compare Equal Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FLT.S:
+            {
+                Reference: f19
+                Description: FLT.S rd, fs1, fs2  # FP Compare Less Than Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FLE.S:
+            {
+                Reference: f20
+                Description: FLE.S rd, fs1, fs2  # FP Compare Less or Equal Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCLASS.S:
+            {
+                Reference: f21
+                Description: FCLASS.S rd, fs1  # FP Classify Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMADD.S:
+            {
+                Reference: f22
+                Description: FMADD.S fd, fs1, fs2, fs3  # FP Fused Multiply-Add Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMSUB.S:
+            {
+                Reference: f23
+                Description: FMSUB.S fd, fs1, fs2, fs3  # FP Fused Multiply-Subtract Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FNMADD.S:
+            {
+                Reference: f24
+                Description: FNMADD.S fd, fs1, fs2, fs3  # FP Fused Negate Multiply-Add Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FNMSUB.S:
+            {
+                Reference: f25
+                Description: FNMSUB.S fd, fs1, fs2, fs3  # FP Fused Negate Multiply-Sub Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.S.L:
+            {
+                Reference: f26
+                Description: FCVT.S.L fd, rs1  # FP Convert Long to Single (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.S.LU:
+            {
+                Reference: f27
+                Description: FCVT.S.LU fd, rs1  # FP Convert Long Unsigned to Single (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.L.S:
+            {
+                Reference: f28
+                Description: FCVT.L.S rd, fs1  # FP Convert Single to Long (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.LU.S:
+            {
+                Reference: f29
+                Description: FCVT.LU.S rd, fs1  # FP Convert Single to Long Unsigned (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"D\" Extension for Double-Precision Floating-Point":
+        {
+            Reference: d123
+            Description: https://docs.riscv.org/reference/isa/unpriv/d-st-ext.html
+            Node_Type: section_title
+            FLD:
+            {
+                Reference: d00
+                Description: FLD fd, offset(rs1)  # Load FP Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSD:
+            {
+                Reference: d01
+                Description: FSD fs2, offset(rs1)  # Store FP Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FADD.D:
+            {
+                Reference: d02
+                Description: FADD.D fd, fs1, fs2  # FP Add Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSUB.D:
+            {
+                Reference: d03
+                Description: FSUB.D fd, fs1, fs2  # FP Subtract Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMUL.D:
+            {
+                Reference: d04
+                Description: FMUL.D fd, fs1, fs2  # FP Multiply Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FDIV.D:
+            {
+                Reference: d05
+                Description: FDIV.D fd, fs1, fs2  # FP Divide Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSQRT.D:
+            {
+                Reference: d06
+                Description: FSQRT.D fd, fs1  # FP Square Root Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJ.D:
+            {
+                Reference: d07
+                Description: FSGNJ.D fd, fs1, fs2  # FP Sign Inject Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJN.D:
+            {
+                Reference: d08
+                Description: FSGNJN.D fd, fs1, fs2  # FP Sign Inject Negated Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FSGNJX.D:
+            {
+                Reference: d09
+                Description: FSGNJX.D fd, fs1, fs2  # FP Sign Inject XOR Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMIN.D:
+            {
+                Reference: d10
+                Description: FMIN.D fd, fs1, fs2  # FP Minimum Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMAX.D:
+            {
+                Reference: d11
+                Description: FMAX.D fd, fs1, fs2  # FP Maximum Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.D.W:
+            {
+                Reference: d12
+                Description: FCVT.D.W fd, rs1  # FP Convert Word to Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.D.WU:
+            {
+                Reference: d13
+                Description: FCVT.D.WU fd, rs1  # FP Convert Word Unsigned to Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.W.D:
+            {
+                Reference: d14
+                Description: FCVT.W.D rd, fs1  # FP Convert Double to Word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.WU.D:
+            {
+                Reference: d15
+                Description: FCVT.WU.D rd, fs1  # FP Convert Double to Word Unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FEQ.D:
+            {
+                Reference: d16
+                Description: FEQ.D rd, fs1, fs2  # FP Compare Equal Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FLT.D:
+            {
+                Reference: d17
+                Description: FLT.D rd, fs1, fs2  # FP Compare Less Than Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FLE.D:
+            {
+                Reference: d18
+                Description: FLE.D rd, fs1, fs2  # FP Compare Less or Equal Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCLASS.D:
+            {
+                Reference: d19
+                Description: FCLASS.D rd, fs1  # FP Classify Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMADD.D:
+            {
+                Reference: d20
+                Description: FMADD.D fd, fs1, fs2, fs3  # FP Fused Multiply-Add Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMSUB.D:
+            {
+                Reference: d21
+                Description: FMSUB.D fd, fs1, fs2, fs3  # FP Fused Multiply-Subtract Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FNMADD.D:
+            {
+                Reference: d22
+                Description: FNMADD.D fd, fs1, fs2, fs3  # FP Fused Negate Multiply-Add Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FNMSUB.D:
+            {
+                Reference: d23
+                Description: FNMSUB.D fd, fs1, fs2, fs3  # FP Fused Negate Multiply-Sub Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.D.L:
+            {
+                Reference: d24
+                Description: FCVT.D.L fd, rs1  # FP Convert Long to Double (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.D.LU:
+            {
+                Reference: d25
+                Description: FCVT.D.LU fd, rs1  # FP Convert Long Unsigned to Double (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.L.D:
+            {
+                Reference: d26
+                Description: FCVT.L.D rd, fs1  # FP Convert Double to Long (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.LU.D:
+            {
+                Reference: d27
+                Description: FCVT.LU.D rd, fs1  # FP Convert Double to Long Unsigned (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMV.D.X:
+            {
+                Reference: d28
+                Description: FMV.D.X fd, rs1  # FP Move from Integer (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FMV.X.D:
+            {
+                Reference: d29
+                Description: FMV.X.D rd, fs1  # FP Move to Integer (RV64 only)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.S.D:
+            {
+                Reference: d30
+                Description: FCVT.S.D fd, fs1  # FP Convert Double to Single
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            FCVT.D.S:
+            {
+                Reference: d31
+                Description: FCVT.D.S fd, fs1  # FP Convert Single to Double
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"B\" Extension for Bit Manipulation":
+        {
+            Reference: b123
+            Description: https://docs.riscv.org/reference/isa/unpriv/b-st-ext.html
+            Node_Type: section_title
+            "Zba - Address generation":
+            {
+                Reference: ba123
+                Node_Type: section_title
+                BCLR:
+                {
+                    Reference: ba00
+                    Description: BCLR rd, rs1, rs2  # Clear bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BCLRI:
+                {
+                    Reference: ba01
+                    Description: BCLRI rd, rs1, shamt  # Clear bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BEXT:
+                {
+                    Reference: ba02
+                    Description: BEXT rd, rs1, rs2  # Extract bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BEXTI:
+                {
+                    Reference: ba03
+                    Description: BEXTI rd, rs1, shamt  # Extract bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BINV:
+                {
+                    Reference: ba04
+                    Description: BINV rd, rs1, rs2  # Invert bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BINVI:
+                {
+                    Reference: ba05
+                    Description: BINVI rd, rs1, shamt  # Invert bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BSET:
+                {
+                    Reference: ba06
+                    Description: BSET rd, rs1, rs2  # Set bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BSETI:
+                {
+                    Reference: ba07
+                    Description: BSETI rd, rs1, shamt  # Set bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+            }
+            "Zbb - Basic bit manipulation":
+            {
+                Reference: bb123
+                Node_Type: section_title
+                ORCB:
+                {
+                    Reference: bb00
+                    Description: ORCB rd, rs1  # OR-combine bytes
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                REV8:
+                {
+                    Reference: bb01
+                    Description: REV8 rd, rs1  # Byte-reverse register
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ROL:
+                {
+                    Reference: bb02
+                    Description: ROL rd, rs1, rs2  # Rotate left
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ROLW:
+                {
+                    Reference: bb03
+                    Description: ROLW rd, rs1, rs2  # Rotate left word (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ROR:
+                {
+                    Reference: bb04
+                    Description: ROR rd, rs1, rs2  # Rotate right
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                RORI:
+                {
+                    Reference: bb05
+                    Description: RORI rd, rs1, shamt  # Rotate right immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                RORIW:
+                {
+                    Reference: bb06
+                    Description: RORIW rd, rs1, shamt  # Rotate right word immediate (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                RORW:
+                {
+                    Reference: bb07
+                    Description: RORW rd, rs1, rs2  # Rotate right word (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                SEXTB:
+                {
+                    Reference: bb08
+                    Description: SEXTB rd, rs1  # Sign-extend byte
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                SEXTH:
+                {
+                    Reference: bb09
+                    Description: SEXTH rd, rs1  # Sign-extend halfword
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ZEXTH:
+                {
+                    Reference: bb10
+                    Description: ZEXTH rd, rs1  # Zero-extend halfword (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CPOP:
+                {
+                    Reference: bb11
+                    Description: CPOP rd, rs1  # Count population
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CPOPW:
+                {
+                    Reference: bb12
+                    Description: CPOPW rd, rs1  # Count population word (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CLZ:
+                {
+                    Reference: bb13
+                    Description: CLZ rd, rs1  # Count leading zeros
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CLZW:
+                {
+                    Reference: bb14
+                    Description: CLZW rd, rs1  # Count leading zeros word (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CTZ:
+                {
+                    Reference: bb15
+                    Description: CTZ rd, rs1  # Count trailing zeros
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CTZW:
+                {
+                    Reference: bb16
+                    Description: CTZW rd, rs1  # Count trailing zeros word (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                MAX:
+                {
+                    Reference: bb17
+                    Description: MAX rd, rs1, rs2  # Maximum signed
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                MAXU:
+                {
+                    Reference: bb18
+                    Description: MAXU rd, rs1, rs2  # Maximum unsigned
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                MIN:
+                {
+                    Reference: bb19
+                    Description: MIN rd, rs1, rs2  # Minimum signed
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                MINU:
+                {
+                    Reference: bb20
+                    Description: MINU rd, rs1, rs2  # Minimum unsigned
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ANDN:
+                {
+                    Reference: bb21
+                    Description: ANDN rd, rs1, rs2  # AND with inverted operand
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ORN:
+                {
+                    Reference: bb22
+                    Description: ORN rd, rs1, rs2  # OR with inverted operand
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                XNOR:
+                {
+                    Reference: bb23
+                    Description: XNOR rd, rs1, rs2  # XOR with inverted result
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+            }
+            "Zbc - Carry-less multiplication":
+            {
+                Reference: bc123
+                Node_Type: section_title
+                CLMUL:
+                {
+                    Reference: bc00
+                    Description: CLMUL rd, rs1, rs2  # Carry-less multiply (lower)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CLMULH:
+                {
+                    Reference: bc01
+                    Description: CLMULH rd, rs1, rs2  # Carry-less multiply (upper)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                CLMULR:
+                {
+                    Reference: bc02
+                    Description: CLMULR rd, rs1, rs2  # Carry-less multiply (reversed)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+            }
+            "Zbs - Single-bit instructions":
+            {
+                Reference: bs123
+                Node_Type: section_title
+                BCLR:
+                {
+                    Reference: bs00
+                    Description: BCLR rd, rs1, rs2  # Clear bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BCLRI:
+                {
+                    Reference: bs01
+                    Description: BCLRI rd, rs1, shamt  # Clear bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BEXT:
+                {
+                    Reference: bs02
+                    Description: BEXT rd, rs1, rs2  # Extract bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BEXTI:
+                {
+                    Reference: bs03
+                    Description: BEXTI rd, rs1, shamt  # Extract bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BINV:
+                {
+                    Reference: bs04
+                    Description: BINV rd, rs1, rs2  # Invert bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BINVI:
+                {
+                    Reference: bs05
+                    Description: BINVI rd, rs1, shamt  # Invert bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BSET:
+                {
+                    Reference: bs06
+                    Description: BSET rd, rs1, rs2  # Set bit
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BSETI:
+                {
+                    Reference: bs07
+                    Description: BSETI rd, rs1, shamt  # Set bit immediate
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+            }
+            "Zbkb - Bit-manipulation for Cryptography":
+            {
+                Reference: bk123
+                Node_Type: section_title
+                PACK:
+                {
+                    Reference: bk00
+                    Description: PACK rd, rs1, rs2  # Pack lower halves
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                PACK_H:
+                {
+                    Reference: bk01
+                    Description: PACKH rd, rs1, rs2  # Pack halfwords
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                PACK_W:
+                {
+                    Reference: bk02
+                    Description: PACKW rd, rs1, rs2  # Pack words (RV64)
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                BREV8:
+                {
+                    Reference: bk03
+                    Description: BREV8 rd, rs1  # Reverse bits in bytes
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                UNZIP:
+                {
+                    Reference: bk04
+                    Description: UNZIP rd, rs1  # Unzip bits
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                ZIP:
+                {
+                    Reference: bk05
+                    Description: ZIP rd, rs1  # Zip bits
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                XPERM8:
+                {
+                    Reference: bk06
+                    Description: XPERM8 rd, rs1, rs2  # Crossbar permute bytes
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+                XPERM4:
+                {
+                    Reference: bk07
+                    Description: XPERM4 rd, rs1, rs2  # Crossbar permute nibbles
+                    Node_Type: metric
+                    Milestone: V2
+                    Owner: Christian Tchilikov
+                    Priority: 0
+                    Issue: https://github.com/lowRISC/mocha/issues/60
+                    Items:
+                    [
+                        functional:my_pkg::my_covergroup2
+                    ]
+                }
+            }
+        }
+        "\"Zicond\" Extension for Integer Conditional Operations":
+        {
+            Reference: zic123
+            Description: https://docs.riscv.org/reference/isa/unpriv/zicond.html
+            Node_Type: section_title
+            CZERO_EQZ:
+            {
+                Reference: zic00
+                Description: CZERO_EQZ rd, rs1, rs2  # Conditional zero if equal
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            CZERO_NEZ:
+            {
+                Reference: zic01
+                Description: CZERO_NEZ rd, rs1, rs2  # Conditional zero if not equal
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "Cryptography Extensions: Scalar & Entropy Source Instructions":
+        {
+            Reference: zkn123
+            Description: https://docs.riscv.org/reference/isa/unpriv/scalar-crypto.html
+            Node_Type: section_title
+            AES32ESI:
+            {
+                Reference: zkn00
+                Description: AES32ESI rd, rs1, rs2, bs  # AES Encrypt SubBytes and ShiftRows (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES32ESMI:
+            {
+                Reference: zkn01
+                Description: AES32ESMI rd, rs1, rs2, bs  # AES Encrypt SubBytes, ShiftRows and MixColumns (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64ES:
+            {
+                Reference: zkn02
+                Description: AES64ES rd, rs1, rs2  # AES Encrypt final round (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64ESM:
+            {
+                Reference: zkn03
+                Description: AES64ESM rd, rs1, rs2  # AES Encrypt middle round (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES32DSI:
+            {
+                Reference: zkn04
+                Description: AES32DSI rd, rs1, rs2, bs  # AES Decrypt SubBytes and ShiftRows (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES32DSMI:
+            {
+                Reference: zkn05
+                Description: AES32DSMI rd, rs1, rs2, bs  # AES Decrypt SubBytes, ShiftRows and MixColumns (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64DS:
+            {
+                Reference: zkn06
+                Description: AES64DS rd, rs1, rs2  # AES Decrypt final round (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64DSM:
+            {
+                Reference: zkn07
+                Description: AES64DSM rd, rs1, rs2  # AES Decrypt middle round (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64IM:
+            {
+                Reference: zkn08
+                Description: AES64IM rd, rs1  # AES Inverse MixColumns (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64KS1I:
+            {
+                Reference: zkn09
+                Description: AES64KS1I rd, rs1, rnum  # AES Key Schedule 1 immediate (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            AES64KS2:
+            {
+                Reference: zkn10
+                Description: AES64KS2 rd, rs1, rs2  # AES Key Schedule 2 (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA256SIG0:
+            {
+                Reference: zkn11
+                Description: SHA256SIG0 rd, rs1  # SHA-256 Sigma0 transform
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA256SIG1:
+            {
+                Reference: zkn12
+                Description: SHA256SIG1 rd, rs1  # SHA-256 Sigma1 transform
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA256SUM0:
+            {
+                Reference: zkn13
+                Description: SHA256SUM0 rd, rs1  # SHA-256 Sum0 transform
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA256SUM1:
+            {
+                Reference: zkn14
+                Description: SHA256SUM1 rd, rs1  # SHA-256 Sum1 transform
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG0H:
+            {
+                Reference: zkn15
+                Description: SHA512SIG0H rd, rs1, rs2  # SHA-512 Sigma0 high (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG0L:
+            {
+                Reference: zkn16
+                Description: SHA512SIG0L rd, rs1, rs2  # SHA-512 Sigma0 low (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG1H:
+            {
+                Reference: zkn17
+                Description: SHA512SIG1H rd, rs1, rs2  # SHA-512 Sigma1 high (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG1L:
+            {
+                Reference: zkn18
+                Description: SHA512SIG1L rd, rs1, rs2  # SHA-512 Sigma1 low (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SUM0R:
+            {
+                Reference: zkn19
+                Description: SHA512SUM0R rd, rs1, rs2  # SHA-512 Sum0 (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SUM1R:
+            {
+                Reference: zkn20
+                Description: SHA512SUM1R rd, rs1, rs2  # SHA-512 Sum1 (RV32)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG0:
+            {
+                Reference: zkn21
+                Description: SHA512SIG0 rd, rs1  # SHA-512 Sigma0 (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SIG1:
+            {
+                Reference: zkn22
+                Description: SHA512SIG1 rd, rs1  # SHA-512 Sigma1 (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SUM0:
+            {
+                Reference: zkn23
+                Description: SHA512SUM0 rd, rs1  # SHA-512 Sum0 (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+            SHA512SUM1:
+            {
+                Reference: zkn24
+                Description: SHA512SUM1 rd, rs1  # SHA-512 Sum1 (RV64)
+                Node_Type: metric
+                Milestone: V2
+                Owner: Christian Tchilikov
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup2
+                ]
+            }
+        }
+        "\"H\" Extension for Hypervisor Support":
+        {
+            Reference: h123
+            Description: https://docs.riscv.org/reference/isa/priv/hypervisor.html#15-3-hypervisor-instructions
+            Node_Type: section_title
+            Owner: Kolos Koblasz
+            Priority: 0
+            Issue: https://github.com/lowRISC/mocha/issues/60
+            HLV.B:
+            {
+                Reference: h000
+                Description: HLV.B   rd, rs1, imm    # virtual-machine load byte
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.BU:
+            {
+                Reference: h001
+                Description: HLV.BU  rd, rs1, imm    # virtual-machine load byte unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.H:
+            {
+                Reference: h002
+                Description: HLV.H   rd, rs1, imm    # virtual-machine load halfword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.HU:
+            {
+                Reference: h003
+                Description: HLV.HU  rd, rs1, imm    # virtual-machine load halfword unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.W:
+            {
+                Reference: h004
+                Description: HLV.W   rd, rs1, imm    # virtual-machine load word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.WU:
+            {
+                Reference: h005
+                Description: HLV.WU  rd, rs1, imm    # virtual-machine load word unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLV.D:
+            {
+                Reference: h006
+                Description: HLV.D   rd, rs1, imm    # virtual-machine load doubleword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLVX.HU:
+            {
+                Reference: h007
+                Description: HLVX.HU rd, rs1, imm    # VM execute-permission load halfword unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HLVX.WU:
+            {
+                Reference: h008
+                Description: HLVX.WU rd, rs1, imm    # VM execute-permission load word unsigned
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HSV.B:
+            {
+                Reference: h009
+                Description: HSV.B   rs2, rs1, imm   # virtual-machine store byte
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HSV.H:
+            {
+                Reference: h010
+                Description: HSV.H   rs2, rs1, imm   # virtual-machine store halfword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HSV.W:
+            {
+                Reference: h011
+                Description: HSV.W   rs2, rs1, imm   # virtual-machine store word
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HSV.D:
+            {
+                Reference: h012
+                Description: HSV.D   rs2, rs1, imm   # virtual-machine store doubleword
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HFENCE.VVMA:
+            {
+                Reference: h013
+                Description: HFENCE.VVMA rs1, rs2   # fence VS-stage address translation
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+            HFENCE.GVMA:
+            {
+                Reference: h014
+                Description: HFENCE.GVMA rs1, rs2   # fence guest-physical (G-stage) address translation
+                Node_Type: metric
+                Milestone: V2
+                Owner: Kolos Koblasz
+                Priority: 0
+                Issue: https://github.com/lowRISC/mocha/issues/60
+                Items:
+                [
+                    functional:my_pkg::my_covergroup3
+                ]
+            }
+        }
+    }
+}
