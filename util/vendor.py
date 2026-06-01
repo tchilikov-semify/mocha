@@ -548,6 +548,11 @@ def clone_git_repo(repo_url, clone_dir, rev='main'):
     cmd += [repo_url, str(clone_dir)]
     subprocess.run(cmd, check=True)
 
+    if re.fullmatch(r'[0-9a-f]{40}', rev):
+        subprocess.run(['git', '-C', str(clone_dir), 'fetch', 'origin', rev],
+                       check=False, stdout=subprocess.DEVNULL,
+                       stderr=subprocess.DEVNULL)
+
     # Check out exactly the revision requested
     cmd = ['git', '-C', str(clone_dir), 'checkout', '--force', rev]
     if not verbose:
