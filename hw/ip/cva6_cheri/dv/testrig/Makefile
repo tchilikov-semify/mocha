@@ -1,6 +1,7 @@
 SIM_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 PRJ_DIR := $(abspath $(SIM_DIR)/..)
 HW_DIR  := $(abspath $(SIM_DIR)/../../../..)
+XRUN 		?= /run/current-system/sw/bin/xrun
 
 # FuseSoC places Xcelium build artefacts here.
 # --build-root directs FuseSoC to create its build tree under sim/ rather than
@@ -9,6 +10,7 @@ FUSESOC_BUILD_DIR := $(SIM_DIR)cosmic__cva6_testrig_0/default-xcelium
 
 export PRJ_DIR
 export SIM_DIR
+export XRUN
 
 .PHONY: build run coverage dvplan clean run_testrig
 
