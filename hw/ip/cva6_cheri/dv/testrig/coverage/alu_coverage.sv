@@ -17,7 +17,7 @@ module alu_coverage
 );
 
   logic valid;
-  assign valid = (fu_i == ALU);
+  assign valid = (fu_i == ALU) || (fu_i == CTRL_FLOW);
 
   // Sign bits.
   logic a_sign, b_sign;
