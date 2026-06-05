@@ -1,0 +1,45 @@
+CAPI=2:
+# Copyright lowRISC contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:mocha_dv:axi_sram_tb:"
+description: "AXI SRAM verification environment"
+filesets:
+  files_dv:
+    depend:
+      - lowrisc:prim:assert
+      - lowrisc:prim:ram_1p
+      - lowrisc:mocha:top_chip_system
+    files:
+      - axi_sram_tb.sv
+    file_type: systemVerilogSource
+
+  cocotb_tb:
+    files:
+      - axi_sram_tb.py
+    file_type: user
+
+targets:
+  default:
+    filesets:
+      - files_dv
+
+  sim:
+    default_tool: verilator
+    filesets:
+      - files_dv
+      - cocotb_tb
+    toplevel: axi_sram_tb
+    flow_options:
+      verilator:
+        mode: cc
+        verilator_options:
+          - "--trace-fst"
+          - "--assert"
+          - "--timing"
+        make_options:
+          - "COCOTB_TOPLEVEL=axi_sram_tb"
+          - "COCOTB_TEST_MODULES=axi_sram_tb"
+          - "SIM=verilator"
+

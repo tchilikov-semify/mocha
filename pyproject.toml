@@ -37,6 +37,11 @@ dependencies = [
     "dvsim>=1.33",
     "svgwrite>=1.4.3",
     "pyelftools>=0.32",
+    # Cocotb for AXI verif
+    "cocotb>=2.0.1",
+    "cocotbext-axi>=0.1.28",
+    "cocotb-bus>=0.3.0",
+    "scapy>=2.7.0",
 ]
 
 [tool.setuptools]
