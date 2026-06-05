@@ -9,8 +9,9 @@ This checklist covers the [design and verification signoffs][stages] for the BLO
 
 ### D1
 
-<!-- Link the git hash this sign-off was based on. -->
 The sign-off checklist items are described in the [D1 design sign-off checklist][D1 checklist].
+This sign-off is based on commit [`1234def`][d1-commit] (nightly yyyy-mm-dd).
+<!-- Replace 1234def with the actual git commit hash and update the d1-commit link below. -->
 
 | Type          | Item                       | Status      | Note/Collaterals |
 |---------------|----------------------------|-------------|------------------|
@@ -36,8 +37,9 @@ The sign-off checklist items are described in the [D1 design sign-off checklist]
 
 ### V1
 
-<!-- Link the git hash this sign-off was based on. -->
 All checklist items refer to the [V1 verification sign-off checklist][V1 checklist].
+This sign-off is based on commit [`abc1234`][v1-commit] (nightly yyyy-mm-dd).
+<!-- Replace abc1234 with the actual git commit hash and update the v1-commit link below. -->
 
 | Type          | Item                               | Status      | Note/Collaterals |
 |---------------|------------------------------------|-------------|------------------|
@@ -70,3 +72,6 @@ All checklist items refer to the [V1 verification sign-off checklist][V1 checkli
 [design stages]: stages.md#design-stages
 [V1 checklist]: stages.md#v1-verification-sign-off-checklist
 [verification stages]: stages.md#verification-stages
+<!-- Replace the commit hashes in the two links below with the actual hashes for each sign-off. -->
+[d1-commit]: https://github.com/lowRISC/mocha/commit/1234def
+[v1-commit]: https://github.com/lowRISC/mocha/commit/abc1234
