@@ -43,6 +43,7 @@
     system_outputs = system: let
       pkgs = import nixpkgs {inherit system;};
       lrPkgs = lowrisc-nix.outputs.packages.${system};
+      isDarwin = pkgs.stdenv.isDarwin;
 
       workspace = inputs.uv2nix.lib.workspace.loadWorkspace {workspaceRoot = ./.;};
       overlay = workspace.mkPyprojectOverlay {
@@ -68,9 +69,9 @@
           pkgs
           pythonEnv
           ;
-        llvm = lrPkgs.llvm_cheri;
+        llvm = if isDarwin then lrPkgs.llvm_cheriot else lrPkgs.llvm_cheri;
       };
-      ftditool-cli = inputs.ftditool.packages.${system}.default;
+      ftditool-cli = if isDarwin then [] else [inputs.ftditool.packages.${system}.default];
 
       commonPackages = with pkgs; [
         bison
@@ -81,11 +82,9 @@
         picocom
         gtkwave
         openfpgaloader
-        ftditool-cli
         openocd
         uv
         pythonEnv
-        verible
         srecord
         d2
         dtc
@@ -98,10 +97,9 @@
           name = "mocha-cheri";
           nativeBuildInputs =
             commonPackages
-            ++ (with lrPkgs; [
-              llvm_cheri
-              verilator_5_040
-            ]);
+            ++ ftditool-cli
+            ++ (with lrPkgs; [verilator_5_040])
+            ++ (if isDarwin then [] else [lrPkgs.llvm_cheri]);
           buildInputs = with pkgs; [libelf zlib];
           env = {
             # Prevent uv from managing Python downloads
@@ -109,6 +107,9 @@
             # Force uv to use nixpkgs Python interpreter
             UV_PYTHON = pythonSet.python.interpreter;
           };
+          shellHook = ''
+            export MOCHA_ROOT="$(git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+          '';
         };
       };
 
