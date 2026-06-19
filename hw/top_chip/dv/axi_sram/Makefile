@@ -18,13 +18,19 @@ TOPLEVEL            := axi_sram_tb
 COCOTB_TEST_MODULES := axi_sram_tb
 SIM                 := verilator
 
-SIM_ARGS += +trace
-
 EXTRA_ARGS += -f $(VC_FILE)
-EXTRA_ARGS += --assert --timing --trace-fst --public-flat-rw
+EXTRA_ARGS += --assert --timing --public-flat-rw
 EXTRA_ARGS += -DDISABLE_PRIM_CDC_RAND_DELAY
 EXTRA_ARGS += -Wno-UNOPTFLAT
-EXTRA_ARGS += --trace-max-array 65536
+
+# Waveform tracing makes Verilator emit huge C++ for the 16384-deep SRAM array
+# (--trace-max-array 65536), so the g++ compile of Vtop__Trace__*.o takes many
+# minutes / lots of RAM and looks like a hang. Tracing is therefore opt-in:
+#   make sim TRACE=1      # build with FST waveform dump (dump.fst)
+ifdef TRACE
+  SIM_ARGS   += +trace
+  EXTRA_ARGS += --trace-fst --trace-max-array 65536
+endif
 
 COCOTB_MAKEFILES := $(shell cocotb-config --makefiles)
 
