@@ -133,7 +133,7 @@ openFPGALoader -b genesys2 build/lowrisc_mocha_chip_mocha_genesys2_0/synth-vivad
 
 Then, to load and run a single software binary on FPGA, first build the software, then run:
 ```sh
-./util/fpga_runner.py run build/sw/device/examples/hello_world
+util/fpga_runner.py run build/sw/device/examples/hello_world
 ```
 
 Replace `run` above with `test` to see UART output in-line, or open a separate UART terminal (instructions below).
@@ -147,7 +147,7 @@ ctest --test-dir build/sw -R fpga_genesys2
 
 To run U-Boot (wrapped in the OpenSBI firmware and bootloader) on the Genesys 2 board, run:
 ```sh
-./util/fpga_runner.py run build/sw/opensbi_with_uboot/fw_payload.elf
+util/fpga_runner.py run build/sw/opensbi_with_uboot/fw_payload.elf
 ```
 
 ### Standalone UART
@@ -156,10 +156,9 @@ The UART output will be automatically presented when using `fpga_runner.py test`
 
 Open a UART terminal with 1Mbps baud rate:
 ```sh
-screen /dev/ttyUSB0 1000000
-# Alternative: `picocom /dev/ttyUSB0 -b 1000000 --imap lfcrlf`
+picocom $(ls /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_*-port0) -b 1000000 -imap lfcrlf
+# Alternative: `screen $(ls /dev/serial/by-id/usb-FTDI_FT232R_USB_UART_*-port0) 1000000`
 ```
-You may have to change the ttyUSB number.
 
 ### Additional hardware
 

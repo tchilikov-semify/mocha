@@ -166,7 +166,7 @@ async def do_fpga_run(args) -> None:
     """
     Run subcommand.
     Just load the binaries/ELFs onto the FPGA without opening the UART,
-    so that it can remain open in a separate application (e.g screen).
+    so that it can remain open in a separate application (e.g screen, picocom).
     """
     print("bootstrapping...")
     await bootstrap(None)
