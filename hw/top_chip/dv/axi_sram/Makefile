@@ -7,8 +7,28 @@ DV_DIR     := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CORE       := lowrisc:mocha_dv:axi_sram_tb
 
 BUILD_ROOT    := $(DV_DIR)build
+
+# ---- cocotb / Verilator (existing flow) ----
 FUSESOC_BUILD := $(BUILD_ROOT)/lowrisc_mocha_dv_axi_sram_tb_0/default-verilator
 VC_FILE       := $(FUSESOC_BUILD)/lowrisc_mocha_dv_axi_sram_tb_0.vc
+
+# ---- UVM / Verilator ----
+UVM_TESTNAME    ?= axi_sram_write_read_test
+UVM_HOME        ?=
+UVM_VLT_BUILD   := $(BUILD_ROOT)/lowrisc_mocha_dv_axi_sram_tb_0/sim_uvm_verilator-verilator
+UVM_VLT_SIM     := $(UVM_VLT_BUILD)/Vaxi_sram_uvm_tb
+
+# Verilator options for the UVM target (= not := so UVM_HOME is lazily expanded).
+# Passed as VERILATOR_OPTIONS override to the edalize-generated Makefile because
+# the deprecated edalize Verilator backend only propagates -D flags from
+# flow_options.verilator.verilator_options; all other options are silently dropped.
+UVM_VLT_OPTIONS = \
+  -DDISABLE_PRIM_CDC_RAND_DELAY \
+  --timing \
+  --public-flat-rw \
+  --assert \
+  -Wno-UNOPTFLAT \
+  +incdir+$(UVM_HOME)/src
 
 # Verilator writes all output (Vtop.mk, C++ files) to its CWD rather than
 # the absolute -Mdir path. We run make -C FUSESOC_BUILD so CWD = FUSESOC_BUILD.
@@ -34,7 +54,7 @@ endif
 
 COCOTB_MAKEFILES := $(shell cocotb-config --makefiles)
 
-.PHONY: setup sim clean
+.PHONY: setup sim sim_uvm_vlt sim_uvm_xcelium clean
 
 $(VC_FILE):
 	cd $(DV_DIR) && fusesoc --cores-root=$(REPO_ROOT) \
@@ -53,6 +73,34 @@ sim: $(VC_FILE)
 	    PYTHONPATH=$(DV_DIR) \
 	    SIM_ARGS="$(SIM_ARGS)" \
 	    EXTRA_ARGS="$(EXTRA_ARGS)"
+
+UVM_VLT_VC := $(UVM_VLT_BUILD)/lowrisc_mocha_dv_axi_sram_tb_0.vc
+
+# Build the UVM+Verilator simulation binary (compile only, no run).
+# Step 1: fusesoc --setup generates the .vc file with all source/include paths.
+# Step 2: Inject uvm_pkg.sv as the first source in the .vc file so that
+#         uvm_pkg is compiled before axi_agent_pkg and dv_utils_pkg, which
+#         reference UVM types.  The package must precede its users in
+#         Verilator's single-pass compilation.
+# Step 3: make -C overrides VERILATOR_OPTIONS to inject --timing, UVM flags.
+$(UVM_VLT_SIM):
+	@test -n "$(UVM_HOME)" || (echo "ERROR: UVM_HOME is not set — enter 'nix develop' first"; exit 1)
+	cd $(DV_DIR) && fusesoc --cores-root=$(REPO_ROOT) \
+	    run --target sim_uvm_verilator --setup $(CORE)
+	python3 -c "lines=open('$(UVM_VLT_VC)').readlines(); idx=next(i for i,l in enumerate(lines) if l.startswith('src/')); lines.insert(idx,'$(UVM_HOME)/src/uvm_pkg.sv\n'); open('$(UVM_VLT_VC)','w').writelines(lines)"
+	$(MAKE) -C $(UVM_VLT_BUILD) VERILATOR_OPTIONS="$(UVM_VLT_OPTIONS)"
+
+# Run UVM smoke test with Verilator.  Recompiles only if binary is stale.
+#   make sim_uvm_vlt                               # default test
+#   make sim_uvm_vlt UVM_TESTNAME=my_other_test    # specific test
+sim_uvm_vlt: $(UVM_VLT_SIM)
+	$(UVM_VLT_SIM) +UVM_TESTNAME=$(UVM_TESTNAME)
+
+# Run UVM smoke test with Xcelium.
+# Test name is set in axi_sram_tb.core sim_uvm.xrun_options; edit there to change.
+sim_uvm_xcelium:
+	cd $(DV_DIR) && fusesoc --cores-root=$(REPO_ROOT) \
+	    run --target sim_uvm --tool xcelium $(CORE)
 
 clean:
 	rm -rf $(BUILD_ROOT)
