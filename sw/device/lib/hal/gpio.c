@@ -20,7 +20,7 @@ bool gpio_read_pin(gpio_t gpio, uint32_t pin)
 void gpio_write_pin(gpio_t gpio, uint32_t pin, bool state)
 {
     uint32_t reg = pin < 16 ? GPIO_REG_MASKED_OUT_LOWER : GPIO_REG_MASKED_OUT_UPPER;
-    uint32_t mask = 1u << (pin & 0xFu);
+    uint32_t mask = 1u << ((pin % 16) & 0xFu);
     DEV_WRITE(gpio + reg, (mask << 16) | (state ? mask : 0u));
 }
 
