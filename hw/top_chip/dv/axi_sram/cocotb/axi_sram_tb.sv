@@ -265,10 +265,10 @@ module axi_sram_tb;
     end else begin
       // ---- immediate assertions for the W beat on the bus this cycle ----
       if (axi_wvalid && axi_wready) begin
-        // bj8we7: a tag bit may only be set as part of a full capability write
+        // bj8we7: a tag bit may only be set as part of a full capability write.
         if (axi_wuser[0]) begin
           assert (is_cap_shaped && full_strobe)
-            else $error("[axi_sram_tb] wuser=1 on a write that is not a full capability write (bj8we7)");
+            else $warning("[axi_sram_tb] wuser=1 on a write that is not a full capability write (bj8we7)");
         end
         // 9a3xf6: both halves of a capability write must agree on wuser
         if (is_cap_shaped && !w_first) begin

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Thin wrapper around fusesoc for the AXI SRAM UVM testbench (Xcelium).
-# All xrun options live in axi_sram_tb.core; this does tool discovery and hands
+# All xrun options live in axi_sram_uvm.core; this does tool discovery and hands
 # xrun an inline run-control script (waive a known DUT assertion, run, and
 # optionally dump waves).
 #
@@ -12,7 +12,7 @@
 #   make clean      # remove the build directory
 
 DV_DIR    := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-REPO_ROOT := $(or $(MOCHA_ROOT),$(realpath $(DV_DIR)../../../..))
+REPO_ROOT := $(or $(MOCHA_ROOT),$(realpath $(DV_DIR)../../../../..))
 
 export PATH            := /nas/lowrisc/tools/cadence/xcelium/XCELIUM2403/tools/bin:$(PATH)
 export XRUN            ?= /run/current-system/sw/bin/xrun
@@ -29,7 +29,7 @@ export XMSIM_OPTIONS := -input "@$(WAIVE_ASSERT); $(DUMP_WAVES) run; exit"
 .PHONY: run clean
 
 run:
-	fusesoc --cores-root=$(REPO_ROOT) run --build-root=$(DV_DIR) lowrisc:mocha_dv:axi_sram_tb
+	fusesoc --cores-root=$(REPO_ROOT) run --build-root=$(DV_DIR) lowrisc:mocha_dv:axi_sram_uvm
 
 clean:
-	rm -rf $(DV_DIR)lowrisc_mocha_dv_axi_sram_tb_0
+	rm -rf $(DV_DIR)lowrisc_mocha_dv_axi_sram_uvm_0

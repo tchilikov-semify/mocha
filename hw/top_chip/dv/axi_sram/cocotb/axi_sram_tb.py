@@ -17,47 +17,7 @@ Multi-master arbitration, LLC interaction, atomics (ATOP), error responses,
 out-of-range address error returns, sub-64-bit read tag clearing (handled by
 interconnect, not axi_sram), wuser mismatch assertion firing, initial value.
 
-Test plan  (maps 1:1 to hw/top_chip/dv/axi_sram/axi_sram_vplan.csv)
----------
-DATA PATH
-  test_clock                          — clock/reset sanity                (947rwh,rrni5j)
-  test_init_value_undefined           — no reliance on power-up contents  (hqbiau)
-  test_write_read                     — single-beat data write + readback (vknoin,pgo845,n5txiq,lhjkel)
-  test_address_boundaries             — first (0x0) and last addresses    (u0s8nt)
-  test_data_all_bits                  — walk a 1 and a 0 through 64 bits   (vknoin)
-  test_aligned_only                   — aligned 64-bit accesses           (lfcb7q)
-  test_burst_last                     — multi-beat burst, last beat ok    (o02amt,mcykq8)
-  test_resp_id_match                  — response ID == request ID         (4t4cew)
-  test_concurrent_data_and_tag_write  — two concurrent transactions       (vknoin)
-
-CHERI TAGS
-  test_tag_write                      — 2-beat cap write (wuser=1) + tag   (8rlwol,35vdeg,u95b14)
-  test_data_and_tag_same_transaction  — data + tag accessed together       (01skcc)
-  test_no_tag_on_single_beat          — awlen=0 + wuser=1 must NOT set tag  (8rlwol,35vdeg)
-  test_no_tag_on_misaligned           — 2-beat wuser=1, addr[3:0]!=0       (8rlwol)
-  test_tag_cleared_by_data_write      — plain write clears tag             (893tz4)
-  test_partial_strobe_clears_tag      — sub-64-bit write clears tag        (893tz4)
-  test_subword_read_clears_tag        — sub-64-bit read returns ruser=0    (raa5pw)
-  test_cap_both_ruser_flits_set       — both ruser flits of a valid cap=1  (kn6exz,af8sx6,u95b14)
-  test_adjacent_slots_independent_tags— per-beat ruser independence        (kn6exz)
-  test_tag_isolation                  — adjacent cap slots independent     (01skcc)
-
-SKIPPED — unimplemented error path / spec exclusion
-  test_out_of_range_error             — RTL has no error path (mem_err=0)  (u0s8nt)
-  test_atomics_excluded               — spec exclusion, no test required   (bsi4rc)
-
-ASSERTION-BASED CHECKS — implemented as SystemVerilog assertions in
-axi_sram_tb.sv (NOT cocotb), see the "TB assertions" section there:
-  interface_geometry / sram_geometry  — static width/param checks   (qohtih,jeluga,01skcc,u0s8nt)
-  bounded_response                    — SVA response-latency watchdog (34ld5i)
-  assert_wuser_not_full_cap           — SVA on W channel              (bj8we7)
-  assert_wuser_mismatch               — SVA on W channel              (9a3xf6)
-  tag_separate_memory                 — structural (separate tag RAM) (lzoy40)
-
-RANDOMISED  (seeded via cocotb for reproducibility)
-  test_random_data                    — N random (addr, data) write/read   (NA)
-  test_random_capabilities            — N random 16-B aligned cap write    (8rlwol,kn6exz)
-=============================================================================
+Test plan  (hw/top_chip/dv/axi_sram/axi_sram_vplan.csv)
 """
 
 import random

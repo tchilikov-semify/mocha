@@ -13,7 +13,7 @@ The fixes fall into three groups:
 3. **Functional correctness** — bugs that let the test run but produced wrong
    data, fixed so the readback matches.
 
-Build-flow files (`axi_sram_tb.core`, `axi_agent.core`, `Makefile`) were also
+Build-flow files (`axi_sram_uvm.core`, `axi_agent.core`, `Makefile`) were also
 changed; those are summarised at the end but are not SV source.
 
 ---
@@ -134,13 +134,19 @@ of failing `make` on a harmless error.
 The flow is "just call fusesoc": a single `fusesoc run` compiles, elaborates and
 simulates in one xrun invocation, with all artifacts in an in-tree build dir.
 
-- **`axi_sram_tb.core`** — the entry point and single source of truth for xrun
-  options. The `default` Xcelium target carries `-64bit -sv -uvm -uvmhome
-  CDNS-1.2 -licqueue +define+UVM -access rwc -l xrun.log -nowarn ... +UVM_TESTNAME
-  +UVM_VERBOSITY`. `+define+UVM` is needed so `dv_utils_pkg`'s `` `ifdef UVM ``
-  guard includes `uvm_macros.svh`. The UVM file list is ordered so
-  `axi_sram_test_pkg.sv` precedes `axi_sram_uvm_tb.sv`. The cocotb/Verilator
-  filesets and targets were removed (Xcelium-only).
+The UVM and cocotb/Verilator environments now live in sibling directories under
+`hw/top_chip/dv/axi_sram/` — `uvm/` (this one) and `cocotb/` — each fully
+self-contained with its own `.core` + `Makefile`. The two share the DUT via
+`depend: lowrisc:mocha:axi_sram`, not a shared core.
+
+- **`uvm/axi_sram_uvm.core`** (`lowrisc:mocha_dv:axi_sram_uvm`) — the entry point
+  and single source of truth for xrun options. The `default` Xcelium target
+  carries `-64bit -sv -uvm -uvmhome CDNS-1.2 -licqueue +define+UVM -access rwc
+  -l xrun.log -nowarn ... +UVM_TESTNAME +UVM_VERBOSITY`. `+define+UVM` is needed
+  so `dv_utils_pkg`'s `` `ifdef UVM `` guard includes `uvm_macros.svh`. The UVM
+  file list is ordered so `axi_sram_test_pkg.sv` precedes `axi_sram_uvm_tb.sv`.
+  The cocotb/Verilator filesets and targets were split out into
+  `cocotb/axi_sram_cocotb.core` (Xcelium-only here).
 - **`axi_agent.core`** — uncommented the `lowrisc:dv:dv_utils` dependency so
   `dv_utils_pkg` (which the `axi_*_if` interfaces import) is compiled first.
 - **`Makefile`** — a thin wrapper: `run` (default goal) just calls `fusesoc run`,
