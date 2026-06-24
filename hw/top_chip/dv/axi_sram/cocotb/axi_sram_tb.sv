@@ -186,13 +186,51 @@ module axi_sram_tb;
   // The bound is intentionally generous — a "no indefinite stall" watchdog; the
   // spec allows latency proportional to burst length.
   //
-  // DISABLED for Verilator: v5.040 does not support the '##[m:n]' bounded
-  // cycle-delay range below ("Unsupported: ## range cycle delay range
-  // expression").  Re-enable on a UVM-capable simulator, or reimplement as an
-  // immediate-assertion cycle-counter watchdog (in the style of the wuser block
-  // below) so it runs under Verilator too.
+  // Two forms are provided.  The ACTIVE form is an immediate-assertion
+  // cycle-counter watchdog that works in the cocotb/Verilator flow (the
+  // '##[m:n]' bounded cycle-delay range is unsupported there).  The COMMENTED
+  // form is the equivalent concurrent SVA, kept for the UVM/Xcelium move —
+  // uncomment it there.
   // ---------------------------------------------------------------------------
-  // localparam int unsigned MaxRespLatency = 256;
+  localparam int unsigned MaxRespLatency = 256;
+
+  // Cycles since the DUT last made forward progress on each response channel
+  // while a request is outstanding.  Progress is measured on *valid* (the DUT
+  // presenting a response), so master back-pressure on b/rready is not blamed
+  // on the DUT.  Trips only on a genuine stall.
+  int unsigned w_outstanding, w_stall_cnt;
+  int unsigned r_outstanding, r_stall_cnt;
+
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if (!rst_ni) begin
+      w_outstanding <= 0; w_stall_cnt <= 0;
+      r_outstanding <= 0; r_stall_cnt <= 0;
+    end else begin
+      // Writes: a B response must appear within the bound after AW is accepted.
+      w_outstanding <= w_outstanding
+                     + ((axi_awvalid && axi_awready) ? 1 : 0)
+                     - ((axi_bvalid  && axi_bready ) ? 1 : 0);
+      if      (axi_bvalid)         w_stall_cnt <= 0;
+      else if (w_outstanding != 0) w_stall_cnt <= w_stall_cnt + 1;
+      else                         w_stall_cnt <= 0;
+      assert (w_stall_cnt <= MaxRespLatency)
+        else $error("[axi_sram_tb] write response exceeded %0d cycles (34ld5i)", MaxRespLatency);
+
+      // Reads: an R beat must appear within the bound (a burst advances per beat).
+      r_outstanding <= r_outstanding
+                     + ((axi_arvalid && axi_arready) ? 1 : 0)
+                     - ((axi_rvalid  && axi_rready && axi_rlast) ? 1 : 0);
+      if      (axi_rvalid)         r_stall_cnt <= 0;
+      else if (r_outstanding != 0) r_stall_cnt <= r_stall_cnt + 1;
+      else                         r_stall_cnt <= 0;
+      assert (r_stall_cnt <= MaxRespLatency)
+        else $error("[axi_sram_tb] read response exceeded %0d cycles (34ld5i)", MaxRespLatency);
+    end
+  end
+
+  // Concurrent-assertion equivalent — uncomment on the UVM/SVA-capable simulator
+  // (the '##[m:n]' bounded cycle-delay range is unsupported by Verilator 5.040).
+  // Shares the MaxRespLatency localparam declared above.
   //
   // property p_write_resp_bounded;
   //   @(posedge clk_i) disable iff (!rst_ni)
@@ -270,10 +308,14 @@ module axi_sram_tb;
           assert (is_cap_shaped && full_strobe)
             else $warning("[axi_sram_tb] wuser=1 on a write that is not a full capability write (bj8we7)");
         end
-        // 9a3xf6: both halves of a capability write must agree on wuser
+        // 9a3xf6: both halves of a capability write must agree on wuser.
+        // Like bj8we7 this is a spec assertion that a directed test
+        // (test_wuser_mismatch_halves) deliberately triggers, so its action is a
+        // non-fatal $warning rather than $error (which Verilator escalates to
+        // $stop).
         if (is_cap_shaped && !w_first) begin
           assert (axi_wuser[0] == w_first_user)
-            else $error("[axi_sram_tb] wuser mismatch between capability halves (9a3xf6)");
+            else $warning("[axi_sram_tb] wuser mismatch between capability halves (9a3xf6)");
         end
       end
 
@@ -298,6 +340,33 @@ module axi_sram_tb;
                 - ((axi_wvalid && axi_wready && axi_wlast) ? 1 : 0);
     end
   end
+
+  // ---------------------------------------------------------------------------
+  // resp_id_match (4t4cew): every B/R response must carry the AXI ID of its
+  // originating request.
+  //
+  // Currently enforced *implicitly* by the cocotb VIP: cocotbext-axi routes each
+  // response back to its request by bid/rid, so a wrong response ID would break
+  // routing and fail/hang the test.  It is therefore not asserted directly here.
+  //
+  // TODO: add an explicit SV ID-match assertion before switching to a different
+  // VIP that may not enforce ID routing.  axi_sram is single-port / in-order, so
+  // it can snoop awid/arid into a small FIFO (like the AW-snoop block above) and
+  // assert axi_bid / axi_rid equal the ID at the head of the outstanding queue.
+  // ---------------------------------------------------------------------------
+
+  // ---------------------------------------------------------------------------
+  // burst_last (o02amt): rlast must be asserted on exactly the last beat of each
+  // read response (wlast is driven by the master, not the DUT).
+  //
+  // Currently enforced *implicitly* by the cocotb VIP: cocotbext-axi reassembles
+  // each read burst by beat count and validates rlast placement, raising on a
+  // mis-placed last beat.  It is therefore not asserted directly here.
+  //
+  // TODO: add an explicit SV rlast assertion before switching to a different VIP
+  // that may not enforce it.  Snoop arlen into a small FIFO (like the AW-snoop
+  // block above) and assert rlast == (beat == arlen) per read response.
+  // ---------------------------------------------------------------------------
 
   // ---------------------------------------------------------------------------
   // tag_separate_memory (lzoy40): tags are stored in a dedicated RAM, separate
