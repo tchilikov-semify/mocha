@@ -13,6 +13,8 @@ package axi_agent_pkg;
     BurstWrap  = 2
   } burst_e;
 
+  `include "axi_agent_cfg.svh"
+
   `include "axi_txn_request_item.svh"
   `include "axi_read_data_item.svh"
 
@@ -50,6 +52,8 @@ package axi_agent_pkg;
   typedef uvm_sequencer#(axi_response_accept_item, uvm_sequence_item) read_data_sequencer_t;
   typedef uvm_sequencer#(axi_reg_op_item, uvm_sequence_item)          reg_op_sequencer_t;
 
+  `include "axi_response_router.svh"
+
   `include "seq_lib/axi_mgr_txn_request_seq.svh"
   `include "seq_lib/axi_mgr_write_data_seq.svh"
   `include "seq_lib/axi_mgr_write_single_data_seq.svh"
@@ -66,6 +70,5 @@ package axi_agent_pkg;
 
   `include "seq_lib/axi_mgr_register_layer_vseq.svh"
 
-  `include "axi_agent_cfg.svh"
   `include "axi_mgr_agent.svh"
 endpackage

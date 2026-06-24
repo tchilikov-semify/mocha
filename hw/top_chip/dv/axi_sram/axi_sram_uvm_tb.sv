@@ -17,6 +17,9 @@ module axi_sram_uvm_tb;
   import axi_agent_pkg::*;
   import top_pkg::*;
   import dv_utils_pkg::Host;
+  // Pull the test package into elaboration so its tests register with the UVM
+  // factory (otherwise +UVM_TESTNAME=... cannot be found).
+  import axi_sram_test_pkg::*;
 
   // ---------------------------------------------------------------------------
   // Parameters (must match axi_sram instantiation)
@@ -58,8 +61,10 @@ module axi_sram_uvm_tb;
     aw_if.set_user_req_width(1);          // only CHERI tag bit[0] is used
     aw_if.if_mode = Host;
     // W
-    w_if.set_data_width(top_pkg::AxiDataWidth);
+    // user_data_width must be set before data_width: set_data_width() enforces
+    // DATA_WIDTH >= 2*USER_DATA_WIDTH, and USER_DATA_WIDTH defaults high.
     w_if.set_user_data_width(1);          // CHERI tag bit[0]
+    w_if.set_data_width(top_pkg::AxiDataWidth);
     w_if.if_mode = Host;
     // B
     b_if.set_id_w_width(top_pkg::AxiIdWidth);
@@ -72,9 +77,10 @@ module axi_sram_uvm_tb;
     ar_if.set_user_req_width(1);
     ar_if.if_mode = Host;
     // R
+    // user_data_width before data_width (see W channel note above).
     r_if.set_id_r_width(top_pkg::AxiIdWidth);
-    r_if.set_data_width(top_pkg::AxiDataWidth);
     r_if.set_user_data_width(1);          // CHERI tag bit[0]
+    r_if.set_data_width(top_pkg::AxiDataWidth);
     r_if.set_rresp_width(2);              // AXI4 RRESP is 2 bits
     r_if.set_user_resp_width(1);
     r_if.if_mode = Host;

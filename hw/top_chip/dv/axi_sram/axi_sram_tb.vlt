@@ -1,7 +1,0 @@
-// Copyright lowRISC contributors (COSMIC project).
-// Licensed under the Apache License, Version 2.0, see LICENSE for details.
-// SPDX-License-Identifier: Apache-2.0
-
-`verilator_config
-// Make prim_ram_1p's mem array accessible via VPI and included in FST traces.
-public -module "prim_ram_1p" -var "mem"

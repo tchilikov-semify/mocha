@@ -8,7 +8,7 @@
 // The single request item is a randomised field (m_fixed_req) and the response is created in the
 // rsp field, which will be created before the sequence completes.
 
-class axi_mgr_read_fixed_vseq extends uvm_sequence(uvm_sequence_item, axi_fixed_read_rsp_item);
+class axi_mgr_read_fixed_vseq extends uvm_sequence#(uvm_sequence_item, axi_fixed_read_rsp_item);
   `uvm_object_utils(axi_mgr_read_fixed_vseq)
 
   // The read response router. Set this by calling set_read_response_router before starting the
@@ -41,6 +41,7 @@ endfunction
 task axi_mgr_read_fixed_vseq::body();
   axi_mgr_txn_request_seq ar_seq;
   axi_mgr_read_data_seq   r_seq;
+  uvm_sequence_item       read_data_item;
   axi_read_data_item      read_data;
 
   if (m_read_response_router == null) begin
@@ -104,11 +105,13 @@ task axi_mgr_read_fixed_vseq::body();
   // m_read_response_router (which may or may not be the response to r_seq).
   fork
     ar_seq.start(m_read_request_sequencer);
-    m_read_response_router.wait_for_response(m_fixed_req.m_id, read_data);
+    m_read_response_router.wait_for_response(m_fixed_req.m_id, read_data_item);
   join
 
   // At this point, the AR sequence has completed (either by sending its items or by seeing a reset)
   // and wait_for_response has completed, writing to read_data.
+  if (!$cast(read_data, read_data_item))
+    `uvm_fatal(get_full_name(), "wait_for_response returned unexpected item type")
   rsp = axi_fixed_read_rsp_item::type_id::create("rsp");
   rsp.m_ar_status = ar_seq.rsp;
   rsp.m_read_data = read_data;

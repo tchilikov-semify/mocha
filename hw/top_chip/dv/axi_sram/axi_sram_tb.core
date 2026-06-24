@@ -4,83 +4,37 @@ CAPI=2:
 # SPDX-License-Identifier: Apache-2.0
 
 name: "lowrisc:mocha_dv:axi_sram_tb"
-description: "AXI SRAM verification environment"
+description: "AXI SRAM UVM verification environment (Xcelium)"
+
 filesets:
-  files_dv:
-    depend:
-      - lowrisc:prim:assert
-      - lowrisc:prim:ram_1p
-      - lowrisc:mocha:top_chip_system
-    files:
-      - axi_sram_tb.sv
-    file_type: systemVerilogSource
-
-  files_vlt:
-    files:
-      - axi_sram_tb.vlt
-    file_type: vlt
-
-  cocotb_tb:
-    files:
-      - axi_sram_tb.py
-    file_type: user
-
   files_uvm:
     depend:
-      - lowrisc:prim:assert
-      - lowrisc:prim:ram_1p
-      - lowrisc:mocha:top_chip_system
+      - lowrisc:mocha:axi_sram
       - lowrisc:dv:dv_utils
       - lowrisc:dv:axi_agent:0.1
     files:
-      - axi_sram_uvm_tb.sv
       - axi_sram_test_pkg.sv
+      - axi_sram_uvm_tb.sv
     file_type: systemVerilogSource
 
 targets:
   default:
-    default_tool: verilator
-    filesets:
-      - files_dv
-      - files_vlt
-      - cocotb_tb
-    toplevel: axi_sram_tb
-    flow_options:
-      verilator:
-        mode: cc
-
-  # UVM target — Verilator backend.
-  # Run via the Makefile: make sim_uvm_vlt [UVM_TESTNAME=<test>]
-  # The Makefile compiles with --setup then runs the binary directly so that
-  # UVM_TESTNAME can be overridden at make time without touching this file.
-  sim_uvm_verilator:
-    default_tool: verilator
-    filesets:
-      - files_uvm
-      - files_vlt
-    toplevel: axi_sram_uvm_tb
-    flow_options:
-      verilator:
-        mode: cc
-        verilator_options:
-          - "--timing"
-          - "--public-flat-rw"
-          - "--assert"
-          - "-DDISABLE_PRIM_CDC_RAND_DELAY"
-          - "-Wno-UNOPTFLAT"
-
-  # UVM target — Xcelium backend.
-  # Run via the Makefile: make sim_uvm_xcelium
-  # Or directly: fusesoc --cores-root=<repo_root> run --target sim_uvm --tool xcelium lowrisc:mocha_dv:axi_sram_tb
-  sim_uvm:
     default_tool: xcelium
     filesets:
       - files_uvm
     toplevel: axi_sram_uvm_tb
-    flow_options:
+    tools:
       xcelium:
         xrun_options:
-          - "-uvm"
-          - "+UVM_TESTNAME=axi_sram_write_read_test"
-
-
+          - -64bit
+          - -sv
+          - -uvm
+          - -uvmhome CDNS-1.2
+          - -licqueue
+          - +define+UVM
+          - -access rwc
+          - -l xrun.log
+          - -nowarn TSNSPK
+          - -nowarn FUNTSK
+          - +UVM_TESTNAME=axi_sram_write_read_test
+          - +UVM_VERBOSITY=UVM_LOW

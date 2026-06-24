@@ -18,7 +18,10 @@ class axi_mgr_write_data_seq extends uvm_sequence #(axi_write_data_item, axi_sta
   // extending this one to more easily constrain the randomisation of the items that get sent.
   //
   // The is_last argument is set when this is the last item in the stream of data words.
-  extern protected function void randomize_item(axi_write_data_item item, bit is_last);
+  //
+  // virtual so subclasses (e.g. axi_mgr_write_single_data_seq) can override how items are
+  // produced; body() invokes it through the base-class handle.
+  extern protected virtual function void randomize_item(axi_write_data_item item, bit is_last);
 
   // The number of items needs to match m_len from the AW channel, which is represented by an 8-bit
   // value that gives the last index. As such, m_number_of_items should be in the range 1..256.

@@ -13,6 +13,7 @@
 // - Tobias Senti <tsenti@ethz.ch>
 
 `include "axi/assign.svh"
+`include "common_cells/registers.svh"
 
 /// Joins a read and a write slave into one single read / write master
 ///

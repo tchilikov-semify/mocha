@@ -1,0 +1,55 @@
+CAPI=2:
+# Copyright lowRISC contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:mocha:axi_sram"
+description: "AXI SRAM with CHERI tag storage"
+
+filesets:
+  files_rtl:
+    depend:
+      - lowrisc:mocha_constants:top_pkg
+      - pulp-platform.org::axi
+      - lowrisc:prim:assert:0.1
+      - lowrisc:prim:ram_1p
+    files:
+      - axi_sram.sv
+    file_type: systemVerilogSource
+
+targets:
+  default: &default_target
+    filesets:
+      - files_rtl
+    toplevel: axi_sram
+
+  sim:
+    default_tool: verilator
+    filesets:
+      - files_rtl
+    toplevel: axi_sram
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    parameters:
+      - SYNTHESIS=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - '--trace'
+          - '--trace-fst'
+          - '--trace-structs'
+          - '--trace-params'
+          - '--trace-max-array 1024'
+          - '-CFLAGS "-Wall -DVM_TRACE_FMT_FST -DTOPLEVEL_NAME=axi_sram_verilator"'
+          - '-LDFLAGS "-pthread -lutil -lelf"'
+          - '--assert'
+          - '-Wall'
+          - "--unroll-count 72"
+
+parameters:
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine

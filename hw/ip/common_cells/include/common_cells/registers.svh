@@ -14,6 +14,8 @@
 `ifndef LOWRISC_COMMON_CELLS_REGISTERS_SVH_
 `define LOWRISC_COMMON_CELLS_REGISTERS_SVH_
 
+`include "prim_assert.sv"
+
 // Flip-Flop with asynchronous active-low reset
 `define FF(__q, __d, __reset_value, __clk, __arst_n) \
   `PRIM_FLOP_A(__d, __q, __reset_value, __clk, __arst_n)

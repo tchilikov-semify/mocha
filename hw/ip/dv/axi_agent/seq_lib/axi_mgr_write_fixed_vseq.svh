@@ -8,7 +8,7 @@
 // The single request item is a randomised field (m_fixed_req) and the response is created in the
 // rsp field, which will be created before the sequence completes.
 
-class axi_mgr_write_fixed_vseq extends uvm_sequence(uvm_sequence_item, axi_fixed_write_rsp_item);
+class axi_mgr_write_fixed_vseq extends uvm_sequence#(uvm_sequence_item, axi_fixed_write_rsp_item);
   `uvm_object_utils(axi_mgr_write_fixed_vseq)
 
   // The write response router. Set this by calling set_write_response_router before starting the
@@ -44,6 +44,7 @@ task axi_mgr_write_fixed_vseq::body();
   axi_mgr_txn_request_seq       aw_seq;
   axi_mgr_write_single_data_seq w_seq;
   axi_mgr_write_response_seq    b_seq;
+  uvm_sequence_item             write_response_item;
   axi_write_response_item       write_response;
 
   if (m_write_response_router == null) begin
@@ -90,10 +91,12 @@ task axi_mgr_write_fixed_vseq::body();
   // randomising: we can just set it to equal the value of m_fixed_req.m_write_data_item.
   w_seq = axi_mgr_write_single_data_seq::type_id::create("w_seq");
   w_seq.m_write_data_item.rand_mode(0);
-  w_seq.m_write_data_item.copy(m_fixed_req.m_write_data_item);
   if (!w_seq.randomize()) begin
     `uvm_fatal(get_full_name(), "Failed to randomize w_seq.")
   end
+  // Copy after randomize() so the explicit payload set by the test is not
+  // overwritten by randomization of w_seq.m_write_data_item.
+  w_seq.m_write_data_item.copy(m_fixed_req.m_write_data_item);
 
   // Create a sequence to receive a single write response (B). (This might or might not match our
   // ID, but that doesn't matter: the point is that we need to send it as a token)
@@ -119,11 +122,15 @@ task axi_mgr_write_fixed_vseq::body();
   fork
     aw_seq.start(m_write_request_sequencer);
     w_seq.start(m_write_data_sequencer);
-    m_write_response_router.wait_for_response(m_fixed_req.m_id, write_response);
+    m_write_response_router.wait_for_response(m_fixed_req.m_id, write_response_item);
   join
 
   // At this point, the AW and W sequences have completed (either by sending their items or by
-  // seeing a reset) and wait_for_response has completed, writing write_response.
+  // seeing a reset) and wait_for_response has completed, writing write_response_item (which is
+  // null on reset). Downcast it to the concrete axi_write_response_item type.
+  if (!$cast(write_response, write_response_item))
+    `uvm_fatal(get_full_name(), "wait_for_response returned unexpected item type")
+
   rsp = axi_fixed_write_rsp_item::type_id::create("rsp");
   rsp.m_aw_status      = aw_seq.rsp;
   rsp.m_w_status       = w_seq.rsp;
