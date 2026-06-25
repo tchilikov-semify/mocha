@@ -14,6 +14,7 @@ filesets:
       - lowrisc:dv:axi_agent:0.1
     files:
       - axi_sram_test_pkg.sv
+      - axi_sram_cov.sv
       - axi_sram_uvm_tb.sv
     file_type: systemVerilogSource
 
@@ -36,5 +37,8 @@ targets:
           - -l xrun.log
           - -nowarn TSNSPK
           - -nowarn FUNTSK
-          - +UVM_TESTNAME=axi_sram_write_read_test
           - +UVM_VERBOSITY=UVM_LOW
+          # NOTE: +UVM_TESTNAME is intentionally NOT set here. UVM honours the
+          # first +UVM_TESTNAME on the command line and fusesoc can only append
+          # options, so the test is selected by the Makefile (TEST=<name>) to
+          # keep a single, overridable source. All build options stay here.

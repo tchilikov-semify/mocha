@@ -116,16 +116,15 @@ changed; those are summarised at the end but are not SV source.
 - `make WAVES=1` → same, plus an SHM waveform dump (`waves.shm`).
 - `make clean`  → removes the in-tree build directory.
 
-### A known DUT assertion, waived in the Makefile (not an SV change)
-A single DUT RTL assertion fires during the run: `prim_fifo_sync DataKnown_A` at
-`u_dut.u_axi_to_detailed_mem.i_mem_to_banks.gen_reqs[0].i_ft_reg`. It is an
-`ASSERT_KNOWN` tripping on the **don't-care `wdata` of the tag read-modify-write
-request** in 4-state Xcelium (Verilator reads X as 0, so the cocotb flow never
-saw it). It does not affect functional correctness, and the verification plan
-treats power-up contents as undefined. The RTL is vendored and was left
-untouched; instead the Makefile waives just that one assertion at run time via an
-inline `assertion -off {...}` so the run exits cleanly (`UVM_ERROR : 0`) instead
-of failing `make` on a harmless error.
+### A known DUT assertion: `prim_fifo_sync DataKnown_A`
+In 4-state Xcelium the tag read-modify-write path reads uninitialised tag RAM
+(X), which propagates into the DUT `prim_fifo_sync` instances and trips
+`DataKnown_A` (Verilator reads X as 0, so the cocotb flow never saw it). It does
+not affect functional correctness, and the vplan treats power-up contents as
+undefined. The vendored RTL is left untouched. The **primary** fix is the TB
+memory pre-clear added for the priority-1 port (see below), which removes the X
+at its source so the assertion no longer fires anywhere; the Makefile's inline
+`assertion -off {…gen_reqs[0]…}` waive is kept as a safety net.
 
 ---
 
@@ -142,7 +141,8 @@ self-contained with its own `.core` + `Makefile`. The two share the DUT via
 - **`uvm/axi_sram_uvm.core`** (`lowrisc:mocha_dv:axi_sram_uvm`) — the entry point
   and single source of truth for xrun options. The `default` Xcelium target
   carries `-64bit -sv -uvm -uvmhome CDNS-1.2 -licqueue +define+UVM -access rwc
-  -l xrun.log -nowarn ... +UVM_TESTNAME +UVM_VERBOSITY`. `+define+UVM` is needed
+  -l xrun.log -nowarn ... +UVM_VERBOSITY`. It deliberately does **not** set
+  `+UVM_TESTNAME` — see the priority-1 port section below. `+define+UVM` is needed
   so `dv_utils_pkg`'s `` `ifdef UVM `` guard includes `uvm_macros.svh`. The UVM
   file list is ordered so `axi_sram_test_pkg.sv` precedes `axi_sram_uvm_tb.sv`.
   The cocotb/Verilator filesets and targets were split out into
@@ -156,3 +156,152 @@ self-contained with its own `.core` + `Makefile`. The two share the DUT via
   It also injects an inline run-control script via `XMSIM_OPTIONS`
   (`-input "@assertion -off {...}; run; exit"`) that waives the assertion above
   and, with `WAVES=1`, splices in the SHM probe commands.
+
+---
+
+## Priority-1 verification-plan test port
+
+The smoke test above was extended into a port of every priority-1 item from the
+verification plan (`axi_sram_vplan.csv`), mirroring the cocotb environment's
+coverage. The P1 set needs **multi-beat bursts with per-beat `wuser`/`ruser`**
+(2-beat CHERI capability writes/reads, N-beat data bursts), which the original
+single-beat FIXED-burst VIP sequences could not drive. The work spanned the VIP,
+the TB, the test package, the core and the Makefile.
+
+### New burst-capable VIP sequences (`hw/ip/dv/axi_agent/`)
+- **`seq_lib/axi_mgr_write_listed_data_seq.svh`** — extends
+  `axi_mgr_write_data_seq`; sends a caller-supplied list of `axi_write_data_item`
+  beats (one per beat), driving `WLAST` on the last.
+- **`seq_lib/axi_mgr_write_burst_vseq.svh`** — multi-beat generalisation of
+  `axi_mgr_write_fixed_vseq`: configurable AW (id/addr/size/burst/…) and one data
+  item per beat (`AWLEN = nbeats-1`).
+- **`seq_lib/axi_mgr_read_burst_vseq.svh`** — multi-beat generalisation of
+  `axi_mgr_read_fixed_vseq`: issues one AR and collects every R beat into
+  `m_read_beats` (per-beat data + `ruser`).
+- Registered (in dependency order) in `axi_agent_pkg.sv` and `axi_agent.core`.
+
+### VIP driver fixes (real AXI bugs — fixed in the VIP)
+The manager-side accept drivers had two latent AXI-protocol bugs that only show
+up with multi-beat bursts or back-to-back transactions; both were fixed **in the
+drivers** (no test- or vseq-level workarounds). Full write-up:
+[`hw/ip/dv/axi_agent/axi_driver_bugs.md`](../../../../ip/dv/axi_agent/axi_driver_bugs.md).
+In short: `drive_req()` in `axi_mgr_read_data_driver.svh` and
+`axi_mgr_write_response_driver.svh` used to read its own clocking *output*
+(`rready`/`bready`) back to infer the handshake and sample *after* the edge,
+which (a) re-sampled the same beat/response when two accepts ran back-to-back in
+the same time step, and (b) lost a beat when a speculative `ready` consumed it
+inside the wait loop. Both `drive_req()`s were rewritten to **track the driven
+`ready` locally and sample on the exact `valid && ready` edge**, which is the
+real AXI transfer condition. This is correct under any back-pressure (the
+`ready_without_valid_pct` / `valid_to_ready_delay` knobs still work and are now
+randomised, not pinned), and it also removes the `*W,CONOTR` illegal-rvalue
+warning. With the drivers correct, `axi_mgr_write_burst_vseq` uses the standard
+`axi_response_router` pattern — identical to `axi_mgr_read_burst_vseq` and the
+`*_fixed_vseq` sequences — with no special-casing.
+
+### TB (`axi_sram_uvm_tb.sv`)
+- **Geometry assertions** (vplan `interface_geometry` / `sram_geometry`): an
+  `initial` block asserts `AxiDataWidth==64`, the 8-bit `wstrb`, ≥1 `wuser`/
+  `ruser` tag bit, and `SramMemSize==128 KiB`.
+- **Memory pre-clear**: an `initial` zeroes `u_dut.u_ram.mem` and
+  `u_dut.u_tag_ram.mem`. In 4-state Xcelium the tag read-modify-write reads the
+  existing tag word; uninitialised X there propagates into the DUT FIFOs and
+  trips `prim_fifo_sync DataKnown_A` (Verilator reads X as 0, so cocotb never saw
+  it). Zeroing matches the 2-state behaviour; the vplan treats power-up contents
+  as undefined. This removes the `DataKnown_A` firings at the source (the
+  Makefile `assertion -off` waive is kept as a belt-and-suspenders safety net).
+
+### Test package (`axi_sram_test_pkg.sv`)
+- `axi_sram_base_test` gained reusable helpers built on the burst vseqs:
+  `write_word`, `write_word_user`, `write_cap`, `write_burst_words`, `read_word`,
+  `read_cap` (returns both data words and both per-flit `ruser` bits), plus
+  `run_write`/`run_read` which check B/R response codes (and, when
+  `m_check_resp_id` is set, that responses echo the request ID).
+- One test per P1 vplan item: `axi_sram_{rst_sanity, write_read, data_all_bits,
+  address_boundaries, burst_last, resp_id_match, tag_write, no_tag_single_beat,
+  tag_cleared_by_write, tag_isolation, cap_ruser}_test`. (`interface_geometry`
+  and `sram_geometry` are the TB assertions above.)
+
+### Test selection moved to the Makefile
+UVM honours the **first** `+UVM_TESTNAME` on the command line, and fusesoc can
+only *append* options — so a `+UVM_TESTNAME` baked into the core can't be
+overridden per run. The core therefore no longer sets it; the Makefile selects
+the test via `make TEST=<name>` (default `axi_sram_write_read_test`), passed as
+`fusesoc … --xrun_options "+UVM_TESTNAME=$(TEST)"`. All build options stay in the
+core.
+
+### Result
+All 11 priority-1 tests pass under `make TEST=…`: `UVM_ERROR : 0`,
+`UVM_FATAL : 0`, and no `DataKnown_A` firings.
+
+---
+
+## Priority-2 / priority-3 verification-plan test port
+
+The same approach was extended to every P2 and P3 vplan item, all built on the
+burst VIP and helpers above (no further VIP changes were needed). New helpers in
+`axi_sram_base_test`: `write_word_strb` (partial-strobe / sub-word writes),
+`write_cap_user` (per-beat WUSER, for the malformed-capability assertion), and
+`read_generic` (configurable beats / AXI size / prot, returning per-beat data and
+RUSER — used for sub-word reads, instruction-flavoured reads and burst reads).
+
+- **P2 tests:** `aligned_only`, `no_tag_misaligned`, `no_tag_two_bursts`,
+  `wuser_mismatch`, `partial_strobe_clears_tag`, `subword_read_clears_tag`,
+  `concurrent_data_tag`, `random_data`, `random_capabilities`.
+- **P3 tests:** `init_value_undefined`, `execute_from_sram`,
+  `burst_read_mixed_tags`, plus `out_of_range_error` and `atomics_excluded`
+  (out-of-scope placeholders that log why and drive no stimulus, for vplan
+  traceability).
+
+### New TB assertions (`axi_sram_uvm_tb.sv`)
+- **`bounded_response` (34ld5i, P2):** a clocked watchdog. Progress is measured on
+  `bvalid`/`rvalid` (the DUT presenting a response), so legal master back-pressure
+  is never blamed on the DUT; it `$error`s only on a genuine >256-cycle stall.
+- **`assert_wuser_not_full_cap` (bj8we7) and `assert_wuser_mismatch` (9a3xf6),
+  P2:** the W channel carries no address, so an AW-attribute snoop FIFO (AXI4 keeps
+  write data in AW order) associates each W beat with its governing request.
+  bj8we7 flags `wuser=1` on a write that is not a full capability write; 9a3xf6
+  flags two cap halves disagreeing on `wuser`. Both are deliberately tripped by
+  directed tests, so their action is a non-fatal `$warning` (the firing *is* the
+  check): bj8we7 fires in the `no_tag_*` tests, 9a3xf6 in `wuser_mismatch`.
+- **`tag_separate_memory` (lzoy40, P3):** structural property, documented as a
+  comment (distinct `u_tag_ram` / `u_ram` instances); not observable at the AXI
+  boundary, so no runtime assertion.
+
+### Notes
+- **`concurrent_data_tag`** issues the two *writes* sequentially (AXI4 forbids
+  write-data interleaving, so two independent write sequences sharing the single W
+  channel would need explicit AW/W coordination — a VIP feature, not exercised);
+  concurrency is exercised on the *read* side, where responses are routed by RID.
+- **AXI ID width:** `AxiIdWidth = 4`, so test IDs must be ≤ 15. The write-request
+  driver correctly *refuses* to drive an ID that does not fit the interface width
+  (driving a truncated ID would be non-compliant) — a useful guard rail, not a bug.
+
+### Result
+All 14 P2/P3 tests pass (`UVM_ERROR : 0`, `UVM_FATAL : 0`, no `DataKnown_A`, no
+bounded-response firings), the P1 set still passes with the new assertions in
+place, and the bj8we7/9a3xf6 `$warning`s fire exactly where expected.
+
+---
+
+## Functional coverage
+
+CHERI-tag functional coverage lives in **`axi_sram_cov.sv`**, a passive module
+instantiated by `axi_sram_uvm_tb` (it snoops the AXI structs and keeps small AW/AR
+attribute FIFOs so each W/R beat is attributed to its governing request). Two
+covergroups, sampled at WLAST/RLAST:
+
+- **`cg_tag_write`** — awlen (single/cap/multi), awsize, 16-byte alignment,
+  full/partial strobe, any-beat wuser, and per-beat wuser mismatch, with each
+  gating dimension crossed with wuser (the full-capability tag-set condition and
+  every disqualifying corner).
+- **`cg_tag_read`** — the per-flit RUSER pair on a 2-beat capability read
+  (`{00}`/`{11}`; mixed is impossible and `ignore_bins`'d) and sub-word reads
+  returning a cleared tag, crossed with arlen/arsize.
+
+Collect with **`make COVERAGE=1`** (adds Xcelium `-coverage u`; without it Xcelium
+does not sample covergroups). Each run writes a named UCD under `cov_work/`; the
+module also prints a per-run `get_coverage()` readout. The multi-test UCD merge +
+report (Cadence `imc`), generic AXI-protocol covergroups, and code coverage remain
+deferred — see the vplan Coverage section. Two vplan rows were added
+(`cov_tag_write_gating`, `cov_tag_read_ruser`).
