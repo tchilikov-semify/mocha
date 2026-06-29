@@ -11,8 +11,19 @@ filesets:
     depend:
       - lowrisc:mocha:axi_sram
       - lowrisc:dv:dv_utils
+      - lowrisc:dv:common_ifs
       - lowrisc:dv:axi_agent:0.1
     files:
+      # Blocks of the test package, `included by axi_sram_test_pkg.sv.
+      - axi_sram_ref_model.svh: {is_include_file: true}
+      - axi_sram_scoreboard.svh: {is_include_file: true}
+      - axi_sram_virtual_sequencer.svh: {is_include_file: true}
+      - axi_sram_env.svh: {is_include_file: true}
+      - axi_sram_base_vseq.svh: {is_include_file: true}
+      - axi_sram_base_test.svh: {is_include_file: true}
+      - axi_sram_vseqs.svh: {is_include_file: true}
+      - axi_sram_test.svh: {is_include_file: true}
+
       - axi_sram_test_pkg.sv
       - axi_sram_cov.sv
       - axi_sram_uvm_tb.sv

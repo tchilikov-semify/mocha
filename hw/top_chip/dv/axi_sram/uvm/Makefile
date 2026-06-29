@@ -11,6 +11,8 @@
 #   make TEST=<uvm_test>  # ... run a specific UVM test instead
 #   make regress          # run every UVM test; print a pass/fail summary
 #   make regress COVERAGE=1  # ... collecting a per-test coverage UCD for merging
+#   make cov_report       # merge the per-test UCDs -> HTML report (after the above)
+#   make cov_gui          # browse the merged coverage database in the imc GUI
 #   make WAVES=1          # ... and dump waves.shm into the build directory
 #   make COVERAGE=1       # ... and collect functional (covergroup) coverage
 #   make clean            # remove the build directory
@@ -45,17 +47,21 @@ TEST ?= axi_sram_write_read_test
 
 # Functional (covergroup) coverage. Opt-in: Xcelium only samples covergroups when
 # -coverage u is set. Each run writes a UCD named after the test into the build
-# directory's cov_work/, so the per-test databases can later be merged/reported
-# with imc (that merge flow is not added here — see the vplan Coverage section).
+# directory's cov_work/scope/<test>/, so the per-test databases can later be
+# merged and reported with `make cov_report` (see the cov_report target below).
 ifdef COVERAGE
   COV_OPTS := -coverage u -covworkdir $(BUILD_DIR)/cov_work -covtest $(TEST) -covoverwrite
 endif
 
-# Every runnable UVM test declared in the test package (excludes the base test).
-TESTS := $(filter-out axi_sram_base_test,\
-           $(shell grep -oE 'axi_sram_[a-z0-9_]+_test' $(DV_DIR)axi_sram_test_pkg.sv | sort -u))
+# Cadence imc (coverage merge/report). On PATH via the nix system profile.
+IMC       ?= /run/current-system/sw/bin/imc
+COV_SCOPE := $(BUILD_DIR)/cov_work/scope
 
-.PHONY: run regress clean
+# Every runnable UVM test declared in the test classes file (excludes the base test).
+TESTS := $(filter-out axi_sram_base_test,\
+           $(shell grep -oE 'axi_sram_[a-z0-9_]+_test' $(DV_DIR)axi_sram_test.svh | sort -u))
+
+.PHONY: run regress cov_report cov_gui clean
 
 run:
 	fusesoc --cores-root=$(REPO_ROOT) run --build-root=$(DV_DIR) lowrisc:mocha_dv:axi_sram_uvm --xrun_options "+UVM_TESTNAME=$(TEST) $(COV_OPTS)"
@@ -76,6 +82,19 @@ regress:
 	echo "==================================================="; \
 	echo "  $$pass / $$total passed"; \
 	[ -z "$$fails" ] || { echo "  failed:$$fails"; false; }
+
+# Merge every per-test functional-coverage UCD (left by `make regress COVERAGE=1`)
+# into cov_work/scope/merged and render an HTML report into cov_report/. The imc
+# batch script (cov.tcl) runs from the build dir, where cov_work/ lives.
+cov_report:
+	@test -d $(COV_SCOPE) || { echo "No coverage data in $(COV_SCOPE). Run: make regress COVERAGE=1"; exit 1; }
+	cd $(BUILD_DIR) && $(IMC) -exec $(DV_DIR)cov.tcl
+	@echo "Open: $(BUILD_DIR)/cov_report/index.html"
+
+# Browse the merged coverage database interactively (needs an X display).
+cov_gui:
+	@test -d $(COV_SCOPE)/merged || { echo "No merged DB. Run 'make cov_report' first."; exit 1; }
+	cd $(BUILD_DIR) && $(IMC) -gui -load cov_work/scope/merged &
 
 clean:
 	rm -rf $(BUILD_DIR)

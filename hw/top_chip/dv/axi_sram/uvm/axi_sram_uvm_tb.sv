@@ -30,18 +30,17 @@ module axi_sram_uvm_tb;
 
   // ---------------------------------------------------------------------------
   // Clock and reset
+  //
+  // Generated and driven by the dv_base clk_rst_if (common_ifs), so the clock
+  // frequency and reset can be controlled at runtime from UVM (e.g. apply_reset
+  // in the base test) rather than hard-coded here. The interface drives the
+  // clk_i / rst_ni nets that the DUT, the AXI interfaces, and the TB assertions
+  // already consume, so nothing downstream changes.
   // ---------------------------------------------------------------------------
-  logic clk_i  = '0;
-  logic rst_ni = '0;
+  wire clk_i;
+  wire rst_ni;
 
-  always #5ns clk_i = ~clk_i;          // 100 MHz
-
-  initial begin
-    rst_ni = '0;
-    repeat (10) @(posedge clk_i);
-    @(negedge clk_i);
-    rst_ni = '1;
-  end
+  clk_rst_if u_clk_rst (.clk(clk_i), .rst_n(rst_ni));
 
   // ---------------------------------------------------------------------------
   // AXI channel interfaces
@@ -360,6 +359,11 @@ module axi_sram_uvm_tb;
   // UVM entry point
   // ---------------------------------------------------------------------------
   initial begin
+    // Start the clock (100 MHz) and enable reset driving before UVM runs.
+    u_clk_rst.set_freq_mhz(100);
+    u_clk_rst.set_active();
+    uvm_config_db#(virtual clk_rst_if)::set(null, "*", "clk_rst_vif", u_clk_rst);
+
     uvm_config_db#(virtual axi_write_request_if)::set(
       null, "*", "write_request_vif", aw_if);
     uvm_config_db#(virtual axi_write_data_if)::set(
