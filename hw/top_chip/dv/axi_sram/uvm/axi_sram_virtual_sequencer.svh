@@ -2,14 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
-  // Virtual sequencer — the single hub that a virtual sequence (axi_sram_base_vseq)
-  // runs on. It holds handles to the active agent's per-channel AXI sequencers and
-  // response routers (the *real* sequencers, where stimulus is arbitrated onto the
-  // drivers), plus the clk_rst_if virtual interface. Note clock/reset is method-
-  // driven (apply_reset/wait_clks), not a sequencer — so it is a *vif handle*, not
-  // a sequencer handle. Wired up in axi_sram_env::connect_phase.
-  // -------------------------------------------------------------------------
+  // Hub a virtual sequence runs on: handles to the active agent's per-channel AXI
+  // sequencers + response routers, plus the clk_rst_if vif (clock/reset is
+  // method-driven, not a sequencer). Wired up in axi_sram_env::connect_phase.
   class axi_sram_virtual_sequencer extends uvm_sequencer;
     `uvm_component_utils(axi_sram_virtual_sequencer)
 

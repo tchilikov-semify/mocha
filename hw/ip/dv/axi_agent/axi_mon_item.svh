@@ -2,14 +2,9 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-// A merged-transaction item produced by the passive AXI monitor (axi_monitor).
-//
-// One object can hold a whole write (AW + all W beats + B) or a whole read
-// (AR + all R beats); obs_kind says which, and which fields are populated. The
-// per-beat W/R payloads are queues. Signal widths use the same max footprint as
-// the per-channel driver interfaces (axi_*_if): the interfaces already mask each
-// field to its configured width, so the monitor records the resolved values
-// directly.
+// Merged-transaction item from axi_monitor: holds a whole write (AW + W beats +
+// B) or a whole read (AR + R beats); obs_kind says which. Per-beat W/R payloads
+// are queues. Field widths mirror the per-channel axi_*_if max footprint.
 
 class axi_mon_item extends uvm_sequence_item;
 

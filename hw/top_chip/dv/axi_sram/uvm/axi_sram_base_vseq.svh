@@ -2,21 +2,20 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
-  // Base virtual sequence — runs on axi_sram_virtual_sequencer and provides the
-  // same read/write helper API as axi_sram_base_test, but sources the channel
-  // sequencers / routers / clk_rst from p_sequencer instead of reaching into the
-  // agent. Tests migrated to the vseq style extend this; the rest still use
-  // axi_sram_base_test's copy of the helpers pending migration. (The duplication
-  // is the temporary cost of incremental migration; base_test's copy is removed
-  // once every test is a vseq.)
-  // -------------------------------------------------------------------------
+  // Base virtual sequence — runs on the virtual sequencer and provides the
+  // read/write helper API (sequencers/routers/clk_rst sourced from p_sequencer).
+  // Every per-test vseq extends this.
   class axi_sram_base_vseq extends uvm_sequence;
     `uvm_object_utils(axi_sram_base_vseq)
     `uvm_declare_p_sequencer(axi_sram_virtual_sequencer)
 
     // When set, run_write/run_read additionally assert response IDs track requests.
     protected bit m_check_resp_id = 1'b0;
+
+    // Base address added to every helper access. The DUT now sits behind the AXI
+    // crossbar, so SRAM-relative offsets (0..SRAMLength) become system addresses
+    // at the SRAM aperture. Tests targeting other regions override this.
+    protected bit [63:0] m_base = top_pkg::SRAMBase;
 
     function new(string name = "axi_sram_base_vseq");
       super.new(name);
@@ -40,8 +39,17 @@
       return it;
     endfunction
 
-    // Drive a prepared write burst and check the B response.
+    // True if a system address lands in the SRAM aperture (else the xbar errors).
+    protected function automatic bit addr_in_sram(bit [63:0] a);
+      return (a >= top_pkg::SRAMBase) && (a < top_pkg::SRAMBase + top_pkg::SRAMLength);
+    endfunction
+
+    // Drive a prepared write burst. In-SRAM writes expect OKAY; out-of-SRAM writes
+    // (negative tests) expect the xbar/err_slv error.
     protected task automatic run_write(axi_mgr_write_burst_vseq seq, string ctx);
+      bit in_range;
+      seq.m_addr = m_base + seq.m_addr;   // SRAM-relative -> system address
+      in_range   = addr_in_sram(seq.m_addr);
       seq.set_write_response_router(p_sequencer.write_response_router);
       seq.set_sequencers(p_sequencer.write_request_seqr,
                          p_sequencer.write_data_seqr,
@@ -49,17 +57,26 @@
       seq.start(null);
       if (seq.rsp == null || seq.rsp.m_write_response == null)
         `uvm_fatal(get_full_name(), {ctx, ": write completed with null B response (reset?)"})
-      if (seq.rsp.m_write_response.m_resp != axi_write_response_item::BRespOkay)
-        `uvm_error(get_full_name(), $sformatf("%s: non-OKAY BRESP %0d", ctx,
-                   seq.rsp.m_write_response.m_resp))
-      if (m_check_resp_id && seq.rsp.m_write_response.m_id != seq.m_id)
-        `uvm_error(get_full_name(), $sformatf("%s: BID 0x%0h != AWID 0x%0h", ctx,
-                   seq.rsp.m_write_response.m_id, seq.m_id))
+      if (in_range) begin
+        if (seq.rsp.m_write_response.m_resp != axi_write_response_item::BRespOkay)
+          `uvm_error(get_full_name(), $sformatf("%s @0x%0h: non-OKAY BRESP %0d", ctx, seq.m_addr,
+                     seq.rsp.m_write_response.m_resp))
+        if (m_check_resp_id && seq.rsp.m_write_response.m_id != seq.m_id)
+          `uvm_error(get_full_name(), $sformatf("%s: BID 0x%0h != AWID 0x%0h", ctx,
+                     seq.rsp.m_write_response.m_id, seq.m_id))
+      end else if (seq.rsp.m_write_response.m_resp == axi_write_response_item::BRespOkay) begin
+        `uvm_error(get_full_name(), $sformatf("%s @0x%0h: out-of-SRAM write returned OKAY (expected error)",
+                   ctx, seq.m_addr))
+      end
     endtask
 
-    // Drive a prepared read burst, check the beat count and R responses.
+    // Drive a prepared read burst, check the beat count and R responses (OKAY in
+    // SRAM, error out of SRAM).
     protected task automatic run_read(axi_mgr_read_burst_vseq seq, string ctx,
                                       int unsigned exp_beats);
+      bit in_range;
+      seq.m_addr = m_base + seq.m_addr;   // SRAM-relative -> system address
+      in_range   = addr_in_sram(seq.m_addr);
       seq.set_read_response_router(p_sequencer.read_response_router);
       seq.set_sequencers(p_sequencer.read_request_seqr, p_sequencer.read_data_seqr);
       seq.start(null);
@@ -67,12 +84,17 @@
         `uvm_fatal(get_full_name(), $sformatf("%s: expected %0d beats, got %0d (reset?)",
                    ctx, exp_beats, seq.m_read_beats.size()))
       foreach (seq.m_read_beats[i]) begin
-        if (seq.m_read_beats[i].m_resp != axi_read_data_item::RRespOkay)
-          `uvm_error(get_full_name(), $sformatf("%s: beat %0d non-OKAY RRESP %0d", ctx, i,
-                     seq.m_read_beats[i].m_resp))
-        if (m_check_resp_id && seq.m_read_beats[i].m_id != seq.m_id)
-          `uvm_error(get_full_name(), $sformatf("%s: beat %0d RID 0x%0h != ARID 0x%0h", ctx, i,
-                     seq.m_read_beats[i].m_id, seq.m_id))
+        if (in_range) begin
+          if (seq.m_read_beats[i].m_resp != axi_read_data_item::RRespOkay)
+            `uvm_error(get_full_name(), $sformatf("%s: beat %0d non-OKAY RRESP %0d", ctx, i,
+                       seq.m_read_beats[i].m_resp))
+          if (m_check_resp_id && seq.m_read_beats[i].m_id != seq.m_id)
+            `uvm_error(get_full_name(), $sformatf("%s: beat %0d RID 0x%0h != ARID 0x%0h", ctx, i,
+                       seq.m_read_beats[i].m_id, seq.m_id))
+        end else if (seq.m_read_beats[i].m_resp == axi_read_data_item::RRespOkay) begin
+          `uvm_error(get_full_name(), $sformatf("%s @0x%0h: out-of-SRAM read beat %0d returned OKAY (expected error)",
+                     ctx, seq.m_addr, i))
+        end
       end
     endtask
 

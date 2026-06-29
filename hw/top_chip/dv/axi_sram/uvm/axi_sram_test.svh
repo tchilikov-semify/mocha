@@ -279,3 +279,36 @@
       phase.drop_objection(this);
     endtask
   endclass
+
+  class axi_sram_wrong_region_decerr_test extends axi_sram_base_test;
+    `uvm_component_utils(axi_sram_wrong_region_decerr_test)
+    function new(string name, uvm_component parent); super.new(name, parent); endfunction
+    task run_phase(uvm_phase phase);
+      axi_sram_wrong_region_decerr_vseq vseq = axi_sram_wrong_region_decerr_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.start(m_env.m_vseqr);
+      phase.drop_objection(this);
+    endtask
+  endclass
+
+  class axi_sram_sram_boundary_test extends axi_sram_base_test;
+    `uvm_component_utils(axi_sram_sram_boundary_test)
+    function new(string name, uvm_component parent); super.new(name, parent); endfunction
+    task run_phase(uvm_phase phase);
+      axi_sram_sram_boundary_vseq vseq = axi_sram_sram_boundary_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.start(m_env.m_vseqr);
+      phase.drop_objection(this);
+    endtask
+  endclass
+
+  class axi_sram_burst_wrap_test extends axi_sram_base_test;
+    `uvm_component_utils(axi_sram_burst_wrap_test)
+    function new(string name, uvm_component parent); super.new(name, parent); endfunction
+    task run_phase(uvm_phase phase);
+      axi_sram_burst_wrap_vseq vseq = axi_sram_burst_wrap_vseq::type_id::create("vseq");
+      phase.raise_objection(this);
+      vseq.start(m_env.m_vseqr);
+      phase.drop_objection(this);
+    endtask
+  endclass

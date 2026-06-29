@@ -2,24 +2,11 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-// Passive AXI transaction monitor.
-//
-// Snoops the five per-channel interfaces (the canonical axi_*_if, via their
-// mon_cb clocking blocks) and reconstructs whole transactions. AXI4 keeps write
-// data in AW order, so AW and W bursts are paired in order; B and R responses
-// are matched to their outstanding request by ID.
-//
-// Analysis ports:
-//   aw_ap / w_ap / ar_ap / r_ap  — per-channel observations (one item per beat
-//                                   group), mostly for debug/coverage hookup.
-//   tx_ap                        — fully merged transactions: an AXI_FULL_WRITE_TR
-//                                   at the B handshake and an AXI_FULL_READ_TR at
-//                                   RLAST. This is what a scoreboard subscribes to.
-//
-// The monitor takes its interfaces from axi_agent_cfg (the same cfg the agent
-// uses); set it with set_cfg() before build_phase, or it is fetched from the
-// config_db. The interfaces already mask each field to its configured width, so
-// the monitor records the resolved mon_cb values directly.
+// Passive AXI transaction monitor. Snoops the five axi_*_if mon_cb clocking
+// blocks and rebuilds whole transactions: AW+W are paired in AW order, B/R are
+// matched to their request by ID. Per-channel items go out on aw/w/ar/r_ap;
+// fully merged transactions on tx_ap (FULL_WRITE_TR at B, FULL_READ_TR at RLAST).
+// Interfaces come from axi_agent_cfg.
 
 class axi_monitor extends uvm_monitor;
   `uvm_component_utils(axi_monitor)

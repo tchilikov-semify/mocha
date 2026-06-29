@@ -2,19 +2,12 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
-  // Reference model — behavioural shadow of the SRAM (data + CHERI tags).
-  //
-  // Updated from observed write transactions; queried to predict read-backs. It
-  // encodes the DUT's tag rules: a region's tag is *set* only by a full
-  // capability write (awlen==1, awsize==3, 16-byte-aligned, full strobes on both
-  // beats, both beats agreeing on wuser); any other write touching a region
-  // *clears* it. On reads, a region's tag is returned only for a capability-sized
-  // read (arlen==1 && arsize==3); every other read returns a cleared tag flit.
-  //
-  // Data is byte-addressed and sparse; never-written bytes read back as 0, which
-  // matches the TB's power-up zeroing of the data/tag RAMs.
-  // -------------------------------------------------------------------------
+  // Behavioural shadow of the SRAM (data + CHERI tags). Driven by observed writes,
+  // queried to predict read-backs. Tag rule: a region's tag is set only by a full
+  // capability write (awlen==1, awsize==3, 16B-aligned, full strobes, both beats
+  // agreeing on wuser); any other write clears it. A read returns the tag only when
+  // capability-sized (arlen==1, arsize==3), else 0. Data is byte-addressed; unwritten
+  // bytes read 0 (matching the TB's power-up RAM zeroing).
   class axi_sram_ref_model extends uvm_object;
     `uvm_object_utils(axi_sram_ref_model)
 
@@ -23,6 +16,12 @@
 
     function new(string name = "axi_sram_ref_model");
       super.new(name);
+    endfunction
+
+    // True if a system address falls inside the SRAM aperture (the xbar routes it
+    // to axi_sram); outside, the xbar / axi_err_slv returns an error.
+    function automatic bit in_sram(bit [63:0] addr);
+      return (addr >= top_pkg::SRAMBase) && (addr < top_pkg::SRAMBase + top_pkg::SRAMLength);
     endfunction
 
     protected function automatic bit [63:0] region_base(bit [63:0] addr);

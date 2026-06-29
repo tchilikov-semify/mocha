@@ -30,7 +30,7 @@ export LD_LIBRARY_PATH := /usr/lib64:/lib64:$(LD_LIBRARY_PATH)
 # fires on the don't-care wdata of the tag read-modify-write request in 4-state
 # Xcelium (Verilator reads X as 0, so cocotb never saw it). NumBanks=1, so the
 # single gen_reqs[0] FIFO is the only instance.
-WAIVE_ASSERT := assertion -off {axi_sram_uvm_tb.u_dut.u_axi_to_detailed_mem.i_mem_to_banks.gen_reqs[0].i_ft_reg.DataKnown_A}
+WAIVE_ASSERT := assertion -off {axi_sram_uvm_tb.u_dut.u_sram.u_axi_to_detailed_mem.i_mem_to_banks.gen_reqs[0].i_ft_reg.DataKnown_A}
 
 ifdef WAVES
   DUMP_WAVES := database -open waves -shm -into waves.shm; probe -create -shm -all -depth all -dynamic -memories -variables -database waves;

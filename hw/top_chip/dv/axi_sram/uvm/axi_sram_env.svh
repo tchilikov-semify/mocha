@@ -2,9 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
   // Environment
-  // -------------------------------------------------------------------------
   class axi_sram_env extends uvm_env;
     `uvm_component_utils(axi_sram_env)
 

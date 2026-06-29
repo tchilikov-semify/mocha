@@ -2,12 +2,10 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
   // Base test — just builds the env. Each concrete test is a thin wrapper whose
   // run_phase starts its virtual sequence (axi_sram_*_vseq, extending
   // axi_sram_base_vseq) on m_env.m_vseqr; the read/write helper API lives in
   // axi_sram_base_vseq.
-  // -------------------------------------------------------------------------
   class axi_sram_base_test extends uvm_test;
     `uvm_component_utils(axi_sram_base_test)
 

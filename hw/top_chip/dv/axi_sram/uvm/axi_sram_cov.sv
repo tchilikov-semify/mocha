@@ -23,9 +23,7 @@ module axi_sram_cov (
 
   localparam int unsigned FifoDepth = 16;
 
-  // ===========================================================================
   // Covergroups
-  // ===========================================================================
 
   // (1a) Tag-write gating. The tag is set only by a *full capability write*: a
   // single 2-beat (awlen==1), 8-byte (awsize==3), 16-byte-aligned burst with full
@@ -105,9 +103,7 @@ module axi_sram_cov (
   cg_tag_write cov_w = new();
   cg_tag_read  cov_r = new();
 
-  // ===========================================================================
   // Write side: AW attribute snoop + per-burst W aggregation
-  // ===========================================================================
   logic [7:0]  aw_len_q  [FifoDepth];
   logic [2:0]  aw_size_q [FifoDepth];
   logic [3:0]  aw_alo_q  [FifoDepth];   // awaddr[3:0]
@@ -190,9 +186,7 @@ module axi_sram_cov (
     end
   end
 
-  // ===========================================================================
   // Read side: AR attribute snoop + per-burst RUSER capture
-  // ===========================================================================
   logic [7:0]  ar_len_q  [FifoDepth];
   logic [2:0]  ar_size_q [FifoDepth];
   int unsigned ar_head, ar_tail, ar_count;

@@ -10,6 +10,8 @@ filesets:
   files_uvm:
     depend:
       - lowrisc:mocha:axi_sram
+      - lowrisc:mocha_constants:top_pkg
+      - pulp-platform.org::axi
       - lowrisc:dv:dv_utils
       - lowrisc:dv:common_ifs
       - lowrisc:dv:axi_agent:0.1
@@ -26,6 +28,7 @@ filesets:
 
       - axi_sram_test_pkg.sv
       - axi_sram_cov.sv
+      - axi_sram_xbar_dut.sv
       - axi_sram_uvm_tb.sv
     file_type: systemVerilogSource
 

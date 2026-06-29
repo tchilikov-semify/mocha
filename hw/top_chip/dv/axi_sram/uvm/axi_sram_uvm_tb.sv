@@ -21,14 +21,11 @@ module axi_sram_uvm_tb;
   // factory (otherwise +UVM_TESTNAME=... cannot be found).
   import axi_sram_test_pkg::*;
 
-  // ---------------------------------------------------------------------------
   // Parameters (must match axi_sram instantiation)
-  // ---------------------------------------------------------------------------
   localparam int unsigned SramMemSize   = 128 * 1024;
   localparam int unsigned AxiAddrOffset = $clog2(top_pkg::AxiDataWidth / 8);
   localparam int unsigned SramAddrWidth = $clog2(SramMemSize) - AxiAddrOffset;
 
-  // ---------------------------------------------------------------------------
   // Clock and reset
   //
   // Generated and driven by the dv_base clk_rst_if (common_ifs), so the clock
@@ -36,15 +33,12 @@ module axi_sram_uvm_tb;
   // in the base test) rather than hard-coded here. The interface drives the
   // clk_i / rst_ni nets that the DUT, the AXI interfaces, and the TB assertions
   // already consume, so nothing downstream changes.
-  // ---------------------------------------------------------------------------
   wire clk_i;
   wire rst_ni;
 
   clk_rst_if u_clk_rst (.clk(clk_i), .rst_n(rst_ni));
 
-  // ---------------------------------------------------------------------------
   // AXI channel interfaces
-  // ---------------------------------------------------------------------------
   axi_write_request_if  aw_if (.clk_i(clk_i), .rst_ni(rst_ni));
   axi_write_data_if     w_if  (.clk_i(clk_i), .rst_ni(rst_ni));
   axi_write_response_if b_if  (.clk_i(clk_i), .rst_ni(rst_ni));
@@ -85,14 +79,12 @@ module axi_sram_uvm_tb;
     r_if.if_mode = Host;
   end
 
-  // ---------------------------------------------------------------------------
   // DUT wiring
   //
   // The DUT uses packed structs.  We build axi_req from interface wires via
   // always_comb, and feed DUT response outputs back to the interface wires via
   // assign (tri-state resolution: the interface drives 'z in Host mode for all
   // signals it does not own, so the DUT value wins).
-  // ---------------------------------------------------------------------------
   top_pkg::axi_req_t  axi_req;
   wire top_pkg::axi_resp_t axi_resp;
 
@@ -158,33 +150,26 @@ module axi_sram_uvm_tb;
   assign r_if.rlast  = axi_resp.r.last;
   assign r_if.ruser  = 528'(axi_resp.r.user);
 
-  // ---------------------------------------------------------------------------
-  // DUT
-  // ---------------------------------------------------------------------------
-  axi_sram #(
-    .AddrWidth (SramAddrWidth)
-  ) u_dut (
+  // DUT: axi_sram behind the real mocha AXI crossbar. The VIP drives axi_req at
+  // the CVA6 host port; the xbar decodes the address and routes to the SRAM (or
+  // to an error subordinate for any non-SRAM region).
+  axi_sram_xbar_dut u_dut (
     .clk_i     (clk_i   ),
     .rst_ni    (rst_ni  ),
     .axi_req_i (axi_req ),
     .axi_resp_o(axi_resp)
   );
 
-  // 4-state simulation: pre-clear the SRAM data and CHERI tag memories at time 0.
-  // The tag read-modify-write path reads the existing tag word before updating a
-  // bit; if the tag RAM starts as X (Xcelium 4-state), that X flows through the
-  // DUT request/response FIFOs and trips prim_fifo_sync DataKnown_A. Verilator
-  // reads X as 0, so the cocotb flow never saw this. The vplan treats power-up
-  // SRAM/tag contents as undefined, so zeroing here is legitimate and matches the
-  // 2-state behaviour.
+  // 4-state simulation: pre-clear the SRAM data and CHERI tag memories at time 0
+  // (the tag RMW path reads the tag word before updating a bit; an X there trips
+  // prim_fifo_sync DataKnown_A in Xcelium). Power-up contents are undefined per the
+  // vplan, so zeroing is legitimate.
   initial begin
-    foreach (u_dut.u_ram.mem[i])     u_dut.u_ram.mem[i]     = '0;
-    foreach (u_dut.u_tag_ram.mem[i]) u_dut.u_tag_ram.mem[i] = '0;
+    foreach (u_dut.u_sram.u_ram.mem[i])     u_dut.u_sram.u_ram.mem[i]     = '0;
+    foreach (u_dut.u_sram.u_tag_ram.mem[i]) u_dut.u_sram.u_tag_ram.mem[i] = '0;
   end
 
-  // ---------------------------------------------------------------------------
   // Functional coverage (CHERI tag write gating + tag read/ruser).
-  // ---------------------------------------------------------------------------
   axi_sram_cov u_cov (
     .clk_i   (clk_i   ),
     .rst_ni  (rst_ni  ),
@@ -192,7 +177,6 @@ module axi_sram_uvm_tb;
     .axi_resp(axi_resp)
   );
 
-  // ---------------------------------------------------------------------------
   // Static geometry checks  (vplan: interface_geometry / qohtih,
   //                                 sram_geometry      / jeluga,01skcc,u0s8nt)
   //
@@ -200,7 +184,6 @@ module axi_sram_uvm_tb;
   // guaranteed by the u_dut instantiation above. Here we additionally assert the
   // AXI/SRAM geometry the spec mandates: 64-bit data word, an 8-bit write strobe,
   // at least one CHERI tag bit on wuser/ruser, and the 128 KiB SRAM size.
-  // ---------------------------------------------------------------------------
   initial begin : g_geometry_check
     assert (top_pkg::AxiDataWidth == 64)
       else $fatal(1, "[axi_sram_uvm_tb] AxiDataWidth must be 64, got %0d", top_pkg::AxiDataWidth);
@@ -215,15 +198,13 @@ module axi_sram_uvm_tb;
       else $fatal(1, "[axi_sram_uvm_tb] SramMemSize must be 128 KiB, got %0d", SramMemSize);
   end
 
-  // ---------------------------------------------------------------------------
   // Bounded response time  (vplan: bounded_response / 34ld5i)
   //
   // Every accepted request must produce its response within a bounded window.
   // Progress is measured on *valid* (the DUT presenting a response), so legal
   // master back-pressure on b/rready is never blamed on the DUT — the watchdog
   // trips only on a genuine stall. The bound is intentionally generous.
-  // ---------------------------------------------------------------------------
-  localparam int unsigned MaxRespLatency = 256;
+  localparam int unsigned MaxRespLatency = 1024;  // generous: the xbar adds latency
 
   int unsigned w_outstanding, w_stall_cnt;
   int unsigned r_outstanding, r_stall_cnt;
@@ -255,7 +236,6 @@ module axi_sram_uvm_tb;
     end
   end
 
-  // ---------------------------------------------------------------------------
   // CHERI tag write assertions  (vplan: assert_wuser_not_full_cap / bj8we7,
   //                                     assert_wuser_mismatch     / 9a3xf6)
   //
@@ -265,7 +245,6 @@ module axi_sram_uvm_tb;
   // (AXI4 keeps write data in AW order) and check each W beat against the
   // governing request. These spec assertions are deliberately tripped by directed
   // tests (no_tag_*, wuser_mismatch), so their action is a non-fatal $warning.
-  // ---------------------------------------------------------------------------
   localparam int unsigned AwFifoDepth = 16;
 
   logic [7:0]  aw_len_q  [AwFifoDepth];
@@ -347,17 +326,13 @@ module axi_sram_uvm_tb;
     end
   end
 
-  // ---------------------------------------------------------------------------
   // tag_separate_memory (vplan / lzoy40): tags are stored in a memory block
   // separate from data. This is a structural property, verified by inspection of
   // the RTL — axi_sram instantiates distinct prim_ram_1p blocks u_tag_ram (tags)
   // and u_ram (data). It is not observable at the AXI boundary, so there is no
   // runtime assertion; the memory pre-clear above touches both instances by name.
-  // ---------------------------------------------------------------------------
 
-  // ---------------------------------------------------------------------------
   // UVM entry point
-  // ---------------------------------------------------------------------------
   initial begin
     // Start the clock (100 MHz) and enable reset driving before UVM runs.
     u_clk_rst.set_freq_mhz(100);

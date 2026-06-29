@@ -2,9 +2,7 @@
 // Licensed under the Apache License, Version 2.0, see LICENSE for details.
 // SPDX-License-Identifier: Apache-2.0
 
-  // -------------------------------------------------------------------------
   // rst_sanity — DUT leaves reset cleanly and accepts its first transaction.
-  // -------------------------------------------------------------------------
   class axi_sram_rst_sanity_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_rst_sanity_vseq)
     function new(string name = "axi_sram_rst_sanity_vseq"); super.new(name); endfunction
@@ -23,11 +21,9 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // write_read — single-beat 8-byte write then readback. (Migrated to the vseq
   // style: stimulus lives in a virtual sequence run on m_vseqr; the test is a
   // thin wrapper that starts it.)
-  // -------------------------------------------------------------------------
   class axi_sram_write_read_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_write_read_vseq)
     function new(string name = "axi_sram_write_read_vseq"); super.new(name); endfunction
@@ -48,9 +44,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // data_all_bits — walking-1 / walking-0 across all 64 data bits.
-  // -------------------------------------------------------------------------
   class axi_sram_data_all_bits_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_data_all_bits_vseq)
     function new(string name = "axi_sram_data_all_bits_vseq"); super.new(name); endfunction
@@ -80,9 +74,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // address_boundaries — first/last word and last capability slot.
-  // -------------------------------------------------------------------------
   class axi_sram_address_boundaries_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_address_boundaries_vseq)
     function new(string name = "axi_sram_address_boundaries_vseq"); super.new(name); endfunction
@@ -116,9 +108,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // burst_last — multi-beat burst round-trips; last beat flagged correctly.
-  // -------------------------------------------------------------------------
   class axi_sram_burst_last_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_burst_last_vseq)
     function new(string name = "axi_sram_burst_last_vseq"); super.new(name); endfunction
@@ -153,10 +143,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // resp_id_match — each B/R response carries the originating request's AXI ID.
-  // (Migrated to the vseq style.)
-  // -------------------------------------------------------------------------
+  //
   class axi_sram_resp_id_match_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_resp_id_match_vseq)
     function new(string name = "axi_sram_resp_id_match_vseq"); super.new(name); endfunction
@@ -182,10 +170,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // tag_write — a full 128-bit aligned 2-beat burst with WUSER=1 sets the tag,
-  // and data+tag are carried in the same transaction. (Migrated to the vseq style.)
-  // -------------------------------------------------------------------------
+  // and data+tag are carried in the same transaction.
   class axi_sram_tag_write_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_tag_write_vseq)
     function new(string name = "axi_sram_tag_write_vseq"); super.new(name); endfunction
@@ -209,10 +195,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // no_tag_single_beat — WUSER=1 on a single-beat (awlen=0) write must NOT set
   // the region tag (is_w_cap_sized requires awlen=1).
-  // -------------------------------------------------------------------------
   class axi_sram_no_tag_single_beat_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_no_tag_single_beat_vseq)
     function new(string name = "axi_sram_no_tag_single_beat_vseq"); super.new(name); endfunction
@@ -234,9 +218,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // tag_cleared_by_write — a plain data write to a tagged slot clears the tag.
-  // -------------------------------------------------------------------------
   class axi_sram_tag_cleared_by_write_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_tag_cleared_by_write_vseq)
     function new(string name = "axi_sram_tag_cleared_by_write_vseq"); super.new(name); endfunction
@@ -267,9 +249,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // tag_isolation — clearing one slot's tag must not disturb a neighbour's.
-  // -------------------------------------------------------------------------
   class axi_sram_tag_isolation_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_tag_isolation_vseq)
     function new(string name = "axi_sram_tag_isolation_vseq"); super.new(name); endfunction
@@ -295,10 +275,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // cap_both_ruser_set — both RUSER flits of a valid cap read are 1, both 0 for
   // an untagged region (the core ANDs the two flits to judge validity).
-  // -------------------------------------------------------------------------
   class axi_sram_cap_ruser_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_cap_ruser_vseq)
     function new(string name = "axi_sram_cap_ruser_vseq"); super.new(name); endfunction
@@ -325,14 +303,10 @@
   endclass
 
 
-  // =========================================================================
   // Priority-2 tests
-  // =========================================================================
 
-  // -------------------------------------------------------------------------
   // aligned_only — sweep several 8-byte-aligned addresses; each must round-trip.
   // (Misaligned data accesses are the interconnect's responsibility, not driven.)
-  // -------------------------------------------------------------------------
   class axi_sram_aligned_only_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_aligned_only_vseq)
     function new(string name = "axi_sram_aligned_only_vseq"); super.new(name); endfunction
@@ -355,10 +329,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // no_tag_misaligned — a 2-beat wuser=1 burst starting at a non-16-byte-aligned
   // address must NOT set the tag (is_w_cap_aligned requires addr[3:0]==0).
-  // -------------------------------------------------------------------------
   class axi_sram_no_tag_misaligned_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_no_tag_misaligned_vseq)
     function new(string name = "axi_sram_no_tag_misaligned_vseq"); super.new(name); endfunction
@@ -388,10 +360,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // no_tag_two_bursts — covering a 128-bit region with two SEPARATE single-beat
   // wuser=1 writes must NOT set the tag (it needs one 2-beat capability burst).
-  // -------------------------------------------------------------------------
   class axi_sram_no_tag_two_bursts_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_no_tag_two_bursts_vseq)
     function new(string name = "axi_sram_no_tag_two_bursts_vseq"); super.new(name); endfunction
@@ -414,12 +384,10 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // wuser_mismatch (assert_wuser_mismatch / 9a3xf6) — a cap-shaped write whose
   // two beats disagree on wuser trips the W-channel consistency assertion. The
   // assertion firing (a non-fatal $warning from the TB) is the actual check;
   // data must still round-trip.
-  // -------------------------------------------------------------------------
   class axi_sram_wuser_mismatch_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_wuser_mismatch_vseq)
     function new(string name = "axi_sram_wuser_mismatch_vseq"); super.new(name); endfunction
@@ -444,10 +412,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // partial_strobe_clears_tag — a sub-64-bit (partial write-strobe) write to a
   // tagged slot clears the tag (size<3 -> is_w_cap_sized false -> tag written 0).
-  // -------------------------------------------------------------------------
   class axi_sram_partial_strobe_clears_tag_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_partial_strobe_clears_tag_vseq)
     function new(string name = "axi_sram_partial_strobe_clears_tag_vseq"); super.new(name); endfunction
@@ -473,10 +439,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // subword_read_clears_tag — a sub-word read (size<3) of a valid cap region
   // returns data but with the tag cleared; the stored tag is unchanged.
-  // -------------------------------------------------------------------------
   class axi_sram_subword_read_clears_tag_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_subword_read_clears_tag_vseq)
     function new(string name = "axi_sram_subword_read_clears_tag_vseq"); super.new(name); endfunction
@@ -507,7 +471,6 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // concurrent_data_tag — a plain-data transaction and a capability transaction
   // in flight together must both complete and read back correctly.
   //
@@ -516,7 +479,6 @@
   // would have to be coordinated to keep W in AW order; that is a VIP feature, not
   // exercised here. Concurrency is exercised on the read side, where responses are
   // routed by RID: the data read and the capability read are issued together.
-  // -------------------------------------------------------------------------
   class axi_sram_concurrent_data_tag_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_concurrent_data_tag_vseq)
     function new(string name = "axi_sram_concurrent_data_tag_vseq"); super.new(name); endfunction
@@ -552,9 +514,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // random_data — N random (8-byte-aligned addr, data) write/read pairs.
-  // -------------------------------------------------------------------------
   class axi_sram_random_data_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_random_data_vseq)
     function new(string name = "axi_sram_random_data_vseq"); super.new(name); endfunction
@@ -586,9 +546,7 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // random_capabilities — N random 16-byte-aligned capability write/read pairs.
-  // -------------------------------------------------------------------------
   class axi_sram_random_capabilities_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_random_capabilities_vseq)
     function new(string name = "axi_sram_random_capabilities_vseq"); super.new(name); endfunction
@@ -625,14 +583,10 @@
   endclass
 
 
-  // =========================================================================
   // Priority-3 tests
-  // =========================================================================
 
-  // -------------------------------------------------------------------------
   // init_value_undefined — power-up SRAM/tag contents are undefined; only assert
   // that an un-written read completes and that a write makes it deterministic.
-  // -------------------------------------------------------------------------
   class axi_sram_init_value_undefined_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_init_value_undefined_vseq)
     function new(string name = "axi_sram_init_value_undefined_vseq"); super.new(name); endfunction
@@ -656,10 +610,8 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // execute_from_sram — instruction-flavoured reads (arprot[2]=1) return stored
   // words identically to data reads, as single fetches and as a sequential burst.
-  // -------------------------------------------------------------------------
   class axi_sram_execute_from_sram_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_execute_from_sram_vseq)
     function new(string name = "axi_sram_execute_from_sram_vseq"); super.new(name); endfunction
@@ -692,12 +644,10 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
   // burst_read_mixed_tags — adjacent slots return independent per-beat ruser when
   // each is read as its own 2-beat transaction. Per-beat tags across a longer
   // (awlen>1) burst are the tag controller's job (axi_sram gates ruser on
   // awlen==1), so that boundary is logged, not asserted.
-  // -------------------------------------------------------------------------
   class axi_sram_burst_read_mixed_tags_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_burst_read_mixed_tags_vseq)
     function new(string name = "axi_sram_burst_read_mixed_tags_vseq"); super.new(name); endfunction
@@ -730,25 +680,121 @@
   endclass
 
 
-  // -------------------------------------------------------------------------
-  // out_of_range_error — OUT OF SCOPE for axi_sram. Kept for vplan traceability.
-  // -------------------------------------------------------------------------
+  // out_of_range_error (u0s8nt) -- accesses outside every mapped region must return
+  // DECERR. Now exercisable because the DUT sits behind the real xbar, which has no
+  // default master port (en_default_mst_port=0). run_*/scoreboard both check it.
   class axi_sram_out_of_range_error_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_out_of_range_error_vseq)
     function new(string name = "axi_sram_out_of_range_error_vseq"); super.new(name); endfunction
 
     task body();
+      bit [63:0] data;
+      m_base = 64'h0;   // drive absolute system addresses
       await_reset();
-      `uvm_info(get_full_name(), {"out_of_range_error (u0s8nt): OUT OF SCOPE — range checking is ",
-                "enforced by the SoC interconnect / address decode upstream, not axi_sram (which ",
-                "ties mem_err_i=0 and masks the address). No stimulus driven."}, UVM_LOW)
+      // Just past the SRAM aperture (SRAMBase + SRAMLength): unmapped -> DECERR.
+      read_word (32'd1, top_pkg::SRAMBase + top_pkg::SRAMLength, data);
+      write_word(32'd1, top_pkg::SRAMBase + top_pkg::SRAMLength, 64'hDEAD_BEEF_DEAD_BEEF);
+      // A rule-less gap (TlCrossbar end .. DRAM base): unmapped -> DECERR.
+      read_word (32'd1, 64'h6000_0000, data);
+      write_word(32'd1, 64'h6000_0000, 64'hBAD0_C0DE_BAD0_C0DE);
+      `uvm_info(get_full_name(),
+                "out_of_range_error: unmapped accesses returned DECERR -- PASS", UVM_LOW)
+    endtask
+  endclass
+
+  // wrong_region_decerr -- every *other* mapped region (ROM, Mailbox, RestOfChip,
+  // TlCrossbar, DRAM) routes away from the SRAM to an axi_err_slv and returns
+  // DECERR. Confirms the xbar decode delivers only the SRAM aperture to axi_sram.
+  class axi_sram_wrong_region_decerr_vseq extends axi_sram_base_vseq;
+    `uvm_object_utils(axi_sram_wrong_region_decerr_vseq)
+    function new(string name = "axi_sram_wrong_region_decerr_vseq"); super.new(name); endfunction
+
+    task body();
+      bit [63:0] data;
+      bit [63:0] bases[] = '{top_pkg::RomCtrlMemBase, top_pkg::MailboxBase,
+                             top_pkg::RestOfChipBase, top_pkg::TlCrossbarBase,
+                             top_pkg::DRAMBase};
+      m_base = 64'h0;   // absolute system addresses
+      await_reset();
+      foreach (bases[i]) begin
+        read_word (32'd2, bases[i], data);
+        write_word(32'd2, bases[i], 64'hA5A5_5A5A_A5A5_5A5A);
+      end
+      `uvm_info(get_full_name(),
+                "wrong_region_decerr: all non-SRAM mapped regions returned DECERR -- PASS", UVM_LOW)
+    endtask
+  endclass
+
+  // sram_boundary -- pin the aperture edges: the first and last words inside the
+  // SRAM round-trip (OKAY), while the word just below the base and the word just
+  // past the top are unmapped and return DECERR.
+  class axi_sram_sram_boundary_vseq extends axi_sram_base_vseq;
+    `uvm_object_utils(axi_sram_sram_boundary_vseq)
+    function new(string name = "axi_sram_sram_boundary_vseq"); super.new(name); endfunction
+
+    task body();
+      bit [63:0] got;
+      await_reset();
+
+      // In-aperture edges (m_base = SRAMBase): first and last words round-trip.
+      write_word(32'd3, 64'h0, 64'hF00D_0000_0000_0001);
+      read_word (32'd3, 64'h0, got);
+      if (got != 64'hF00D_0000_0000_0001)
+        `uvm_error(get_full_name(), $sformatf("first word: got 0x%016h", got))
+      write_word(32'd3, LastWordAddr, 64'hF00D_0000_0000_0002);
+      read_word (32'd3, LastWordAddr, got);
+      if (got != 64'hF00D_0000_0000_0002)
+        `uvm_error(get_full_name(), $sformatf("last word: got 0x%016h", got))
+
+      // Out-of-aperture edges (absolute): one word below the base and one word past
+      // the top are unmapped -> DECERR (checked by run_read + the scoreboard).
+      m_base = 64'h0;
+      read_word(32'd3, top_pkg::SRAMBase - WordBytes,           got);
+      read_word(32'd3, top_pkg::SRAMBase + top_pkg::SRAMLength, got);
+      `uvm_info(get_full_name(),
+                "sram_boundary: aperture edges OK, just-outside returned DECERR -- PASS", UVM_LOW)
+    endtask
+  endclass
+
+  // burst_wrap -- the "partial burst out of range" scenario (u0s8nt): a burst that
+  // starts in-SRAM whose later beats cross the aperture top. Such a burst would cross
+  // the 4 KiB boundary at SRAMBase+SRAMLength, which AXI4 (A4.1.2) forbids, so a
+  // compliant master cannot issue it -- u0s8nt is met by proxy of AXI4. This test
+  // confirms the protocol layer actually rejects it: the VIP's request item carries
+  // no_4kb_boundary_crossing_c, so a boundary-crossing request fails to randomise.
+  //
+  // (Were it forced through anyway, axi_sram has no range check -- mem_err_i=0, it
+  // masks the address -- so the over-the-top beat would wrap to SRAM word 0. But the
+  // xbar already blocks fully-out-of-range accesses and AXI4 blocks the partial case,
+  // so axi_sram never sees an out-of-aperture address; range enforcement is by proxy.)
+  class axi_sram_burst_wrap_vseq extends axi_sram_base_vseq;
+    `uvm_object_utils(axi_sram_burst_wrap_vseq)
+    function new(string name = "axi_sram_burst_wrap_vseq"); super.new(name); endfunction
+
+    task body();
+      axi_txn_request_item aw = axi_txn_request_item::type_id::create("aw");
+      bit legal;
+      await_reset();
+      // 2-beat INCR (8-byte) burst whose second beat lands one word past the aperture
+      // top -- i.e. it crosses the 4 KiB boundary at SRAMBase+SRAMLength.
+      legal = aw.randomize() with {
+        m_addr  == (top_pkg::SRAMBase + top_pkg::SRAMLength - WordBytes);
+        m_len   == 8'd1;
+        m_size  == 3'd3;
+        m_burst == BurstIncr;
+      };
+      if (legal)
+        `uvm_error(get_full_name(), {"burst_wrap: a burst crossing the SRAM aperture top randomised ",
+                  "as legal -- the AXI4 4 KiB-boundary constraint is missing"})
+      else
+        `uvm_info(get_full_name(), {"burst_wrap: a burst crossing the SRAM aperture top is rejected by ",
+                  "the AXI4 4 KiB-boundary constraint; the partial-out-of-range scenario cannot be ",
+                  "issued by a compliant master, so u0s8nt is met by proxy -- PASS"}, UVM_LOW)
     endtask
   endclass
 
 
-  // -------------------------------------------------------------------------
   // atomics_excluded — spec exclusion (bsi4rc); no functional test required.
-  // -------------------------------------------------------------------------
   class axi_sram_atomics_excluded_vseq extends axi_sram_base_vseq;
     `uvm_object_utils(axi_sram_atomics_excluded_vseq)
     function new(string name = "axi_sram_atomics_excluded_vseq"); super.new(name); endfunction
