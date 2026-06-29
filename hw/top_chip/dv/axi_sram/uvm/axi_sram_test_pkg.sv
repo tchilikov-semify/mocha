@@ -38,12 +38,179 @@ package axi_sram_test_pkg;
   localparam bit [63:0]       LastCapAddr  = SramSize - CapBytes;   // 0x1FFF0
 
   // -------------------------------------------------------------------------
+  // Reference model — behavioural shadow of the SRAM (data + CHERI tags).
+  //
+  // Updated from observed write transactions; queried to predict read-backs. It
+  // encodes the DUT's tag rules: a region's tag is *set* only by a full
+  // capability write (awlen==1, awsize==3, 16-byte-aligned, full strobes on both
+  // beats, both beats agreeing on wuser); any other write touching a region
+  // *clears* it. On reads, a region's tag is returned only for a capability-sized
+  // read (arlen==1 && arsize==3); every other read returns a cleared tag flit.
+  //
+  // Data is byte-addressed and sparse; never-written bytes read back as 0, which
+  // matches the TB's power-up zeroing of the data/tag RAMs.
+  // -------------------------------------------------------------------------
+  class axi_sram_ref_model extends uvm_object;
+    `uvm_object_utils(axi_sram_ref_model)
+
+    protected bit [7:0] m_data [bit [63:0]];   // byte address -> byte
+    protected bit       m_tag  [bit [63:0]];   // 16-byte region base -> tag
+
+    function new(string name = "axi_sram_ref_model");
+      super.new(name);
+    endfunction
+
+    protected function automatic bit [63:0] region_base(bit [63:0] addr);
+      return addr & ~64'hF;
+    endfunction
+
+    // Address of beat `i` of a burst (FIXED repeats the address; INCR steps by
+    // the beat size). axi_sram never uses WRAP, so it is treated as INCR.
+    protected function automatic bit [63:0] beat_addr(bit [63:0] base, bit [2:0] size,
+                                                      bit [1:0] burst, int i);
+      if (burst == 2'b00) return base;                 // FIXED
+      return base + (64'(i) * (64'd1 << size));        // INCR
+    endfunction
+
+    // Apply an observed full write transaction.
+    function void predict_write(axi_mon_item tr);
+      int        nbeats   = int'(tr.awlen) + 1;
+      bit [63:0] base     = tr.awaddr;
+      bit        cap_user = tr.wuser[0][0];
+      bit        full_cap = (tr.awlen == 8'd1) && (tr.awsize == 3'd3) && (base[3:0] == 4'd0);
+
+      foreach (tr.wstrb[i]) if (tr.wstrb[i][7:0] !== 8'hFF)    full_cap = 1'b0;
+      foreach (tr.wuser[i]) if (tr.wuser[i][0]   !== cap_user) full_cap = 1'b0;
+
+      // Data: commit each enabled byte lane to its byte address.
+      for (int i = 0; i < nbeats; i++) begin
+        bit [63:0] baddr = beat_addr(base, tr.awsize, tr.awburst, i);
+        bit [63:0] wbase = baddr & ~64'h7;             // 8-byte bus-word base
+        for (int lane = 0; lane < 8; lane++)
+          if (tr.wstrb[i][lane]) m_data[wbase + lane] = tr.wdata[i][8*lane +: 8];
+      end
+
+      // Tag: set only for a full capability write, else clear every touched region.
+      if (full_cap) begin
+        m_tag[region_base(base)] = cap_user;
+      end else begin
+        for (int i = 0; i < nbeats; i++)
+          m_tag[region_base(beat_addr(base, tr.awsize, tr.awburst, i))] = 1'b0;
+      end
+    endfunction
+
+    // Expected 8-byte read-back for the word containing `word_base`.
+    function automatic bit [63:0] expected_word(bit [63:0] word_base);
+      expected_word = '0;
+      for (int lane = 0; lane < 8; lane++)
+        if (m_data.exists(word_base + lane))
+          expected_word[8*lane +: 8] = m_data[word_base + lane];
+    endfunction
+
+    // Predict the per-beat data and RUSER (tag) of an observed read transaction.
+    function void predict_read(axi_mon_item tr, output bit [63:0] exp_data[$],
+                                                output bit        exp_user[$]);
+      int  nbeats   = int'(tr.arlen) + 1;
+      bit  cap_read = (tr.arlen == 8'd1) && (tr.arsize == 3'd3);
+      exp_data.delete();
+      exp_user.delete();
+      for (int i = 0; i < nbeats; i++) begin
+        bit [63:0] baddr = beat_addr(tr.araddr, tr.arsize, tr.arburst, i);
+        bit [63:0] reg_b = region_base(baddr);
+        exp_data.push_back(expected_word(baddr & ~64'h7));
+        exp_user.push_back((cap_read && m_tag.exists(reg_b)) ? m_tag[reg_b] : 1'b0);
+      end
+    endfunction
+  endclass
+
+  // -------------------------------------------------------------------------
+  // Scoreboard — subscribes to the agent's monitor (tx_ap, fully-merged write/
+  // read transactions) and checks the DUT against the reference model. Writes
+  // update the model and have their BRESP checked; reads are compared beat by
+  // beat on data, RUSER (CHERI tag) and RRESP.
+  // -------------------------------------------------------------------------
+  class axi_sram_scoreboard extends uvm_scoreboard;
+    `uvm_component_utils(axi_sram_scoreboard)
+
+    uvm_analysis_imp #(axi_mon_item, axi_sram_scoreboard) tx_imp;
+    axi_sram_ref_model m_model;
+
+    int unsigned m_writes, m_reads, m_data_errs, m_tag_errs, m_resp_errs;
+
+    function new(string name, uvm_component parent);
+      super.new(name, parent);
+      tx_imp = new("tx_imp", this);
+    endfunction
+
+    function void build_phase(uvm_phase phase);
+      super.build_phase(phase);
+      m_model = axi_sram_ref_model::type_id::create("m_model");
+    endfunction
+
+    // Analysis callback (tx_ap only ever emits fully merged transactions).
+    function void write(axi_mon_item tr);
+      case (tr.obs_kind)
+        AXI_FULL_WRITE_TR: check_write(tr);
+        AXI_FULL_READ_TR : check_read(tr);
+        default: ;
+      endcase
+    endfunction
+
+    protected function void check_write(axi_mon_item tr);
+      m_writes++;
+      if (tr.bresp != 3'd0) begin
+        `uvm_error(get_full_name(), $sformatf(
+                   "write @0x%0h (id 0x%0h): BRESP=%0d (expected OKAY)", tr.awaddr, tr.bid, tr.bresp))
+        m_resp_errs++;
+      end
+      m_model.predict_write(tr);
+    endfunction
+
+    protected function void check_read(axi_mon_item tr);
+      bit [63:0] exp_data[$];
+      bit        exp_user[$];
+      m_reads++;
+      m_model.predict_read(tr, exp_data, exp_user);
+      foreach (tr.rdata[i]) begin
+        bit [63:0] baddr = tr.araddr + ((tr.arburst == 2'b00) ? 0 : (64'(i) << tr.arsize));
+        if (tr.rresp[i] != 3'd0) begin
+          `uvm_error(get_full_name(), $sformatf(
+                     "read @0x%0h beat %0d (id 0x%0h): RRESP=%0d (expected OKAY)",
+                     baddr, i, tr.rid, tr.rresp[i]))
+          m_resp_errs++;
+        end
+        if (tr.rdata[i][63:0] != exp_data[i]) begin
+          `uvm_error(get_full_name(), $sformatf(
+                     "read DATA @0x%0h beat %0d (id 0x%0h): got 0x%016h, model 0x%016h",
+                     baddr, i, tr.rid, tr.rdata[i][63:0], exp_data[i]))
+          m_data_errs++;
+        end
+        if (tr.ruser[i][0] != exp_user[i]) begin
+          `uvm_error(get_full_name(), $sformatf(
+                     "read TAG  @0x%0h beat %0d (id 0x%0h): got %0b, model %0b",
+                     baddr, i, tr.rid, tr.ruser[i][0], exp_user[i]))
+          m_tag_errs++;
+        end
+      end
+    endfunction
+
+    function void report_phase(uvm_phase phase);
+      super.report_phase(phase);
+      `uvm_info(get_full_name(), $sformatf({"scoreboard: %0d writes, %0d reads checked; ",
+                "data_errs=%0d tag_errs=%0d resp_errs=%0d"},
+                m_writes, m_reads, m_data_errs, m_tag_errs, m_resp_errs), UVM_LOW)
+    endfunction
+  endclass
+
+  // -------------------------------------------------------------------------
   // Environment
   // -------------------------------------------------------------------------
   class axi_sram_env extends uvm_env;
     `uvm_component_utils(axi_sram_env)
 
-    axi_mgr_agent m_agent;
+    axi_mgr_agent       m_agent;          // active: drives stimulus (and observes)
+    axi_mgr_agent       m_passive_agent;  // passive: monitor-only, feeds the scoreboard
+    axi_sram_scoreboard m_scoreboard;
 
     function new(string name, uvm_component parent);
       super.new(name, parent);
@@ -86,6 +253,23 @@ package axi_sram_test_pkg;
 
       m_agent = axi_mgr_agent::type_id::create("m_agent", this);
       m_agent.set_cfg(cfg);
+
+      // A second agent in PASSIVE mode on the same interfaces. With is_active =
+      // UVM_PASSIVE it builds no drivers/sequencers — only the (reset + txn)
+      // monitors — so it exercises the agent's monitor-only path. It shares the
+      // same cfg (hence the same five vifs) as the active agent.
+      uvm_config_db#(uvm_active_passive_enum)::set(this, "m_passive_agent", "is_active", UVM_PASSIVE);
+      m_passive_agent = axi_mgr_agent::type_id::create("m_passive_agent", this);
+      m_passive_agent.set_cfg(cfg);
+
+      m_scoreboard = axi_sram_scoreboard::type_id::create("m_scoreboard", this);
+    endfunction
+
+    function void connect_phase(uvm_phase phase);
+      super.connect_phase(phase);
+      // Drive the scoreboard from the PASSIVE agent's monitor: the active agent
+      // drives the bus, the passive agent only observes it.
+      m_passive_agent.get_monitor().tx_ap.connect(m_scoreboard.tx_imp);
     endfunction
   endclass
 

@@ -73,5 +73,17 @@ package axi_agent_pkg;
 
   `include "seq_lib/axi_mgr_register_layer_vseq.svh"
 
+  // ---------------------------------------------------------------------------
+  // Passive AXI transaction monitor (re-homed from the former axi4_vip VIP onto
+  // the canonical per-channel interfaces). It reconstructs whole write/read
+  // transactions from the five axi_*_if mon_cb clocking blocks and publishes
+  // them on its analysis ports (tx_ap = fully merged transactions). It shares
+  // axi_agent_cfg with the driver, so the same agent can drive and/or observe.
+  // Included before axi_mgr_agent, which instantiates the monitor.
+  // ---------------------------------------------------------------------------
+  `include "axi_mon_types.svh"
+  `include "axi_mon_item.svh"
+  `include "axi_monitor.svh"
+
   `include "axi_mgr_agent.svh"
 endpackage
