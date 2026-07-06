@@ -110,8 +110,8 @@ class kmac_scoreboard extends cip_base_scoreboard #(
   // key length enum
   key_len_e key_len;
 
-  bit [keymgr_pkg::KmacDataIfWidth-1:0]   kmac_app_block_data;
-  bit [keymgr_pkg::KmacDataIfWidth/8-1:0] kmac_app_block_strb;
+  bit [kmac_pkg::MsgWidth-1:0]   kmac_app_block_data;
+  bit [kmac_pkg::MsgWidth/8-1:0] kmac_app_block_strb;
   int kmac_app_block_strb_size = 0;
   bit kmac_app_last;
 
@@ -263,13 +263,13 @@ class kmac_scoreboard extends cip_base_scoreboard #(
 
             // Once valid sideload keys have been seen, update scoreboard state.
             //
-            // Note: max size of sideloaded key is keymgr_pkg::KeyWidth
+            // Note: max size of sideloaded key is kmac_pkg::KeyWidth
 
             sideload_key = cfg.keymgr_sideload_agent_cfg.vif.sideload_key;
 
             `uvm_info(`gfn, $sformatf("detected valid sideload_key: %0p", sideload_key), UVM_HIGH)
 
-            for (int i = 0; i < keymgr_pkg::KeyWidth / 32; i++) begin
+            for (int i = 0; i < kmac_pkg::KeyWidth / 32; i++) begin
               keymgr_keys[0][i] = sideload_key.key[0][i*32 +: 32];
               keymgr_keys[1][i] = sideload_key.key[1][i*32 +: 32];
             end
@@ -287,12 +287,12 @@ class kmac_scoreboard extends cip_base_scoreboard #(
   // Get sideload keys, pack and return the keys.
   virtual function bit [KMAC_NUM_SHARES-1:0][KMAC_NUM_KEYS_PER_SHARE-1:0][31:0] get_keymgr_keys();
     bit [KMAC_NUM_SHARES-1:0][KMAC_NUM_KEYS_PER_SHARE-1:0][31:0] keymgr_keys;
-    keymgr_pkg::hw_key_req_t sideload_key;
+    kmac_pkg::hw_key_req_t sideload_key;
 
     if (cfg.keymgr_sideload_agent_cfg.vif.sideload_key.valid) begin
       sideload_key = cfg.keymgr_sideload_agent_cfg.vif.sideload_key;
       `uvm_info(`gfn, $sformatf("get valid sideload_key: %0p", sideload_key), UVM_HIGH)
-      for (int i = 0; i < keymgr_pkg::KeyWidth / 32; i++) begin
+      for (int i = 0; i < kmac_pkg::KeyWidth / 32; i++) begin
         keymgr_keys[0][i] = sideload_key.key[0][i*32 +: 32];
         keymgr_keys[1][i] = sideload_key.key[1][i*32 +: 32];
       end
@@ -561,7 +561,7 @@ class kmac_scoreboard extends cip_base_scoreboard #(
                 // sample coverage
                 if (cfg.en_cov) begin
                   cov.app_cg_wrappers[app_mode].app_sample(
-                    kmac_app_rsp.byte_data_q.size() <= keymgr_pkg::KmacDataIfWidth/8,
+                    kmac_app_rsp.byte_data_q.size() <= kmac_pkg::MsgWidth/8,
                     '0,
                     kmac_app_rsp.rsp_error,
                     1,
