@@ -37,8 +37,8 @@ endfunction
 
 function void axi_response_accept_item::do_print(uvm_printer printer);
   super.do_print(printer);
-  printer.print_field_int("m_ready_without_valid_pct", m_ready_without_valid_pct, 32, UVM_DECIMAL);
-  printer.print_field_int("m_valid_to_ready_delay", m_valid_to_ready_delay, 32, UVM_DECIMAL);
+  printer.print_field_int("m_ready_without_valid_pct", m_ready_without_valid_pct, 32, UVM_DEC);
+  printer.print_field_int("m_valid_to_ready_delay", m_valid_to_ready_delay, 32, UVM_DEC);
 endfunction
 
 function void axi_response_accept_item::do_copy(uvm_object rhs);
@@ -62,9 +62,9 @@ function bit axi_response_accept_item::do_compare(uvm_object rhs, uvm_comparer c
 
   return (super.do_compare(rhs, comparer) &
           comparer.compare_field_int("m_ready_without_valid_pct", m_ready_without_valid_pct,
-                                     rhs_.m_ready_without_valid_pct, 32, UVM_DECIMAL) &
+                                     rhs_.m_ready_without_valid_pct, 32, UVM_DEC) &
           comparer.compare_field_int("m_valid_to_ready_delay", m_valid_to_ready_delay,
-                                     rhs_.m_valid_to_ready_delay, 32, UVM_DECIMAL));
+                                     rhs_.m_valid_to_ready_delay, 32, UVM_DEC));
 endfunction
 
 constraint axi_response_accept_item::ready_without_valid_c {

@@ -6,6 +6,7 @@
 // AWBURST set to FIXED and AWLEN = 0 (so just a single data transfer).
 
 class axi_fixed_write_req_item extends uvm_sequence_item;
+  `uvm_object_utils(axi_fixed_write_req_item)
   // Transaction identifier for the write channel
   //
   // This is sent as AWID, whose width is configurable (and will be checked against the
@@ -61,7 +62,7 @@ function void axi_fixed_write_req_item::do_print(uvm_printer printer);
   printer.print_field_int("m_id", m_id, 32, UVM_HEX);
   printer.print_field("m_addr", m_addr, 64, UVM_HEX);
   printer.print_field_int("m_region", m_region, 4, UVM_HEX);
-  printer.print_field_int("m_size", m_size, 3, UVM_DECIMAL);
+  printer.print_field_int("m_size", m_size, 3, UVM_DEC);
   printer.print_field_int("m_lock", m_lock, 1, UVM_BIN);
   printer.print_field_int("m_cache", m_cache, 4, UVM_BIN);
   printer.print_field_int("m_prot", m_prot, 3, UVM_BIN);
@@ -102,7 +103,7 @@ function bit axi_fixed_write_req_item::do_compare(uvm_object rhs, uvm_comparer c
           comparer.compare_field_int("m_id", m_id, rhs_.m_id, 32, UVM_HEX) &
           comparer.compare_field("m_addr", m_addr, rhs_.m_addr, 64, UVM_HEX) &
           comparer.compare_field_int("m_region", m_region, rhs_.m_region, 4, UVM_HEX) &
-          comparer.compare_field_int("m_size", m_size, rhs_.m_size, 3, UVM_DECIMAL) &
+          comparer.compare_field_int("m_size", m_size, rhs_.m_size, 3, UVM_DEC) &
           comparer.compare_field_int("m_lock", m_lock, rhs_.m_lock, 1, UVM_BIN) &
           comparer.compare_field_int("m_cache", m_cache, rhs_.m_cache, 4, UVM_BIN) &
           comparer.compare_field_int("m_prot", m_prot, rhs_.m_prot, 3, UVM_BIN) &

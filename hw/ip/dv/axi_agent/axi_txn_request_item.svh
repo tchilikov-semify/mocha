@@ -84,8 +84,8 @@ function void axi_txn_request_item::do_print(uvm_printer printer);
   printer.print_field_int("m_id", m_id, 32, UVM_HEX);
   printer.print_field("m_addr", m_addr, 64, UVM_HEX);
   printer.print_field_int("m_region", m_region, 4, UVM_HEX);
-  printer.print_field_int("m_len", m_len, 8, UVM_DECIMAL);
-  printer.print_field_int("m_size", m_size, 3, UVM_DECIMAL);
+  printer.print_field_int("m_len", m_len, 8, UVM_DEC);
+  printer.print_field_int("m_size", m_size, 3, UVM_DEC);
   printer.print_string("m_burst", m_burst.name());
   printer.print_field_int("m_lock", m_lock, 1, UVM_BIN);
   printer.print_field_int("m_cache", m_cache, 4, UVM_BIN);
@@ -126,8 +126,8 @@ function bit axi_txn_request_item::do_compare(uvm_object rhs, uvm_comparer compa
           comparer.compare_field_int("m_id", m_id, rhs_.m_id, 32, UVM_HEX) &
           comparer.compare_field("m_addr", m_addr, rhs_.m_addr, 64, UVM_HEX) &
           comparer.compare_field_int("m_region", m_region, rhs_.m_region, 4, UVM_HEX) &
-          comparer.compare_field_int("m_len", m_len, rhs_.m_len, 8, UVM_DECIMAL) &
-          comparer.compare_field_int("m_size", m_size, rhs_.m_size, 3, UVM_DECIMAL) &
+          comparer.compare_field_int("m_len", m_len, rhs_.m_len, 8, UVM_DEC) &
+          comparer.compare_field_int("m_size", m_size, rhs_.m_size, 3, UVM_DEC) &
           comparer.compare_field_int("m_burst", m_burst, rhs_.m_burst, 2, UVM_BIN) &
           comparer.compare_field_int("m_lock", m_lock, rhs_.m_lock, 1, UVM_BIN) &
           comparer.compare_field_int("m_cache", m_cache, rhs_.m_cache, 4, UVM_BIN) &

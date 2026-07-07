@@ -82,6 +82,7 @@ task axi_mgr_write_response_driver::get_and_drive();
   forever begin
     seq_item_port.get_next_item(req);
     drive_req();
+    rsp.set_id_info(req);
     seq_item_port.item_done(rsp);
   end
 endtask

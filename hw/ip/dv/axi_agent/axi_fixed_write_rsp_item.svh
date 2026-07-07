@@ -8,6 +8,7 @@
 // sequences (which may be null if the sequences were interrupted by a reset).
 
 class axi_fixed_write_rsp_item extends uvm_sequence_item;
+  `uvm_object_utils(axi_fixed_write_rsp_item)
   // The status of the write request transfer (which either completed or was interrupted by reset)
   axi_status_item         m_aw_status;
 

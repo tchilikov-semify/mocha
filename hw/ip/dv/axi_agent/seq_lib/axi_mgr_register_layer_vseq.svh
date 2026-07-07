@@ -171,7 +171,7 @@ task axi_mgr_register_layer_vseq::send_op_item(axi_reg_op_item item);
       r_complete = (read_vseq.rsp.m_read_data != null);
 
       item.m_rw.status = (ar_complete && r_complete &&
-                          read_vseq.rsp.m_read_data.m_resp inside {RRespOk, RRespExOkay}) ?
+                          read_vseq.rsp.m_read_data.m_resp inside {axi_read_data_item::RRespOkay, axi_read_data_item::RRespExOkay}) ?
                          UVM_IS_OK :
                          UVM_NOT_OK;
       item.m_rw.data   = r_complete ? (read_vseq.rsp.m_read_data.m_data & bit_mask) : 0;
@@ -206,7 +206,7 @@ task axi_mgr_register_layer_vseq::send_op_item(axi_reg_op_item item);
       b_complete = (write_vseq.rsp.m_write_response != null);
 
       item.m_rw.status = (aw_complete && w_complete && b_complete &&
-                          write_vseq.rsp.m_write_response.m_resp inside {BRespOk, BRespExOkay}) ?
+                          write_vseq.rsp.m_write_response.m_resp inside {axi_write_response_item::BRespOkay, axi_write_response_item::BRespExOkay}) ?
                          UVM_IS_OK :
                          UVM_NOT_OK;
     end

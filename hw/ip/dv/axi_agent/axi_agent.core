@@ -6,6 +6,8 @@ name: "lowrisc:dv:axi_agent:0.1"
 description: "AXI agent"
 filesets:
   files_dv:
+    depend:
+      - lowrisc:dv:dv_utils
     files:
       - axi_read_data_if.sv
       - axi_read_request_if.sv

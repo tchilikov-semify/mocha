@@ -298,7 +298,7 @@ task axi_mgr_agent::run_layered_register_vseq();
     `uvm_fatal(get_full_name(), "Overlapping runs of layered register vseq.")
   end
 
-  m_layered_reg_sequencer = layered_reg_sequencer_t::type_id::create("m_layered_reg_sequencer");
+  m_layered_reg_sequencer = layered_reg_sequencer_t::type_id::create("m_layered_reg_sequencer", this);
 
   layer_vseq = axi_mgr_register_layer_vseq::type_id::create("layer_vseq");
 
@@ -310,12 +310,12 @@ task axi_mgr_agent::run_layered_register_vseq();
                             m_read_data_sequencer);
   layer_vseq.set_response_routers(m_read_response_router, m_write_response_router);
 
-  layer_vseq.start();
+  layer_vseq.start(null);
 
   // Because layer_vseq never completes, we don't expect to get her.
   `uvm_fatal(get_full_name(), "Instance of axi_mgr_register_layer_vseq ran to completion.")
 endtask
 
-function axi_mgr_agent::layered_reg_sequencer_t get_register_layering_sequencer();
+function axi_mgr_agent::layered_reg_sequencer_t axi_mgr_agent::get_register_layering_sequencer();
   return m_layered_reg_sequencer;
 endfunction

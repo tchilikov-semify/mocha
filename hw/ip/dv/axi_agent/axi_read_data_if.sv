@@ -4,8 +4,11 @@
 
 // An interface to track an AXI read data channel
 
+  `include "uvm_macros.svh"
+
 interface axi_read_data_if (input clk_i, input rst_ni);
   import dv_utils_pkg::if_mode_e, dv_utils_pkg::Host, dv_utils_pkg::Device, dv_utils_pkg::Monitor;
+  import uvm_pkg::*;
 
   // The interface mode.
   //

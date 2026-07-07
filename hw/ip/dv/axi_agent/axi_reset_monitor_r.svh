@@ -19,6 +19,10 @@ class axi_reset_monitor_r extends uvm_monitor;
   extern function void set_vif(virtual axi_read_data_if vif);
 endclass
 
+function void axi_reset_monitor_r::set_vif(virtual axi_read_data_if vif);
+  m_vif = vif;
+endfunction
+
 function axi_reset_monitor_r::new(string name, uvm_component parent);
   super.new(name, parent);
   m_analysis_port = new("m_analysis_port", this);

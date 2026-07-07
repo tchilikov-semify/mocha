@@ -10,7 +10,7 @@ class axi_reg_adapter extends uvm_reg_adapter;
 
   extern function new(string name="");
   extern function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
-  extern function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op op);
+  extern function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
 endclass
 
 function axi_reg_adapter::new(string name="");
@@ -22,7 +22,7 @@ function axi_reg_adapter::new(string name="");
   provides_responses   = 1;
 endfunction
 
-function axi_reg_adapter::uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+function uvm_sequence_item axi_reg_adapter::reg2bus(const ref uvm_reg_bus_op rw);
   axi_reg_op_item bus_item = axi_reg_op_item::type_id::create("bus_item");
 
   // Take a copy of the uvm_reg_bus_op (which will be a deep copy because uvm_reg_bus_op is a
@@ -32,10 +32,11 @@ function axi_reg_adapter::uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw)
   return bus_item;
 endfunction
 
-function void axi_reg_adapter::bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op op);
-  // Replace all the fields in op that bus2reg would normally populate (kind, addr, data and status)
-  op.kind = bus_item.m_rw.kind;
-  op.addr = bus_item.m_rw.addr;
-  op.data = bus_item.m_rw.data;
-  op.status = bus_item.m_rw.status;
+function void axi_reg_adapter::bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
+  axi_reg_op_item item;
+  if (!$cast(item, bus_item)) `uvm_fatal("bus2reg", "bus_item is not an axi_reg_op_item")
+  rw.kind   = item.m_rw.kind;
+  rw.addr   = item.m_rw.addr;
+  rw.data   = item.m_rw.data;
+  rw.status = item.m_rw.status;
 endfunction

@@ -93,6 +93,7 @@ task axi_mgr_write_request_driver::get_and_drive();
   forever begin
     seq_item_port.get_next_item(req);
     status_item = axi_status_item::type_id::create("status_item");
+    status_item.set_id_info(req);
     drive_req(status_item.m_sending_complete);
     seq_item_port.item_done(status_item);
   end
