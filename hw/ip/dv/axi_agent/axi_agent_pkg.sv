@@ -73,5 +73,9 @@ package axi_agent_pkg;
 
   `include "seq_lib/axi_mgr_register_layer_vseq.svh"
 
+  `include "axi_mon_types.svh"
+  `include "axi_mon_item.svh"
+  `include "axi_monitor.svh"
+
   `include "axi_mgr_agent.svh"
 endpackage

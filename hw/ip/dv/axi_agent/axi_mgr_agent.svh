@@ -42,6 +42,10 @@ class axi_mgr_agent extends uvm_agent;
   // A response router for reads
   local axi_response_router m_read_response_router;
 
+  // A passive transaction monitor. Built whether the agent is active or passive:
+  // an active agent both drives and observes the bus; a passive agent only observes.
+  local axi_monitor m_monitor;
+
   // A reg adapter. This is stateless, so gets created in build_phase whenever the agent is active.
   // It's useful in conjunction with a layered sequencer (which is created by
   // run_layered_register_vseq and can be retrieved with get_register_layering_sequencer).
@@ -75,6 +79,9 @@ class axi_mgr_agent extends uvm_agent;
 
   // Get the reset_monitor for the read data channel (R). Can only be called after build_phase.
   extern function axi_reset_monitor_r get_read_data_reset_monitor();
+
+  // Get the passive transaction monitor. Can only be called after build_phase.
+  extern function axi_monitor get_monitor();
 
   // Get the sequencer for the write request channel (AW). Can only be called after build_phase, and
   // the agent must be active.
@@ -135,6 +142,11 @@ function void axi_mgr_agent::build_phase(uvm_phase phase);
   m_reset_monitor_b  = axi_reset_monitor_b::type_id::create("m_reset_monitor_b", this);
   m_reset_monitor_ar = axi_reset_monitor_ar::type_id::create("m_reset_monitor_ar", this);
   m_reset_monitor_r  = axi_reset_monitor_r::type_id::create("m_reset_monitor_r", this);
+
+  // Passive transaction monitor: built in both active and passive agents. It
+  // takes the per-channel interfaces from the shared cfg (resolved above).
+  m_monitor = axi_monitor::type_id::create("m_monitor", this);
+  m_monitor.set_cfg(m_cfg);
 
   if (get_is_active() == UVM_ACTIVE) begin
     // Create routers for write and read responses
@@ -242,6 +254,11 @@ function axi_reset_monitor_r axi_mgr_agent::get_read_data_reset_monitor();
   if (m_reset_monitor_r == null)
     `uvm_fatal(get_full_name(), "m_reset_monitor_r is null.")
   return m_reset_monitor_r;
+endfunction
+
+function axi_monitor axi_mgr_agent::get_monitor();
+  if (m_monitor == null) `uvm_fatal(get_full_name(), "m_monitor is null.")
+  return m_monitor;
 endfunction
 
 function write_request_sequencer_t axi_mgr_agent::get_write_request_sequencer();
