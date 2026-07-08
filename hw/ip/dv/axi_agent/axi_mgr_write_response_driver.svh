@@ -117,29 +117,36 @@ task axi_mgr_write_response_driver::drive_req();
       wait(m_in_reset);
       begin
         axi_write_response_item response;
+        bit          bready_q;          // the bready value we are driving this cycle
+        bit          valid_seen = 1'b0; // bvalid has been observed at least once
+        int unsigned delay      = 0;    // cycles counted since bvalid was first seen
 
-        // For the time until bvalid is asserted, obey req.m_ready_without_valid_pct and assert
-        // bready for some fraction of the total time.
-        while (m_vif.mgr_cb.bvalid !== 1'b1) begin
-          m_vif.mgr_cb.bready <= $urandom_range(0, 99) < req.m_ready_without_valid_pct;
+        // Drive rready and watch for the actual transfer. We track the rready we drive in rready_q
+	// rather than reading it back from the clocking block, and we sample on that exact handshake
+	// edge. This is what makes the accept protocol-correct:
+        //   * a speculative rready (asserted before rvalid via ready_without_valid_pct) that catches
+        //     the beat is detected and sampled, instead of consuming the beat unsampled; and
+        //   * two accepts running back-to-back (no clock edge between sequence items) cannot
+        //     re-sample the same beat, because each iteration advances a clock before checking.
+        forever begin
+          if (!valid_seen)
+            // Before bvalid: optionally assert bready speculatively.
+            bready_q = ($urandom_range(0, 99) < req.m_ready_without_valid_pct);
+          else
+            // After bvalid: hold bready low for valid_to_ready_delay cycles, then assert it.
+            bready_q = (delay >= req.m_valid_to_ready_delay);
+
+          m_vif.mgr_cb.bready <= bready_q;
           @(m_vif.mgr_cb);
+
+          if (m_vif.mgr_cb.bvalid === 1'b1) begin
+            if (bready_q) break;                 // bvalid && bready on this edge: response accepted
+            if (!valid_seen) valid_seen = 1'b1;  // first bvalid: start the valid-to-ready countdown
+            else             delay++;
+          end
         end
 
-        // At this point, bvalid has been asserted. If bready is true, the transfer has gone
-        // through. If not, wait req.m_valid_to_ready_delay cycles before we assert ready.
-        //
-        // Read bready from the clocking block to see the last value we wrote. Practically speaking,
-        // mgr_cb.bready will not be true unless we had at least one cycle in the loop above: we set
-        // mgr_cb.bready <= 0 at the end of this task and also when a reset is seen in monitor_reset.
-        if (m_vif.mgr_cb.bready !== 1'b1) begin
-          repeat (req.m_valid_to_ready_delay) @(m_vif.mgr_cb);
-          m_vif.mgr_cb.bready <= 1'b1;
-          @(m_vif.mgr_cb);
-        end
-
-        // When we get here, we have finished accepting a response and we are at the end of a cycle
-        // where bvalid and bready were asserted. Fill the response output variable with a sequence
-        // item to represent the response that we have seen.
+        // The response transferred on the edge we just broke out of: sample it.
         response = axi_write_response_item::type_id::create("response");
         response.m_id   = m_vif.mgr_cb.bid;
         response.m_resp = axi_write_response_item::bresp_e'(m_vif.mgr_cb.bresp);
@@ -148,7 +155,8 @@ task axi_mgr_write_response_driver::drive_req();
         // Set rsp, which will pass the response back to the sequencer.
         rsp = response;
 
-        // Finally, clear bready (for next cycle).
+        // Deassert bready. If the next accept follows immediately, its first iteration re-drives
+        // bready before the next clock edge, so consecutive responses are still accepted seamlessly.
         m_vif.mgr_cb.bready <= 1'b0;
       end
     join_any
