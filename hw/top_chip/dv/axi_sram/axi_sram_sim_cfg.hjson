@@ -1,0 +1,24 @@
+// Copyright lowRISC contributors (COSMIC project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  // Primary dvsim cfg for axi_sram verification. Aggregates the two build cfgs so
+  // both regressions run from one entry point:
+  //   dvsim axi_sram_sim_cfg.hjson              # block + integration
+  //   dvsim .../axi_sram_block_sim_cfg.hjson -i block        # block only
+  //   dvsim .../mocha_axi_bfm_sim_cfg.hjson  -i integration  # integration only
+  name: axi_sram
+
+  import_cfgs: [
+    "{proj_root}/hw/data/common_project_cfg.hjson"
+  ]
+
+  flow: sim
+
+  rel_path: "hw/top_chip/dv/axi_sram/summary"
+
+  use_cfgs: [
+    "{proj_root}/hw/top_chip/dv/axi_sram/block_tb/axi_sram_block_sim_cfg.hjson"
+    "{proj_root}/hw/top_chip/dv/mocha_axi_bfm_tb/mocha_axi_bfm_sim_cfg.hjson"
+  ]
+}
