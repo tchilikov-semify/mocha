@@ -1,0 +1,54 @@
+// Copyright lowRISC contributors (COSMIC project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: axi_sram_block
+
+  // DUT + testbench (dut_instance defaults to {tb}.dut in common_sim_cfg).
+  dut: axi_sram
+  tb:  axi_sram_block_tb
+
+  fusesoc_core: lowrisc:mocha_dv:axi_sram_block_tb:0
+
+  import_cfgs: [
+    "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson"
+  ]
+
+  // Directed UVM tests (one class each); each runs once.
+  reseed: 1
+  uvm_test: axi_sram_base_test
+
+  // Block DUT is addressed from 0 (the tb publishes sram_base=0).
+
+  tests: [
+    { name: "axi_sram_write_read",              uvm_test: "axi_sram_write_read_test" }
+    { name: "axi_sram_rst_sanity",              uvm_test: "axi_sram_rst_sanity_test" }
+    { name: "axi_sram_data_all_bits",           uvm_test: "axi_sram_data_all_bits_test" }
+    { name: "axi_sram_address_boundaries",      uvm_test: "axi_sram_address_boundaries_test" }
+    { name: "axi_sram_burst_last",              uvm_test: "axi_sram_burst_last_test" }
+    { name: "axi_sram_resp_id_match",           uvm_test: "axi_sram_resp_id_match_test" }
+    { name: "axi_sram_tag_write",               uvm_test: "axi_sram_tag_write_test" }
+    { name: "axi_sram_no_tag_single_beat",      uvm_test: "axi_sram_no_tag_single_beat_test" }
+    { name: "axi_sram_tag_cleared_by_write",    uvm_test: "axi_sram_tag_cleared_by_write_test" }
+    { name: "axi_sram_tag_isolation",           uvm_test: "axi_sram_tag_isolation_test" }
+    { name: "axi_sram_cap_ruser",               uvm_test: "axi_sram_cap_ruser_test" }
+    { name: "axi_sram_aligned_only",            uvm_test: "axi_sram_aligned_only_test" }
+    { name: "axi_sram_no_tag_misaligned",       uvm_test: "axi_sram_no_tag_misaligned_test" }
+    { name: "axi_sram_no_tag_two_bursts",       uvm_test: "axi_sram_no_tag_two_bursts_test" }
+    { name: "axi_sram_wuser_mismatch",          uvm_test: "axi_sram_wuser_mismatch_test" }
+    { name: "axi_sram_partial_strobe_clears_tag", uvm_test: "axi_sram_partial_strobe_clears_tag_test" }
+    { name: "axi_sram_subword_read_clears_tag", uvm_test: "axi_sram_subword_read_clears_tag_test" }
+    { name: "axi_sram_concurrent_data_tag",     uvm_test: "axi_sram_concurrent_data_tag_test" }
+    { name: "axi_sram_random_data",             uvm_test: "axi_sram_random_data_test" }
+    { name: "axi_sram_random_capabilities",     uvm_test: "axi_sram_random_capabilities_test" }
+    { name: "axi_sram_init_value_undefined",    uvm_test: "axi_sram_init_value_undefined_test" }
+    { name: "axi_sram_execute_from_sram",       uvm_test: "axi_sram_execute_from_sram_test" }
+    { name: "axi_sram_burst_read_mixed_tags",   uvm_test: "axi_sram_burst_read_mixed_tags_test" }
+    { name: "axi_sram_atomics_excluded",        uvm_test: "axi_sram_atomics_excluded_test" }
+  ]
+
+  // The block-level regression = every test in this cfg.
+  regressions: [
+    { name: "block" }
+  ]
+}
