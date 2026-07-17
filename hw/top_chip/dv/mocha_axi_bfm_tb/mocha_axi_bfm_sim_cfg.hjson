@@ -1,0 +1,37 @@
+// Copyright lowRISC contributors (COSMIC project).
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{
+  name: mocha_axi_bfm
+  dut: top_chip_system
+  tb:  mocha_axi_bfm_tb
+  fusesoc_core: lowrisc:mocha_dv:mocha_axi_bfm_tb:0
+
+  import_cfgs: [
+    "{proj_root}/hw/vendor/lowrisc_ip/dv/tools/dvsim/common_sim_cfg.hjson"
+  ]
+
+  reseed: 1
+  uvm_test: axi_sram_base_test
+
+  // Let Xcelium parse the SystemVerilog `config` in mocha_cfg.sv.
+  build_opts: ["-compcnfg"]
+
+  // sim_tops = the SV config mocha_cfg, elaborated as top (it swaps CVA6 for the
+  // BFM wrapper); {tb} = mocha_axi_bfm_tb is the runtime hierarchy scope.
+  overrides: [
+    { name: "sim_tops", value: ["mocha_cfg"] }
+  ]
+
+  // Integration-level tests
+  tests: [
+    { name: "axi_sram_out_of_range_error",  uvm_test: "axi_sram_out_of_range_error_test" }
+    { name: "axi_sram_wrong_region_decerr", uvm_test: "axi_sram_wrong_region_decerr_test" }
+    { name: "axi_sram_sram_boundary",       uvm_test: "axi_sram_sram_boundary_test" }
+    { name: "axi_sram_burst_wrap",          uvm_test: "axi_sram_burst_wrap_test" }
+  ]
+
+  regressions: [
+    { name: "integration" }
+  ]
+}
