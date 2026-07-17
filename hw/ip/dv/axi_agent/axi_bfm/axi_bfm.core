@@ -1,0 +1,24 @@
+CAPI=2:
+# Copyright lowRISC contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:mocha_dv:axi_bfm"
+description: "Reusable parameterized AXI manager BFM (agent interfaces + struct bridge + config_db publish), shared by both axi_sram harnesses"
+
+filesets:
+  files_bfm:
+    depend:
+      - lowrisc:mocha_constants:top_pkg
+      - pulp-platform.org::axi
+      - lowrisc:dv:dv_utils
+      - lowrisc:dv:common_ifs
+      - lowrisc:dv:axi_agent:0.1
+    files:
+      - axi_bfm.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - files_bfm
