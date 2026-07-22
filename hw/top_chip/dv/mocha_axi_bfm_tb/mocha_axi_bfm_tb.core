@@ -10,7 +10,7 @@ filesets:
   files_tb:
     depend:
       - lowrisc:mocha_dv:axi_sram_env
-      - lowrisc:mocha_dv:axi_bfm
+      - lowrisc:mocha_dv:axi_vip
       - lowrisc:mocha:top_chip_system
     files:
       # CVA6 replacement + the config that swaps it in

@@ -26,19 +26,21 @@ module axi_sram_block_tb;
   top_pkg::axi_dev_req_t  sram_req;
   top_pkg::axi_dev_resp_t sram_resp;
 
-  axi_bfm #(
+  axi_vip_if #(
     .req_t     (top_pkg::axi_dev_req_t),
     .resp_t    (top_pkg::axi_dev_resp_t),
     .IdWidth   (top_pkg::AxiDevIdWidth),
     .AddrWidth (top_pkg::AxiAddrWidth),
     .DataWidth (top_pkg::AxiDataWidth),
     .UserWidth (top_pkg::AxiUserWidth)
-  ) u_axi_bfm (
+  ) u_axi_vip (
     .clk_i     (clk),
-    .rst_ni    (rst_n),
-    .axi_req_o (sram_req),
-    .axi_resp_i(sram_resp)
+    .rst_ni    (rst_n)
   );
+  // Manager (IsActive defaults UVM_ACTIVE): drive the SRAM request from the VIP,
+  // observe its response.
+  assign sram_req           = u_axi_vip.axi_req;
+  assign u_axi_vip.axi_resp = sram_resp;
 
   axi_sram #(
     .AddrWidth(SramAddrWidth)

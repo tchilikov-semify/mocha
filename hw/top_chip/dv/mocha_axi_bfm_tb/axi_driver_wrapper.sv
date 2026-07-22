@@ -37,18 +37,20 @@ module axi_driver_wrapper import top_pkg::*; #(
   assign rvfi_probes_o = '0;
   assign cvxif_req_o   = '0;
 
-  axi_bfm #(
+  axi_vip_if #(
     .req_t     (noc_req_t),
     .resp_t    (noc_resp_t),
     .IdWidth   (CVA6Cfg.AxiIdWidth),
     .AddrWidth (CVA6Cfg.AxiAddrWidth),
     .DataWidth (CVA6Cfg.AxiDataWidth),
     .UserWidth (CVA6Cfg.AxiUserWidth)
-  ) u_axi_bfm (
+  ) u_axi_vip (
     .clk_i     (clk_i),
-    .rst_ni    (rst_ni),
-    .axi_req_o (noc_req_o),
-    .axi_resp_i(noc_resp_i)
+    .rst_ni    (rst_ni)
   );
+  // Manager (IsActive defaults UVM_ACTIVE): drive the CVA6-port request from the
+  // VIP, observe its response.
+  assign noc_req_o          = u_axi_vip.axi_req;
+  assign u_axi_vip.axi_resp = noc_resp_i;
 
 endmodule

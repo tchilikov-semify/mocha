@@ -11,8 +11,8 @@ filesets:
     depend:
       # Shared, DUT-agnostic UVM env (same one the integration harness uses).
       - lowrisc:mocha_dv:axi_sram_env
-      # Shared AXI manager BFM (parameterized on the device-side req/resp here).
-      - lowrisc:mocha_dv:axi_bfm
+      # Shared AXI VIP interface (active manager on the device-side req/resp here).
+      - lowrisc:mocha_dv:axi_vip
       # The block DUT. Its abstract prims (prim:ram_1p, ...) are resolved to the
       # generic implementation at build time via fusesoc --mapping.
       - lowrisc:mocha:axi_sram
