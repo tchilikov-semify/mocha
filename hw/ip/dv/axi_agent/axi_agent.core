@@ -9,6 +9,7 @@ filesets:
     depend:
       - lowrisc:dv:dv_utils
       - lowrisc:dv:common_ifs
+      - lowrisc:dv:dv_base_agent
     files:
       - axi_read_data_if.sv
       - axi_read_request_if.sv

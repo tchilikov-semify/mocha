@@ -4,6 +4,7 @@
 
 package axi_agent_pkg;
   import uvm_pkg::*;
+  import dv_base_agent_pkg::*;
   `include "uvm_macros.svh"
 
   // The possible encodings of the AxBURST signal
