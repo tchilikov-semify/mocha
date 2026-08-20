@@ -45,7 +45,26 @@ This sign-off is based on commit [`55fa175`][d1-commit].
 
 ### V1
 
-*Not yet started - see [stages.md][verification stages].*
+All checklist items refer to the [V1 verification sign-off checklist][V1 checklist].
+This sign-off is based on commit [`55fa175`][v1-commit].
+
+| Type          | Item                               | Status | Note/Collaterals |
+|---------------|------------------------------------|--------|------------------|
+| Documentation | DV_DOC_DRAFT_COMPLETED             | Done   | [SPI device DV document][] describes the goals, testbench architecture, stimulus, coverage, and checking strategy |
+| Documentation | TESTPLAN_COMPLETED                 | Done   | [SPI device testplan][] defines the V1 smoke test and post-V1 functional, error, performance and stress testpoints |
+| Testbench     | TB_TOP_CREATED                     | Done   | [tb.sv][] instantiates clock and reset, TileLink, the upstream and passthrough SPI, interrupt and alert interfaces along with the SPI device DUT |
+| Testbench     | PRELIMINARY_ASSERTION_CHECKS_ADDED | Done   | [spi_device_bind.sv][] binds the TLUL protocol and CSR assertions; the SPI device RTL checks that outputs are known after reset |
+| Integration   | PRE_VERIFIED_SUB_MODULES_V1        | Waived | SPI device and its primitive submodules are vendored from OpenTitan, where SPI device reached V2S ([OpenTitan spi_device checklist][]); Mocha applies no functional changes |
+| Review        | DESIGN_SPEC_REVIEWED               | Waived | The specification was reviewed through the OpenTitan sign-off process and the block was imported without functional changes |
+| Review        | TESTPLAN_REVIEWED                  | Done   | The vendored [OpenTitan spi_device checklist][] records the testplan review as complete |
+| Review        | STD_TEST_CATEGORIES_PLANNED        | Done   | Error scenarios, performance, command filtering, upload and stress tests are covered in the [SPI device testplan][]; security countermeasures are captured in the sec_cm testplan, but V2S is not used in Mocha; power and debug are N/A |
+| Simulation    | SIM_TB_ENV_CREATED                 | Done   | CIP-based UVM environment with two SPI agents (upstream host and passthrough device) and scoreboard |
+| Tests         | SIM_SMOKE_TEST_PASSING             | Done   | `spi_device_flash_and_tpm`: 1/1 passed with Xcelium on September 29, 2026 at commit `55fa175` |
+| Regression    | SIM_SMOKE_REGRESSION_SETUP         | Done   | `smoke` regression in `base_sim_cfg.hjson` selects `spi_device_flash_mode`; the aggregate Mocha config imports the SPI device simulation config |
+| Regression    | SIM_NIGHTLY_REGRESSION_SETUP       | Done   | SPI device is included in `mocha_sim_cfgs.hjson`; results are published on the [COSMIC reports dashboard][] |
+| Coverage      | SIM_COVERAGE_MODEL_ADDED           | Done   | Block-level coverage is in `spi_device_env_cov.sv` |
+| Tests         | FPV_MAIN_ASSERTIONS_PROVEN         | N/A    | This V1 sign-off uses simulation; TLUL and CSR assertions are enabled in the simulation testbench |
+| Regression    | FPV_REGRESSION_SETUP               | N/A    | No SPI device FPV regression is configured in Mocha |
 
 ### V2
 
@@ -61,11 +80,18 @@ This sign-off is based on commit [`55fa175`][d1-commit].
 [verification stages]: stages.md#hardware-ip-block-verification-stages
 [OpenTitan hash]: https://github.com/lowRISC/opentitan/tree/bf4a2b24e41742151cfce9c4041e959a3ba76ca3
 [OpenTitan D1 signoff]: https://github.com/lowRISC/opentitan/pull/898
+[OpenTitan spi_device checklist]: ../../hw/vendor/lowrisc_ip/ip/spi_device/doc/checklist.md
 [D1 checklist]: stages.md#d1-design-sign-off-checklist
+[V1 checklist]: stages.md#v1-verification-sign-off-checklist
 [d1-commit]: https://github.com/lowRISC/mocha/commit/55fa1759f16937343678b01ada783c990492825a
+[v1-commit]: https://github.com/lowRISC/mocha/commit/55fa1759f16937343678b01ada783c990492825a
 [registers]: ../../hw/vendor/lowrisc_ip/ip/spi_device/doc/registers.md
 [output asserts]: https://github.com/lowRISC/mocha/blob/55fa1759f16937343678b01ada783c990492825a/hw/vendor/lowrisc_ip/ip/spi_device/rtl/spi_device.sv#L1958-L1988
-[OpenTitan spi_device checklist]: ../../hw/vendor/lowrisc_ip/ip/spi_device/doc/checklist.md
 [lint waivers]: ../../hw/top_chip/lint/top_chip_system.vlt
 [patch]: ../../hw/vendor/patches/lowrisc_ip/spi_device
 [sram type]: https://github.com/lowRISC/mocha/issues/271
+[SPI device DV document]: ../../hw/vendor/lowrisc_ip/ip/spi_device/dv/README.md
+[SPI device testplan]: ../../hw/vendor/lowrisc_ip/ip/spi_device/data/spi_device_testplan.hjson
+[tb.sv]: ../../hw/vendor/lowrisc_ip/ip/spi_device/dv/tb/tb.sv
+[spi_device_bind.sv]: ../../hw/vendor/lowrisc_ip/ip/spi_device/dv/sva/spi_device_bind.sv
+[COSMIC reports dashboard]: https://dashboard.reports.lowrisc.org/cosmic/mocha/dashboard.html
