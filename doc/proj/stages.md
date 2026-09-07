@@ -13,7 +13,7 @@ This table shows the current design and verification stage for each block in Moc
 | **Module name**       | **Design stage** | **Verification stage** |
 |-----------------------|------------------|------------------------|
 | AXI crossbar          | D0               | V0                     |
-| Clock manager         | D0               | V0                     |
+| [Clock manager][]     | D1               | V0                     |
 | CVA6-CHERI            | D0               | V0                     |
 | Debug module          | D0               | V0                     |
 | Entropy source        | D0               | V0                     |
@@ -37,6 +37,7 @@ This table shows the current design and verification stage for each block in Moc
 
 [KMAC]: kmac.md
 [I2C]: i2c.md
+[Clock manager]: clkmgr.md
 [TileLink crossbar]: xbar_peri.md
 [UART]: uart.md
 
