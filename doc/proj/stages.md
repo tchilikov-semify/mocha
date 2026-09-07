@@ -19,7 +19,7 @@ This table shows the current design and verification stage for each block in Moc
 | Entropy source        | D0               | V0                     |
 | GPIO                  | D0               | V0                     |
 | I2C                   | D0               | V0                     |
-| KMAC                  | D0               | V0                     |
+| [KMAC][]              | D1               | V0                     |
 | Mailbox               | D0               | V0                     |
 | PLIC                  | D0               | V0                     |
 | Power manager         | D0               | V0                     |
@@ -35,6 +35,7 @@ This table shows the current design and verification stage for each block in Moc
 |                       |                  |                        |
 | Top chip              | N/A*             | V0                     |
 
+[KMAC]: kmac.md
 [TileLink crossbar]: xbar_peri.md
 [UART]: uart.md
 
