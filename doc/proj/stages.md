@@ -18,7 +18,7 @@ This table shows the current design and verification stage for each block in Moc
 | Debug module          | D0               | V0                     |
 | [Entropy source][]    | D1               | V0                     |
 | [GPIO][]              | D1               | V0                     |
-| I2C                   | D0               | V0                     |
+| [I2C][]               | D1               | V0                     |
 | KMAC                  | D0               | V0                     |
 | Mailbox               | D0               | V0                     |
 | PLIC                  | D0               | V0                     |
@@ -38,6 +38,7 @@ This table shows the current design and verification stage for each block in Moc
 [Clock manager]: clkmgr.md
 [Entropy source]: entropy_src.md
 [GPIO]: gpio.md
+[I2C]: i2c.md
 [TileLink crossbar]: xbar_peri.md
 [UART]: uart.md
 
