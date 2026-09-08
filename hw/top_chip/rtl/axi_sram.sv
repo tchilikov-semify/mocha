@@ -158,4 +158,15 @@ module axi_sram #(
     end
   end
 
+  // The read data and tag are deliberately omitted, since access to uninitialized memory reads X
+  `ASSERT_KNOWN(AwReadyKnownO_A, axi_resp_o.aw_ready)
+  `ASSERT_KNOWN(ArReadyKnownO_A, axi_resp_o.ar_ready)
+  `ASSERT_KNOWN(WReadyKnownO_A, axi_resp_o.w_ready)
+  `ASSERT_KNOWN(BValidKnownO_A, axi_resp_o.b_valid)
+  `ASSERT_KNOWN(RValidKnownO_A, axi_resp_o.r_valid)
+  `ASSERT_KNOWN_IF(BKnownO_A, axi_resp_o.b, axi_resp_o.b_valid)
+  `ASSERT_KNOWN_IF(RIdKnownO_A, axi_resp_o.r.id, axi_resp_o.r_valid)
+  `ASSERT_KNOWN_IF(RRespKnownO_A, axi_resp_o.r.resp, axi_resp_o.r_valid)
+  `ASSERT_KNOWN_IF(RLastKnownO_A, axi_resp_o.r.last, axi_resp_o.r_valid)
+
 endmodule
