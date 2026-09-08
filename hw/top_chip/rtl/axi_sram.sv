@@ -18,9 +18,10 @@ module axi_sram #(
 );
 
   // Every tag entry can store AxiDataWidth capability tags
-  localparam int unsigned TagBitAddrWidth = AddrWidth - $clog2(top_pkg::CapSizeBits / 8);
+  localparam int unsigned TagBitAddrWidth = AddrWidth -
+                                            $clog2(top_pkg::CapSizeBits / top_pkg::AxiDataWidth);
   localparam int unsigned TagAddrWidth    = TagBitAddrWidth - $clog2(top_pkg::AxiDataWidth);
-  localparam int unsigned TagBitWith      = $clog2(top_pkg::AxiDataWidth);
+  localparam int unsigned TagBitWidth     = $clog2(top_pkg::AxiDataWidth);
 
   // 64-bit memory format signals
   logic                                 sram_req;
@@ -34,7 +35,7 @@ module axi_sram #(
   logic [    top_pkg::AxiDataWidth-1:0] sram_wmask;
   logic [          TagBitAddrWidth-1:0] sram_tag_bit_addr;
   logic [             TagAddrWidth-1:0] sram_tag_word_addr;
-  logic [               TagBitWith-1:0] sram_tag_bit_select_d, sram_tag_bit_select_q;
+  logic [              TagBitWidth-1:0] sram_tag_bit_select_d, sram_tag_bit_select_q;
   logic [    top_pkg::AxiDataWidth-1:0] sram_tag_wmask;
   logic [    top_pkg::AxiDataWidth-1:0] sram_tag_wdata;
   logic [    top_pkg::AxiDataWidth-1:0] sram_tag_rdata;
@@ -157,6 +158,17 @@ module axi_sram #(
       sram_tag_bit_select_q <= sram_tag_bit_select_d;
     end
   end
+
+  // The tag memory must hold one bit for every capability-sized region of the data memory.
+  `ASSERT_INIT(TagRamCoversDataRam_A,
+               (2 ** TagAddrWidth) * top_pkg::AxiDataWidth * top_pkg::CapSizeBits ==
+               (2 ** AddrWidth) * top_pkg::AxiDataWidth)
+
+  // The data memory must be exactly the size the address map reserves for it. The addresses are
+  // masked with SRAMMask, so a parameter that disagrees with the map would silently wrap.
+  `ASSERT_INIT(SramSizeMatchesMap_A,
+               2 ** AddrWidth ==
+               (top_pkg::SRAMMask + 1) / (top_pkg::AxiDataWidth / 8))
 
   // The read data and tag are deliberately omitted, since access to uninitialized memory reads X
   `ASSERT_KNOWN(AwReadyKnownO_A, axi_resp_o.aw_ready)
