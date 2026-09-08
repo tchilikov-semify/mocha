@@ -1,0 +1,55 @@
+CAPI=2:
+# Copyright lowRISC contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:mocha:axi_sram"
+description: "AXI SRAM with CHERI tag storage"
+
+filesets:
+  files_rtl:
+    depend:
+      - lowrisc:mocha_constants:top_pkg
+      - pulp-platform.org::axi
+      - lowrisc:prim:assert:0.1
+      - lowrisc:prim:ram_1p
+    files:
+      - rtl/axi_sram.sv
+    file_type: systemVerilogSource
+
+  # Standalone builds have nothing else to pick a provider for the virtual
+  # prim:ram_1p core, and would otherwise get the Xilinx one. The top selects a
+  # provider for itself, so this must not be part of the default target.
+  files_ram_1p_generic:
+    depend:
+      - lowrisc:prim_generic:ram_1p
+
+  files_verilator_waiver:
+    files:
+      - lint/top_chip_system.vlt
+    file_type: vlt
+
+targets:
+  default: &default_target
+    filesets:
+      - tool_verilator ? (files_verilator_waiver)
+      - files_rtl
+    toplevel: axi_sram
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    filesets_append:
+      - files_ram_1p_generic
+    parameters:
+      - SYNTHESIS=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - "-Wall"
+
+parameters:
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine

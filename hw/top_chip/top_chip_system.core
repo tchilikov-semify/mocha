@@ -22,6 +22,7 @@ filesets:
       - lowrisc:mocha_ip:pwrmgr
       - lowrisc:mocha_ip:rstmgr
       - lowrisc:mocha_ip:rv_plic
+      - lowrisc:mocha:axi_sram
       - lowrisc:prim:onehot
       - lowrisc:tlul:adapter_host
       - lowrisc:tlul:adapter_reg
@@ -35,7 +36,6 @@ filesets:
       - cosmic:pulp:axi_riscv_atomics
     files:
       - rtl/mem_downsizer.sv
-      - rtl/axi_sram.sv
       - rtl/top_chip_system.sv
     file_type: systemVerilogSource
 
