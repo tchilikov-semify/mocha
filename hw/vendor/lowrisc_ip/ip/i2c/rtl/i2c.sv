@@ -178,6 +178,7 @@ module i2c
   `ASSERT_KNOWN(IntrHostTimeoutKnownO_A, intr_host_timeout_o)
   `ASSERT_KNOWN(LsioTriggerKnown_A, lsio_trigger_o)
   `ASSERT_KNOWN(RaclErrorValidKnown_A, racl_error_o.valid)
+  `ASSERT_KNOWN(RamCfgRspKnownO_A, ram_cfg_rsp_o)
 
   // Alert assertions for reg_we onehot check
   `ASSERT_PRIM_REG_WE_ONEHOT_ERROR_TRIGGER_ALERT(RegWeOnehotCheck_A, u_reg, alert_tx_o[0])
