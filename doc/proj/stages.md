@@ -21,7 +21,7 @@ This table shows the current design and verification stage for each block in Moc
 | I2C                   | D0               | V0                     |
 | KMAC                  | D0               | V0                     |
 | Mailbox               | D0               | V0                     |
-| PLIC                  | D0               | V0                     |
+| [PLIC][]              | D1               | V0                     |
 | Power manager         | D0               | V0                     |
 | Reset manager         | D0               | V0                     |
 | ROM control           | D0               | V0                     |
@@ -35,6 +35,7 @@ This table shows the current design and verification stage for each block in Moc
 |                       |                  |                        |
 | Top chip              | N/A*             | V0                     |
 
+[PLIC]: rv_plic.md
 [TileLink crossbar]: xbar_peri.md
 [UART]: uart.md
 
