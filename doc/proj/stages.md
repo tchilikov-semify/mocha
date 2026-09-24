@@ -28,7 +28,7 @@ This table shows the current design and verification stage for each block in Moc
 | SPI device            | D0               | V0                     |
 | [SPI host][]          | D1               | V0                     |
 | [SRAM][]              | D1               | V0                     |
-| Tag controller        | D0               | V0                     |
+| [Tag controller][]    | D1               | V0                     |
 | [TileLink crossbar][] | D1               | V1                     |
 | Timer                 | D0               | V0                     |
 | [UART][]              | D1               | V1                     |
@@ -47,6 +47,7 @@ This table shows the current design and verification stage for each block in Moc
 [SPI host]: spi_host.md
 [ROM control]: rom_ctrl.md
 [AXI crossbar]: axi_xbar.md
+[Tag controller]: tagctrl.md
 [TileLink crossbar]: xbar_peri.md
 [UART]: uart.md
 
