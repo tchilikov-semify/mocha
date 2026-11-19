@@ -13,6 +13,9 @@ class mailbox_env_cfg extends uvm_object;
   // Per-port register models at the Mocha base addresses
   mailbox_reg_block ral[NumPorts];
 
+  // Build the functional coverage model, set by +en_cov=1
+  bit en_cov;
+
   // Tests set the minimum number of checked MBOXR words to prevent a pass without data checks
   int unsigned min_checked_words;
 

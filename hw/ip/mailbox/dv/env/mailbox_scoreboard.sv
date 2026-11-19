@@ -20,6 +20,9 @@ class mailbox_scoreboard extends uvm_scoreboard;
 
   mailbox_env_cfg cfg;
 
+  // Null unless cfg.en_cov is set
+  mailbox_env_cov cov;
+
   uvm_analysis_imp_main_req #(axi_mon_item, mailbox_scoreboard)   main_req_imp;
   uvm_analysis_imp_ext_req  #(axi_mon_item, mailbox_scoreboard)   ext_req_imp;
   uvm_analysis_imp_main_txn #(axi_mon_item, mailbox_scoreboard)   main_txn_imp;
@@ -281,6 +284,9 @@ function void mailbox_scoreboard::check_responses(bit flush = 1'b0);
       default: begin
       end
     endcase
+    if (cov != null) begin
+      cov.sample(acc);
+    end
   end
 endfunction : check_responses
 

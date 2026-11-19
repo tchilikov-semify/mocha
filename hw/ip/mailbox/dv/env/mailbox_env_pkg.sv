@@ -17,6 +17,9 @@ package mailbox_env_pkg;
 
   parameter int unsigned NumPorts = 2;
 
+  // Registers in mailbox.hjson
+  parameter int unsigned NumRegs = 10;
+
   // Port 0 connects to the main crossbar; port 1 is external
   typedef enum int unsigned {
     PortMain = 0,
@@ -51,6 +54,7 @@ package mailbox_env_pkg;
   `include "mailbox_reg_predictor.sv"
   `include "mailbox_access.sv"
   `include "mailbox_state.sv"
+  `include "mailbox_env_cov.sv"
   `include "mailbox_scoreboard.sv"
   `include "mailbox_virtual_sequencer.sv"
   `include "mailbox_env.sv"
