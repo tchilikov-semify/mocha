@@ -1,0 +1,35 @@
+CAPI=2:
+# Copyright lowRISC and contributors (COSMIC project).
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
+name: "lowrisc:mocha_dv:tagctrl_env:0.1"
+description: "Tag controller UVM environment"
+
+filesets:
+  files_dv:
+    depend:
+      - lowrisc:dv:dv_utils
+      - lowrisc:dv:common_ifs
+      - lowrisc:mocha_dv:axi_agent:0.1
+    files:
+      - tagctrl_model.svh: {is_include_file: true}
+      - tagctrl_scoreboard.svh: {is_include_file: true}
+      - tagctrl_virtual_sequencer.svh: {is_include_file: true}
+      - tagctrl_env.svh: {is_include_file: true}
+      - tagctrl_base_test.svh: {is_include_file: true}
+      - seq_lib/tagctrl_vseq_list.svh: {is_include_file: true}
+      - seq_lib/tagctrl_op.svh: {is_include_file: true}
+      - seq_lib/tagctrl_base_vseq.svh: {is_include_file: true}
+      - seq_lib/tagctrl_reset_state_vseq.svh: {is_include_file: true}
+      - seq_lib/tagctrl_register_map_vseq.svh: {is_include_file: true}
+      - seq_lib/tagctrl_region_registers_readback_vseq.svh: {is_include_file: true}
+      - seq_lib/tagctrl_control_start_vseq.svh: {is_include_file: true}
+      - seq_lib/tagctrl_tag_roundtrip_vseq.svh: {is_include_file: true}
+      - tagctrl_env_pkg.sv
+    file_type: systemVerilogSource
+
+targets:
+  default:
+    filesets:
+      - files_dv
