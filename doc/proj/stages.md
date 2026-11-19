@@ -13,7 +13,7 @@ This table shows the current design and verification stage for each block in Moc
 | **Module name**       | **Design stage** | **Verification stage** |
 |-----------------------|------------------|------------------------|
 | [AXI crossbar][]      | D1               | V0                     |
-| [Clock manager][]     | D1               | V0                     |
+| [Clock manager][]     | D1               | V1                     |
 | [CVA6-CHERI][]        | D1               | V0                     |
 | [Debug module][]      | D1               | V0                     |
 | [Entropy source][]    | D1               | V0                     |

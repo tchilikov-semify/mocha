@@ -44,7 +44,26 @@ This sign-off is based on commit [b597321][d1-commit].
 
 ### V1
 
-*Not yet started - see [stages.md][verification stages].*
+All checklist items refer to the [V1 verification sign-off checklist][V1 checklist].
+This sign-off is based on commit [`4c320ef`][v1-commit].
+
+| Type          | Item                               | Status | Note/Collaterals |
+|---------------|------------------------------------|--------|------------------|
+| Documentation | DV_DOC_DRAFT_COMPLETED             | Done   | [Clock manager DV document][] describes the goals, testbench architecture, stimulus, coverage, and checking strategy |
+| Documentation | TESTPLAN_COMPLETED                 | Done   | [Clock manager testplan][] defines the V1 smoke test and post-V1 peripheral and transactional clock enable, clock status, jitter, register lock and stress testpoints |
+| Testbench     | TB_TOP_CREATED                     | Done   | [tb.sv][] instantiates the register, `main`, `io` and `aon` clocks and resets, the root clock resets, the shadowed reset, TileLink, power manager handshake, idle, scan mode and alert interfaces along with the Clock manager DUT |
+| Testbench     | PRELIMINARY_ASSERTION_CHECKS_ADDED | Done   | [clkmgr_bind.sv][] binds the TLUL protocol, CSR, power manager handshake, gated clock, transactional clock and clock gating indication assertions; the Clock manager RTL checks that outputs are known after reset |
+| Integration   | PRE_VERIFIED_SUB_MODULES_V1        | Waived | The Clock manager and its primitive submodules (`prim_clock_gating`, `prim_subreg_shadow`, etc.) and TileLink adapters (`tlul_adapter_reg`, `tlul_cmd_intg_chk`, etc.) are generated from the OpenTitan template, where the block reached V2S; the [OpenTitan clock manager checklist][] records this item as N/A |
+| Review        | DESIGN_SPEC_REVIEWED               | Done   | The specification was reviewed through the OpenTitan sign-off process, and the [theory of operation][theory] was reviewed against the Mocha instantiation for this sign-off. It describes the clock groups, software and hint gating and the power manager handshake correctly, but it is written for the OpenTitan EarlGrey configuration ([issue #709][block doc issue]): Mocha has one hint clock, no derived clocks and no external clock bypass, so frequency measurement is disabled, the idle hint and scan mode inputs are tied off, and `alert_tx_o` and `jitter_en_o` are left unconnected at the [instantiation][instantiation] |
+| Review        | TESTPLAN_REVIEWED                  | Done   | The generated [OpenTitan clock manager checklist][] records the testplan review as complete upstream. The V1 testpoints of the [Clock manager testplan][], `smoke` plus the imported CSR testpoints, apply as written; the [vendor patches][patch] drop the frequency measurement testpoints that the Mocha configuration disables. The testbench drives `main`, `io` and `aon` at the frequencies in the [Mocha configuration][ipconfig], while the top drives all three from the same clock |
+| Review        | STD_TEST_CATEGORIES_PLANNED        | Done   | Clock gating, register lock and stress tests are covered in the [Clock manager testplan][]; security countermeasures are captured in the sec_cm testplan, but V2S is not used in Mocha; debug, power and performance are N/A |
+| Simulation    | SIM_TB_ENV_CREATED                 | Done   | CIP-based UVM environment with TL agent and scoreboard |
+| Tests         | SIM_SMOKE_TEST_PASSING             | Done   | All V1 testpoints (`clkmgr_smoke` and the five CSR tests): 30/30 passed, 5 seeds each, with Xcelium on November 19, 2026 at commit `4c320ef` |
+| Regression    | SIM_SMOKE_REGRESSION_SETUP         | Done   | `smoke` regression in `clkmgr_sim_cfg.hjson` selects `clkmgr_smoke`; the aggregate Mocha config imports the Clock manager simulation config |
+| Regression    | SIM_NIGHTLY_REGRESSION_SETUP       | Done   | The Clock manager is included in `mocha_sim_cfgs.hjson`; results are published on the [COSMIC reports dashboard][] |
+| Coverage      | SIM_COVERAGE_MODEL_ADDED           | Done   | Block-level coverage is in `clkmgr_env_cov.sv`, with the idle input covered by `clkmgr_cov_bind.sv` |
+| Tests         | FPV_MAIN_ASSERTIONS_PROVEN         | N/A    | This V1 sign-off uses simulation; TLUL and CSR assertions are enabled in the simulation testbench |
+| Regression    | FPV_REGRESSION_SETUP               | N/A    | No Clock manager FPV regression is configured in Mocha |
 
 ### V2
 
@@ -69,3 +88,13 @@ This sign-off is based on commit [b597321][d1-commit].
 [pguide]: ../../hw/top_chip/ip_autogen/clkmgr/doc/programmers_guide.md
 [ipconfig]: ../../hw/top_chip/ip_autogen/clkmgr/data/mocha_clkmgr.ipconfig.hjson
 [output asserts]: https://github.com/lowRISC/mocha/blob/b5973217f704923917e7761f73df7dfcb8d0c345/hw/top_chip/ip_autogen/clkmgr/rtl/clkmgr.sv#L483-L490
+[V1 checklist]: stages.md#v1-verification-sign-off-checklist
+[v1-commit]: https://github.com/lowRISC/mocha/commit/4c320ef82c8e3f46acc69f069dc7c22f9c34d301
+[instantiation]: https://github.com/lowRISC/mocha/blob/4c320ef82c8e3f46acc69f069dc7c22f9c34d301/hw/top_chip/rtl/top_chip_system.sv#L1075-L1108
+[patch]: ../../hw/vendor/patches/lowrisc_ip/clkmgr
+[Clock manager DV document]: ../../hw/top_chip/ip_autogen/clkmgr/dv/README.md
+[Clock manager testplan]: ../../hw/top_chip/ip_autogen/clkmgr/data/clkmgr_testplan.hjson
+[tb.sv]: ../../hw/top_chip/ip_autogen/clkmgr/dv/tb.sv
+[clkmgr_bind.sv]: ../../hw/top_chip/ip_autogen/clkmgr/dv/sva/clkmgr_bind.sv
+[COSMIC reports dashboard]: https://dashboard.reports.lowrisc.org/cosmic/mocha/dashboard.html
+[OpenTitan clock manager checklist]: ../../hw/top_chip/ip_autogen/clkmgr/doc/checklist.md
